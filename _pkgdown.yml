@@ -1,0 +1,51 @@
+url: https://ultreia-io.github.io/ros.form.observe/
+template:
+  bootstrap: 5
+  light-switch: true
+home:
+  sidebar: false
+news:
+  cran_dates: false
+navbar:
+  structure:
+    left: [intro, reference, articles, news, coverage, community]
+    right: [search, github, lightswitch]
+  components:
+    articles:
+      text: Articles
+      menu:
+        - text: Terminology
+          href: articles/terminology.html
+    coverage:
+      text: Coverage
+      href: https://app.codecov.io/gh/ultreia-io/ros.form.observe
+    intro:
+      text: Getting started
+      href: articles/ros.form.observe.html
+    community:
+      text: Community
+      menu:
+        - text: Contributing
+          href: CONTRIBUTING.html
+        - text: Maintainer guide
+          href: DEVELOPMENT.html
+        - text: Security policy
+          href: SECURITY.html
+        - text: Code of conduct
+          href: CODE_OF_CONDUCT.html
+articles:
+  - title: Guides
+    navbar: ~
+    contents: [ros.form.observe, terminology]
+reference:
+  - title: Package
+    contents: [ros.form.observe-package]
+
+footer:
+  structure:
+    left: [company, copyright, license]
+    right: built_with
+  components:
+    company: "[ultreia.io](https://ultreia.io/)"
+    copyright: "· © 2026"
+    license: "· [License: GPL-3](https://ultreia-io.github.io/ros.form.observe/LICENSE)"

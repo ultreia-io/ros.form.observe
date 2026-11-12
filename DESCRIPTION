@@ -1,0 +1,30 @@
+Package: ros.form.observe
+Title: Populate Regional Observer Scheme Forms from ObServe Data
+Version: 0.1.0
+Authors@R:
+    person("Tony", "Chemit", role = c("aut", "cre", "cph"),
+           email = "dev@tchemit.fr",
+           comment = c(ORCID = "0009-0007-1802-5256", URL = "https://ultreia.io"))
+Description: Exports longline and purse-seine observer data from ObServe to
+    Regional Observer Scheme (ROS) forms. The package writes one Excel workbook
+    per trip and validates it against the requirements of the selected ROS form.
+License: GPL-3
+URL: https://ultreia-io.github.io/ros.form.observe/,
+    https://github.com/ultreia-io/ros.form.observe
+BugReports: https://github.com/ultreia-io/ros.form.observe/issues
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: db.tools (>= 0.1.2), digest, form.model, form.references (>= 0.4.0),
+    form.tools (>= 0.3.0), ros.form.model (>= 0.4.0),
+    ros.form.references (>= 0.1.0), httr2, yaml
+Suggests: askpass, DBI, keyring, knitr, pkgload, RJDBC, rmarkdown, RPostgres,
+    testthat (>= 3.0.0), withr
+Remotes: ultreia-io/db.tools@0.1.2, ultreia-io/form.references@develop,
+    ultreia-io/form.tools@develop, ultreia-io/ros.form.model@develop,
+    ultreia-io/ros.form.references@develop
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/Needs/coverage: covr, xml2
+Roxygen: list(markdown = TRUE)
+Config/Needs/website: pkgdown
+Config/roxygen2/version: 8.1.1

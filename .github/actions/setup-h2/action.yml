@@ -1,0 +1,46 @@
+name: Set up H2 for R
+description: Configure Java for RJDBC and supply the pinned H2 driver used by tests and vignettes.
+runs:
+  using: composite
+  steps:
+    - name: Set up Java
+      uses: actions/setup-java@v6.3.0
+      with:
+        distribution: temurin
+        java-version: '21'
+
+    # Configure R before setup-r-dependencies installs or restores rJava and RJDBC.
+    - name: Configure R Java support
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        r_executable="$(command -v R)"
+        if [ "$(id -u)" -eq 0 ]; then
+          "$r_executable" CMD javareconf
+        else
+          sudo env "JAVA_HOME=$JAVA_HOME" "PATH=$PATH" "$r_executable" CMD javareconf
+        fi
+
+    # Keep third-party drivers outside the source tree and verify the published artifact.
+    - name: Download H2 JDBC driver
+      shell: bash
+      run: |
+        h2_directory="$RUNNER_TEMP/h2"
+        if [ "$RUNNER_OS" = Windows ]; then
+          h2_directory="$(cygpath -u "$h2_directory")"
+        fi
+        mkdir -p "$h2_directory"
+        cd "$h2_directory"
+        curl --fail --location --retry 3 --output h2-2.5.252.jar \
+          https://repo.maven.apache.org/maven2/com/h2database/h2/2.5.252/h2-2.5.252.jar
+        h2_checksum=90b11dc413da82070ef15fc943282c1408e6ffd34fa68998335fea8603b5ff20
+        if command -v sha256sum >/dev/null 2>&1; then
+          printf '%s  h2-2.5.252.jar\n' "$h2_checksum" | sha256sum --check
+        else
+          printf '%s  h2-2.5.252.jar\n' "$h2_checksum" | shasum -a 256 --check
+        fi
+        h2_jar="$h2_directory/h2-2.5.252.jar"
+        if [ "$RUNNER_OS" = Windows ]; then
+          h2_jar="$(cygpath -m "$h2_jar")"
+        fi
+        echo "H2_JAR=$h2_jar" >> "$GITHUB_ENV"
