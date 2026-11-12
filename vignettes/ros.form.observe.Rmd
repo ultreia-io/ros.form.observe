@@ -1,0 +1,33 @@
+---
+title: "Getting started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## About this guide
+
+Understand how ObServe data relates to ROS forms and the packages used by the exporter.
+
+## Export scope
+
+The first export target is ObServe 10.0.6 to ROS longline 4.2.0.
+
+Shared operations must also support purse-seine forms, with separate mappings for each fishing gear.
+
+## Export stages
+
+1. Select the source trips and the target ROS form model.
+2. Extract the ObServe records required by each sheet.
+3. Apply field mappings and resolve reference values through the configured catalogues.
+4. Populate the matching Excel form template.
+5. Validate the populated form and report any findings.
+
+## Related packages
+
+* `ros.form.model` defines the target form structure.
+* `ros.form.references` provides shared reference lookups.
+* `form.tools` writes values into the form template.
+* `ros.form.validation` checks the populated form.

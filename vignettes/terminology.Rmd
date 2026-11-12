@@ -1,0 +1,26 @@
+---
+title: "Terminology"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Terminology}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Main concepts
+
+| Term       | Meaning                                                    |
+| ---------- | ---------------------------------------------------------- |
+| ObServe    | The application holding the source observation data.        |
+| ROS form   | An Excel workbook for reporting observer data to the IOTC.  |
+| Form model | A definition of the expected form structure and fields.     |
+| Export     | The process of populating a ROS form from ObServe records.  |
+
+## Data mapping
+
+| Term            | Meaning                                                   |
+| --------------- | --------------------------------------------------------- |
+| Source record   | Data read from the ObServe database.                       |
+| Field mapping   | The source and transformation used to populate a field.    |
+| Reference lookup | Matching a source value against a reference table.         |
+| Finding         | A problem reported when validating the populated form.     |

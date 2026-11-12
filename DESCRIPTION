@@ -1,0 +1,24 @@
+Package: ros.form.observe
+Title: Populate Regional Observer Scheme Forms from ObServe Data
+Version: 0.1.0
+Authors@R:
+    person("Tony", "Chemit", role = c("aut", "cre", "cph"),
+           email = "dev@tchemit.fr",
+           comment = c(ORCID = "0009-0007-1802-5256", URL = "https://ultreia.io"))
+Description: Provides the package structure for populating Regional Observer
+    Scheme forms from ObServe data. The export design covers longline and
+    purse-seine forms using shared form definitions, reference catalogues
+    and validation rules.
+License: GPL-3
+URL: https://ultreia-io.github.io/ros.form.observe/,
+    https://github.com/ultreia-io/ros.form.observe
+BugReports: https://github.com/ultreia-io/ros.form.observe/issues
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Suggests: knitr, pkgload, rmarkdown, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Config/Needs/coverage: covr, xml2
+Roxygen: list(markdown = TRUE)
+Config/Needs/website: pkgdown
+Config/roxygen2/version: 8.1.1
