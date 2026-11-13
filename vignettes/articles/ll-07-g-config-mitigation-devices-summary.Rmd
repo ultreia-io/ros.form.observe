@@ -1,0 +1,34 @@
+---
+title: "LL 07 G-CONFIG-MITIGATION-DEVICES summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 07 G-CONFIG-MITIGATION-DEVICES summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+ROS 4.2.0 has 17 fields, six mandatory: trip identity and five tori-line configuration details.
+
+These are line length, streamer type, maximum streamer length, streamer count and attachment height.
+
+## Available
+
+The 2025 review covers 67 trips (17 observer-monitored, 50 self-reporting) and 461 sets.
+
+No mitigation categories were selected. This does not prove that equipment was absent or unused.
+
+The five required equipment details remain unsupported by the inspected sources.
+
+## To decide
+
+Find configuration details and distinguish trip equipment from its use during individual sets.
+
+Agree device correspondences and reporting when tori lines are absent or their details are unknown.
+
+The database allows an empty sheet without a blank tori-line record. Reporting requirements remain open.
+
+[Full review](ll-07-g-config-mitigation-devices.html).
+
+[Short review index](ll-sheet-summaries.html).

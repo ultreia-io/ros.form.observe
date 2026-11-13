@@ -1,0 +1,38 @@
+---
+title: "LL 05 G-GENERAL summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 05 G-GENERAL summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Four fields: trip ID and responses for the line setter/shooter, line hauler and bait-casting machine.
+
+## Available
+
+In the 2025 selection, shooter use is recorded on 21 sets: one observer-monitored and 20 self-reporting sets.
+
+This is evidence of use, subject to confirming that the source device matches the ROS equipment.
+
+No mitigation-device categories were selected. That does not prove bait-casting equipment was absent.
+
+No reliable line-hauler evidence has been established.
+
+## To decide
+
+Distinguish equipment available on a trip from equipment used on a set; agree trip-level reporting rules.
+
+Choose NAV for information not collected, or UNK when undetermined at collection, only when justified.
+
+A default-false flag does not prove absence. Equipment mappings and delivery levels remain open.
+
+The sheet may be empty structurally; reported configurations/devices still need a gear parent in the database.
+
+IOTC reporting and importer rules remain open.
+
+[Full review](ll-05-g-general.html)
+
+[Short review index](ll-sheet-summaries.html).

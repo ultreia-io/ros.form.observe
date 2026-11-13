@@ -1,0 +1,36 @@
+---
+title: "LL 03 V-TRIP summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 03 V-TRIP summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+One field: the shared trip ID. The ten departure and return fields are optional.
+
+## Available
+
+All 67 trips in the 2025 selection have both port links, port codes and harbour coordinates.
+
+Recorded vessel trip dates are available. ROS port and country correspondences still need confirmation.
+
+Use departure at **00:00** and return at **23:59**, as agreed reporting conventions rather than measured times.
+
+This convention applies only to vessel movements; the separate observer-date decision remains open.
+
+## To decide
+
+Confirm the time zone, canonical ROS port codes and whether harbour coordinates describe the actual endpoints.
+
+Identify at-sea departures or returns; port coordinates cannot supply at-sea locations.
+
+Leave unsupported optional values empty. Final delivery scope remains open.
+
+The database permits an empty sheet because these details share the vessel record. IOTC rules remain open.
+
+[Full review](ll-03-v-trip.html)
+
+[Short review index](ll-sheet-summaries.html).

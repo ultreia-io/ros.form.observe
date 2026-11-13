@@ -1,0 +1,30 @@
+---
+title: "LL 16 E-SET-CATCH-SPECIMENS summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 16 E-SET-CATCH-SPECIMENS summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Nine fields: four IDs; sampling period and method; first length's type, value and tool.
+
+## Available
+
+The 17 observer trips contain 4,023 lengths for 4,013 individuals. Ten turtles have two different length measures.
+
+Recorded tools include 1,140 Unknown values. No individual weights or maturity values occur in this selection.
+
+## To decide
+
+Keep one specimen per actual animal, with its measurements together; do not create a fish per measurement.
+
+Establish sampling period/method, measurement correspondences and stable specimen IDs.
+
+Ask Emmanuel how to report unmeasured animals with SSI or tag information.
+
+An empty sheet is structurally possible only without SSI or tag rows; the reporting rule remains open.
+
+[Detailed review](ll-16-e-set-catch-specimens.html) · [Short review index](ll-sheet-summaries.html).

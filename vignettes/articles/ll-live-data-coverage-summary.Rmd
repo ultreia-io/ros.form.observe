@@ -1,0 +1,33 @@
+---
+title: "LL actual source data summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL actual source data summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Selection checked
+
+The 12 November 2026 review used Philippe's programme filters and 2025 French / Indian Ocean trip selection.
+
+It found 67 trips: 17 observer-monitored and 50 self-reporting, covering 461 sets.
+
+## Useful data
+
+- 1,350 grouped weights, all self-reporting; 1,123 have specified processing and method.
+- 4,023 lengths on 4,013 individuals, all observer-monitored; ten turtles have two lengths.
+- 1,267 photo references and one tag candidate; their files and meaning still need checking.
+- 293 known hook sizes; another 530 are Unknown and two are missing.
+
+## Remaining gaps
+
+This selection has no individual weights, maturity values or mitigation selections.
+
+Missing mitigation selections do not prove that no mitigation was used.
+
+Some data needs interpretation: bait preparation, floatline lengths, sampling protocols and tag events.
+
+Decide whether self-reporting trips belong in the export. Available data does not yet prove complete ROS rows.
+
+[Detailed review](ll-live-data-coverage.html) · [Short review index](ll-sheet-summaries.html).

@@ -1,0 +1,36 @@
+---
+title: "LL 11 E-SET-HOOKS summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 11 E-SET-HOOKS summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+ROS 4.2.0 has five fields, three mandatory: trip/set identities and a combined hook type/size or terminal-device code.
+
+Percentage and variations are optional.
+
+## Available
+
+The 2025 review covers 67 trips (17 observer-monitored, 50 self-reporting) and 461 sets.
+
+Of 825 hook composition rows, 293 have known sizes, 530 explicitly say Unknown and two have no size.
+
+Every self-reporting composition uses Unknown. Percentages total 100% per set; no offsets are populated.
+
+## To decide
+
+Match actual type/size combinations to ROS codes. Fixed sizes would discard or invent recorded detail.
+
+Agree treatment of unknown or unsupported combinations; the reviewed ROS list has no generic unknown hook code.
+
+Resolve categories that share a target code before combining their percentages.
+
+The database allows settings without hook-detail rows. Reporting requirements remain open.
+
+[Full review](ll-11-e-set-hooks.html).
+
+[Short review index](ll-sheet-summaries.html).

@@ -1,0 +1,28 @@
+---
+title: "LL 18 E-SET-TAG-DETAILS summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 18 E-SET-TAG-DETAILS summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Only the four IDs linking the tag to its trip, set, catch and specimen. All tag details are optional.
+
+## Available
+
+One measured albacore has a five-character value that could be a tag identifier.
+
+It does not tell us whether the tag was deployed or recovered, or what type it was.
+
+## To decide
+
+Confirm what the recorded number means, then reuse the same specimen ID as its length record.
+
+Leave unsupported event, second-tag and finder details empty.
+
+An empty sheet is structurally possible; the reporting rule remains open. Do not create an unsupported ID-only row.
+
+[Detailed review](ll-18-e-set-tag-details.html) · [Short review index](ll-sheet-summaries.html).

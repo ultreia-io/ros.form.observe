@@ -1,0 +1,220 @@
+---
+title: "LL 08 E-SET mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 08 E-SET mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Setting operations, positions, gear quantities, line configuration and target species.
+
+ROS LL **4.2.0**: **33 fields**, including **19 mandatory fields**.
+
+Initial source review recorded. Field mappings, import obligation and delivery levels remain open.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](export-design.html) for context.
+
+## Import obligation
+
+[Database review](ll-database-import.html#e-set) records the event, operations and dependent tables.
+
+E-SET may be empty only if all its descendant sheets are empty under the form's parent-key rules.
+
+The form model declares a primary key `(observed_trip_id, set_id)` and a parent link to O-INFO.
+
+Lights, mitigation, hooks, baits, hauling and catches directly reference E-SET through that key.
+
+Any decision to omit an E-SET row must account for its dependent rows.
+
+Apply the shared [row-presence review](export-design.html#sheet-row-presence).
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+In the tables, `s` denotes `ll_observation.fishingSet`. Source presence does not prove populated or valid values.
+
+| ROS field                          | Required | Type      | ROS reference / fixed values                | Source candidate / legacy value             | Assessment                                                                  |
+| ---------------------------------- | -------- | --------- | ------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| `observed_trip_id`                 | M        | string    | —                                           | `s.activity -> activity.trip`               | Source link exists; reuse the shared ROS trip ID rule.                      |
+| `set_id`                           | M        | string    | —                                           | `s.topiaId`; optional `s.number`            | Choose a stable identifier shared by all set-level sheets.                  |
+| `start_setting_date_time`          | M        | datetime  | —                                           | `s.settingStartTimeStamp`                   | Source exists; confirm UTC interpretation and completeness.                 |
+| `start_setting_position_latitude`  | M        | latitude  | —                                           | `s.settingStartLatitude`                    | Source exists; actual trip values remain unchecked.                         |
+| `start_setting_position_longitude` | M        | longitude | —                                           | `s.settingStartLongitude`                   | Source exists; actual trip values remain unchecked.                         |
+| `end_setting_date_time`            | M        | datetime  | —                                           | `s.settingEndTimeStamp`                     | Source exists; confirm UTC interpretation and completeness.                 |
+| `end_setting_position_latitude`    | M        | latitude  | —                                           | `s.settingEndLatitude`                      | Source exists; actual trip values remain unchecked.                         |
+| `end_setting_position_longitude`   | M        | longitude | —                                           | `s.settingEndLongitude`                     | Source exists; actual trip values remain unchecked.                         |
+| `vessel_speed_kn`                  | M        | number    | —                                           | `s.settingVesselSpeed`                      | Nullable source; UI labels knots, matching the target unit.                 |
+| `line_setter_speed_ms`             | M        | number    | —                                           | `s.shooterSpeed`                            | UI labels knots; target expects m/s. Review conversion and unused shooter.  |
+| `number_total_hooks_set`           | M        | integer   | —                                           | `s.totalHooksCount`                         | Nullable source; establish missing-count handling.                          |
+| `floatline_length_1_m`             | M        | number    | —                                           | `floatlinesComposition.length`              | Candidate outside current extraction; select and order lengths per set.     |
+| `number_hooks_between_floats`      | M        | integer   | —                                           | `s.branchlinesPerBasketCount`               | Confirm basket/float and hook/branchline correspondence.                    |
+| `shark_lines_set`                  | M        | string    | `refs_data.logical_responses` / `code`      | Legacy constant `FALSE`                     | No source established; absence must be evidenced.                           |
+| `leader_material_type`             | M        | string    | `refs_fishery.line_material_types` / `code` | `branchlinesComposition.tracelineType`      | Reference recoding and multiple-material handling remain open.              |
+| `leader_material_percentage`       | M        | number    | —                                           | `branchlinesComposition.proportion`         | Associate each proportion with its material; review aggregation.            |
+| `branchline_length_minimum_value`  | M        | number    | —                                           | Minimum candidate from composition `length` | Confirm meaning and coverage with Pascal; handle missing lengths.           |
+| `branchline_length_maximum_value`  | M        | number    | —                                           | Maximum candidate from composition `length` | Confirm meaning and coverage with Pascal; handle missing lengths.           |
+| `target_species_species_1`         | M        | string    | `refs_biology.species` / `code`             | `ll_common.trip_species`                    | Trip-level target candidate; set-level applicability and order remain open. |
+
+<details>
+<summary>Optional fields (14)</summary>
+
+| ROS field                        | Required | Type    | ROS reference / fixed values                | Source candidate / legacy value    | Assessment                                                             |
+| -------------------------------- | -------- | ------- | ------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------- |
+| `mainline_material`              | O        | string  | `refs_fishery.line_material_types` / `code` | `s.lineType -> ll_common.lineType` | Review code correspondence; legacy unmatched codes become empty.       |
+| `mainline_length_value`          | O        | number  | —                                           | Legacy `NULL`                      | No observation-source mapping established.                             |
+| `mainline_length_unit`           | O        | string  | Allowed: `km`, `nm`                         | Legacy `NULL`                      | Depends on the selected length source; target allows km or nm.         |
+| `clip_on_time_branchline`        | O        | number  | —                                           | `s.timeBetweenHooks`               | Source labelled seconds; SQL selects it, then R clears it.             |
+| `clip_on_time_buoys`             | O        | number  | —                                           | Legacy `NULL`                      | No source established.                                                 |
+| `number_total_floats_set`        | O        | integer | —                                           | Legacy `s.totalBasketsCount - 1`   | Derived assumption; confirm float counts for the actual line layout.   |
+| `number_radio_dhan_buoys_set`    | O        | integer | —                                           | No legacy selection                | 4.2.0 addition; source remains to be identified.                       |
+| `floatline_length_2_m`           | O        | number  | —                                           | `floatlinesComposition.length`     | Candidate outside extraction; determine distinct lengths and ordering. |
+| `floatline_length_3_m`           | O        | number  | —                                           | `floatlinesComposition.length`     | Decide how to represent sets with more than three lengths.             |
+| `distance_between_branchlines_m` | O        | number  | —                                           | No legacy selection                | 4.2.0 addition; no observation-source mapping established.             |
+| `shark_lines_number`             | O        | integer | —                                           | Legacy `NULL`                      | No source established; distinguish unknown from zero.                  |
+| `target_species_species_2`       | O        | string  | `refs_biology.species` / `code`             | `ll_common.trip_species`           | Legacy NULL; choose order and validate set-level applicability.        |
+| `target_species_species_3`       | O        | string  | `refs_biology.species` / `code`             | `ll_common.trip_species`           | Legacy NULL; choose order and validate set-level applicability.        |
+| `target_species_species_4`       | O        | string  | `refs_biology.species` / `code`             | `ll_common.trip_species`           | Legacy NULL; agree handling when more than four targets are recorded.  |
+
+</details>
+
+Parent: **O-INFO**, linked through `observed_trip_id`.
+
+## Source coverage
+
+The existing four-sheet extraction includes set times, positions, speeds, counts and links to the trip.
+
+Additional source relations need assessment:
+
+* `ll_observation.floatlinesComposition`: length and proportion by set.
+* `ll_observation.branchlinesComposition`: length, leader material and composition proportion.
+* `ll_common.trip_species`: target species recorded for the trip.
+
+Basket-level `floatline1Length` and `floatline2Length` are additional candidates, linked through sections to sets.
+
+These relations are outside the current four-sheet extraction. Their actual population has not been measured.
+
+Whole-branchline length candidates do not resolve the separate G-CONFIG-BRANCHLINES section-detail questions.
+
+## Philippe’s existing export
+
+* SQL fixes shark-line use to FALSE and the first target species to SWO; source evidence is still needed.
+* SQL selects `timeBetweenHooks`, then R clears both clip-on time fields.
+* SQL derives floats as baskets minus one; confirm the line-layout assumptions before reuse.
+* R computes minimum and maximum lengths from branchline composition rows previously expanded by section count.
+* The composition join can multiply set rows; leader aggregation can produce further rows per material.
+* R sums all leader proportions per set, requiring review when several materials occur.
+* R filters sets by reporting year; the agreed export scope retains each selected trip in full.
+
+These are code observations, not measured effects on a selected trip.
+
+### Shooter speed and applicability
+
+ObServe labels shooter speed in knots, while the ROS field requires metres per second.
+
+The legacy SQL copies the source value into the m/s column without conversion. Confirm the stored unit.
+
+The ObServe UI clears shooter speed when `shooterUsed` is false. ROS still marks the speed field mandatory.
+
+The applicable missing-data treatment needs review; a missing speed does not automatically establish zero.
+
+### Changes required by the 4.2.0 field set
+
+The mandatory first floatline length is absent from Philippe's selected E-SET columns.
+
+Other additions are radio/dhan-buoy count, two more floatline lengths and distance between branchlines.
+
+The 4.2.0 workbook expresses both branchline length bounds in metres and removes the legacy unit columns.
+
+## Questions for the sheet review
+
+1. Establish import obligation and row retention when required details are missing, including dependent sheets.
+2. Confirm timestamp interpretation, shooter-speed units and the unused-shooter case.
+3. Check actual population of floatline lengths and agree selection of up to three values per set.
+4. Review leader materials, proportions and branchline lengths with Pascal, preserving one row per target key.
+5. Decide whether trip target species apply to every set, their order, and handling of more than four targets.
+6. Identify shark-line evidence and review the derived float counts and missing mandatory numeric values.
+
+Identifier conversion, source coverage, reporting rules and delivery levels remain open.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 352-388 and 433-526; set SQL lines 16-46 and 83-100; leader SQL lines 15-25; branchline SQL lines 17-40.
+
+* `sql-queries/observe_ll_set.sql`
+* `sql-queries/observe_ll_leader.sql`
+* `sql-queries/observe_ll_branchline.sql`
+
+Additional evidence:
+
+* `ros.form.observe`: `inst/models/10.0/ll-form.yaml` and `inst/sql/10.0/ll/set.sql`.
+* `ros.form.model`: `inst/models/4.2.0/ll-form.yaml`, E-SET and its child-sheet parent keys.
+* `observe-app`: `empty-schema-PG.sql`, lines 84, 108-110, 115, 117 and 123.
+* `observe-app`: `services_en_GB.properties`, lines 132-134, 330, 334, 368 and 595.
+* `observe-app`: observation `FishingSetUIHandler.java`, lines 124-127.
+* `iotc-data-forms`: `form_reporting_templates/ROS-LL/v4.2.0/CHANGELOG.md`.
+
+The schema file is under `core/persistence/migration/src/main/resources/db/migration/v10/10.0/`.
+
+The labels file is under `core/services/i18n/src/main/i18n/translations/`.
+
+The UI handler is under `client/datasource/editor/ll/src/main/java/` in this package:
+
+```text
+fr.ird.observe.client.datasource.editor.ll.data.observation
+```
+
+No source-data queries were run. Data population, actual coverage and export behaviour remain unverified.
+
+See the [reference correspondence inventory](ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retain source trip/set links; use the same verified exported IDs across all dependent sheets.
+* Retrieve populated setting timestamps, positions, vessel speed and total hook count.
+* Convert confirmed shooter speeds from knots to metres per second; a missing speed stays missing.
+* Preserve recorded floatline lengths, branchline lengths, materials and associated proportions for review.
+* Optional mainline material and clip-on timing are usable once code and field meanings are matched.
+
+### What stays unresolved
+
+* Confirm timestamp interpretation and that baskets/branchlines represent the requested hooks between floats.
+* Confirm composition scope before taking branchline length minima/maxima or selecting up to three floatline lengths.
+* Keep each leader material paired with its proportion; multiple materials need a rule for the single target row.
+* Trip-level target species do not establish the target of each set; do not substitute the legacy SWO constant.
+* Do not invent shark-line absence, an unused shooter's speed or float counts from basket counts.
+* Preserve one row per set; composition joins must not multiply the parent operation.
+
+### Complete-row assessment
+
+Positions and operational values provide substantial coverage, but several mandatory meanings remain unresolved.
+
+Any missing parent row also affects lights, hooks, baits, hauling and catches; omission cannot be decided in isolation.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* All 461 sets have endpoint times/positions and hook/basket counts; vessel speed is populated for 458.
+* Shooter speed is populated for 20 sets; one additional recorded shooter use lacks a speed.
+* Clip-on timing has 122 values. Known source units support the proposed conversions, subject to field meaning.
+* Floatline compositions exist for all sets: 1,992 records, with 333 sets exceeding three distinct lengths.
+* Eighteen sets contain a zero floatline length; its meaning and representation need review.
+* All sets have one 100% MON leader composition, simplifying this cohort's material/proportion case.
+* There are 127 trip-target memberships; they do not establish set-specific targets or their order.

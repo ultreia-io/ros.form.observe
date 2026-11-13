@@ -1,0 +1,182 @@
+---
+title: "LL 12 E-SET-BAITS mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 12 E-SET-BAITS mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Bait condition, species, percentage and dye colour for each set.
+
+ROS LL **4.2.0**: **6 fields**, including **5 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](ll-database-import.html#e-set-baits) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field          | Required | Type   | ROS reference / fixed values            |
+| ------------------ | -------- | ------ | --------------------------------------- |
+| `observed_trip_id` | M        | string | —                                       |
+| `set_id`           | M        | string | —                                       |
+| `bait_condition`   | M        | string | `refs_biology.bait_conditions` / `code` |
+| `bait_species`     | M        | string | `refs_biology.bait_species` / `code`    |
+| `bait_percentage`  | M        | number | —                                       |
+
+<details>
+<summary>Optional fields (1)</summary>
+
+| ROS field         | Required | Type   | ROS reference / fixed values |
+| ----------------- | -------- | ------ | ---------------------------- |
+| `bait_dye_colour` | O        | string | —                            |
+
+</details>
+
+Parent: **E-SET**, linked through `observed_trip_id`, `set_id`.
+
+## Source coverage
+
+* Mandatory trip and set identifiers are available; their ROS identity rules remain shared with E-SET.
+* Mandatory bait condition comes from `baitSettingStatus`; its ROS interpretation requires a mapping.
+* Mandatory bait species comes from `baitType`, which also contains artificial bait and preparation categories.
+* Mandatory percentage comes from `baitsComposition.proportion`.
+* Optional dye colour is left empty by Philippe. No dedicated dye field appears in the inspected composition.
+
+The source is `ll_observation.baitsComposition`, linked to its fishing set.
+
+Type and proportion are non-null in the schema; setting condition can be null.
+
+The UI exposes these fields, plus individual size and weight. These do not establish dye colour or whole bait.
+
+Composition rows require coverage beyond the current four-sheet intermediate model.
+
+Individual branchline records also hold bait details. Their hauling condition is distinct from setting condition.
+
+This review checks schema, UI, catalogues and legacy code. Actual trip-level population remains to be measured.
+
+## Philippe’s existing export
+
+* SQL extracts source type, setting condition and proportion, with `NULL` for dye colour.
+* Its left joins can retain a set without composition, leaving required bait attributes empty.
+* R recodes selected bait types to species codes; several branches merge distinct source categories.
+* Five artificial-bait codes become `AR`, which belongs to ROS bait types, not ROS bait species.
+* Unhandled types, including no bait (`TLNO`) and unknown (`UNK`), become missing species values.
+* Frozen (`FRO`) becomes frozen/whole (`FW`); thawed (`DEF`) becomes thawed/whole (`TW`).
+* Fresh (`FRE`) becomes dead (`DE`). Live (`LIV`) is not handled, although ROS has live (`LI`).
+* Artificial bait becomes condition `OT` only after the frozen, thawed and fresh branches are evaluated.
+* Percentage is copied directly. R prints incomplete rows but does not reject or repair them.
+
+No explicit whole/chopped check supports the frozen and thawed conversions.
+
+ROS keys a row by trip, set, species and condition. R does not aggregate rows after recoding.
+
+Source categories that collapse to the same target key can therefore create duplicate rows.
+
+## Correspondence findings
+
+The frozen source catalogue has 38 bait types, mixing species, aggregates, artificial bait and preparation.
+
+Only 11 source types receive a valid target species code from the legacy branches; 22 remain missing and 5 become AR.
+
+These are catalogue counts, not counts of affected observations. Valid codes still need semantic review.
+
+`MIL`, `SAP` and `MAX` exist in both catalogues but are unhandled by Philippe: direct-mapping candidates.
+
+`LIV` to `LI` is also a direct condition candidate, subject to confirming its use in the source observations.
+
+Other conversions lose detail or need scrutiny: `OTHC` (other cephalopod) becomes `SQU` (squids).
+
+`CUT` (piece of fish) carries preparation information without identifying a species.
+
+E-SET-BAITS has no separate bait-type field; artificial bait cannot be represented by placing AR in bait_species.
+
+The inspected target species list has no artificial, no-bait or unknown entry. Their reporting needs clarification.
+
+The database references general species; the form uses a restricted bait-species list. Keep that distinction visible.
+
+## Questions for the sheet review
+
+Resolve mandatory-field coverage first; review optional information afterwards.
+
+1. Agree species correspondences, including artificial bait, no bait, unknown and unsupported species.
+2. Establish whole/chopped evidence and validate fresh, live, frozen and thawed condition rules.
+3. Inspect actual population and define aggregation of percentages when source rows share a target key.
+4. Identify any other source for optional dye colour; the inspected composition has no dedicated field.
+5. Apply the general empty-sheet policy when no bait was used or no usable information is available.
+
+Ask Emmanuel how to report artificial bait or no bait when species and condition are mandatory within a row.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 652-703; bait query; reference correspondence inventory and frozen catalogue snapshots.
+
+* `sql-queries/observe_ll_bait.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* ObServe 10.0 DDL: `ll_observation.baitsComposition` and `ll_observation.branchline`.
+* Observation UI: `FishingSetBaitsCompositionUI.jaxx`.
+* IRD snapshot: `20261112T184113Z`; `ll_common.baittype` and `ll_common.baitsettingstatus`.
+* ROS snapshot: `code_lists--b7c000cba93d`; bait species, types and conditions.
+
+See the [reference correspondence inventory](ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Read actual bait type, setting condition and proportion from each set's bait composition.
+* Match species by verified identity; MIL, SAP and MAX are additional direct-code candidates.
+* Recorded live bait has candidate condition LI; preserve the recorded proportion at the corresponding row scope.
+* Keep the condition at setting distinct from the condition observed at hauling.
+
+### What stays unresolved
+
+* Frozen or thawed does not establish whole versus chopped; fresh does not by itself establish dead.
+* Artificial bait is not a species: AR cannot be placed in bait_species.
+* No bait, unknown species and aggregate categories need explicit reporting rules.
+* Combine proportions only when the same target key represents disjoint source shares.
+* Leave dye colour empty without a source; size, weight and preparation do not establish it.
+
+### Complete-row assessment
+
+A natural-bait row can be complete when species, full condition and proportion are supported alongside both IDs.
+
+Other categories remain partial; a valid-looking code is insufficient when it adds unsupported biological detail.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* All 879 composition rows have type and proportion; 822 have a setting-condition reference.
+* Natural bait includes 820 defrosted records and one fresh record; no live condition occurs in this selection.
+* Artificial squid accounts for 49 records and plastic trap-line squid for nine.
+* The real data does not establish whole versus chopped bait, or a valid species for artificial categories.
+* Source population therefore does not remove the condition/category blockers.

@@ -1,0 +1,38 @@
+---
+title: "LL 04 V-ATTRIBUTES summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 04 V-ATTRIBUTES summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+One field: the shared trip ID, if a row is reported. All 40 vessel-attribute fields are optional.
+
+These cover dimensions, engines, storage, preservation, electronics and waste management.
+
+## Available
+
+Optional vessel attributes were not profiled for the 67 selected trips in 2025.
+
+The agreed export scope leaves all 40 optional fields empty; ObServe attributes may be outdated.
+
+Consolidate vessel attributes in the ROS database from RAV separately from this workbook export.
+
+## To decide
+
+Ask Emmanuel whether the sheet should contain no data rows or one row with only the trip ID.
+
+The database requires no separate attributes row or placeholder associations. IOTC and importer rules remain open.
+
+The shared vessel record can be supplied by other sheets.
+
+For later RAV consolidation, review access, field coverage, units, freshness and vessel matching separately.
+
+Further ObServe attribute investigation remains outside the agreed scope.
+
+[Full review](ll-04-v-attributes.html)
+
+[Short review index](ll-sheet-summaries.html).

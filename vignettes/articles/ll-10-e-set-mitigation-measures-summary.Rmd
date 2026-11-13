@@ -1,0 +1,36 @@
+---
+title: "LL 10 E-SET-MITIGATION-MEASURES summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 10 E-SET-MITIGATION-MEASURES summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+ROS 4.2.0 has 15 fields, 12 mandatory: trip/set identities, tori-line count, lighting and weighting details.
+
+Hook-to-sinker distance, hook-pod use and four other-measure slots are also mandatory.
+
+## Available
+
+The 2025 review covers 67 trips (17 observer-monitored, 50 self-reporting) and 461 sets.
+
+Snap weights are populated for 264 sets and swivel weights for 70. They describe components, not an average sinker.
+
+No mitigation categories were selected. This does not prove that no mitigation was used.
+
+## To decide
+
+Establish actual counts, average weights, weighted-branchline percentages, distances, lighting and hook-pod use.
+
+Whole-line length does not locate a sinker. Missing observations cannot justify zero or false responses.
+
+Agree device correspondences and how to report fewer than four known measures.
+
+The database allows an empty sheet without mitigation records. Reporting requirements remain open.
+
+[Full review](ll-10-e-set-mitigation-measures.html).
+
+[Short review index](ll-sheet-summaries.html).

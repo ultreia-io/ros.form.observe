@@ -14,14 +14,31 @@ navbar:
     articles:
       text: Articles
       menu:
-        - text: Terminology
-          href: articles/terminology.html
+        - text: Short reviews - start here
+          href: articles/ll-sheet-summaries.html
+        - text: Discussion with Emmanuel
+          href: articles/emmanuel-discussion.html
+        - text: Export design - short
+          href: articles/export-design-summary.html
+        - text: Database overview - short
+          href: articles/ll-database-import-summary.html
+        - text: Source data - short
+          href: articles/ll-live-data-coverage-summary.html
+        - text: "-------"
+        - text: Detailed sheet reviews
+          href: articles/ll-sheet-reviews.html
+        - text: Detailed database overview
+          href: articles/ll-database-import.html
+        - text: Detailed export design
+          href: articles/export-design.html
+        - text: All articles
+          href: articles/index.html
     coverage:
       text: Coverage
       href: https://app.codecov.io/gh/ultreia-io/ros.form.observe
     intro:
-      text: Getting started
-      href: articles/ros.form.observe.html
+      text: Start here
+      href: articles/ll-sheet-summaries.html
     community:
       text: Community
       menu:
@@ -34,9 +51,74 @@ navbar:
         - text: Code of conduct
           href: CODE_OF_CONDUCT.html
 articles:
-  - title: Guides
+  - title: Short overviews
     navbar: ~
-    contents: [ros.form.observe, terminology]
+    contents:
+      - articles/ll-sheet-summaries
+      - articles/emmanuel-discussion
+      - articles/ros.form.observe-summary
+      - articles/terminology-summary
+      - articles/export-design-summary
+      - articles/ll-database-import-summary
+      - articles/ll-reference-correspondences-summary
+      - articles/ll-live-data-coverage-summary
+  - title: Short sheet reviews
+    navbar: ~
+    contents:
+      - articles/ll-00-meta-summary
+      - articles/ll-01-o-info-summary
+      - articles/ll-02-v-info-summary
+      - articles/ll-03-v-trip-summary
+      - articles/ll-04-v-attributes-summary
+      - articles/ll-05-g-general-summary
+      - articles/ll-06-g-config-branchlines-summary
+      - articles/ll-07-g-config-mitigation-devices-summary
+      - articles/ll-08-e-set-summary
+      - articles/ll-09-e-set-lights-summary
+      - articles/ll-10-e-set-mitigation-measures-summary
+      - articles/ll-11-e-set-hooks-summary
+      - articles/ll-12-e-set-baits-summary
+      - articles/ll-13-e-set-hauling-summary
+      - articles/ll-14-e-set-hauling-biteoffs-summary
+      - articles/ll-15-e-set-catches-summary
+      - articles/ll-16-e-set-catch-specimens-summary
+      - articles/ll-17-e-set-catch-specimens-ssi-summary
+      - articles/ll-18-e-set-tag-details-summary
+  - title: Detailed guides
+    navbar: ~
+    contents:
+      - ros.form.observe
+      - terminology
+  - title: Detailed overviews
+    navbar: ~
+    contents:
+      - articles/export-design
+      - articles/ll-database-import
+      - articles/ll-reference-correspondences
+      - articles/ll-live-data-coverage
+      - articles/ll-sheet-reviews
+  - title: Detailed sheet reviews
+    navbar: ~
+    contents:
+      - articles/ll-00-meta
+      - articles/ll-01-o-info
+      - articles/ll-02-v-info
+      - articles/ll-03-v-trip
+      - articles/ll-04-v-attributes
+      - articles/ll-05-g-general
+      - articles/ll-06-g-config-branchlines
+      - articles/ll-07-g-config-mitigation-devices
+      - articles/ll-08-e-set
+      - articles/ll-09-e-set-lights
+      - articles/ll-10-e-set-mitigation-measures
+      - articles/ll-11-e-set-hooks
+      - articles/ll-12-e-set-baits
+      - articles/ll-13-e-set-hauling
+      - articles/ll-14-e-set-hauling-biteoffs
+      - articles/ll-15-e-set-catches
+      - articles/ll-16-e-set-catch-specimens
+      - articles/ll-17-e-set-catch-specimens-ssi
+      - articles/ll-18-e-set-tag-details
 reference:
   - title: Package
     contents: [ros.form.observe-package]

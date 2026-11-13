@@ -13,7 +13,7 @@ Understand how ObServe data relates to ROS forms and the packages used by the ex
 
 ## Export scope
 
-The first export target is ObServe 10.0.6 to ROS longline 4.2.0.
+The first export target is ObServe 10.0 to ROS longline 4.2.0.
 
 Shared operations must also support purse-seine forms, with separate mappings for each fishing gear.
 

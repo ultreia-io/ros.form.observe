@@ -1,0 +1,17 @@
+---
+title: "Terminology summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Terminology summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+- **ObServe:** source observations.
+- **ROS form:** the Excel workbook sent to the IOTC.
+- **Model:** the form's fields and requirements.
+- **Catalogue:** reference values, such as species or ports.
+- **Correspondence:** how a source value becomes an accepted ROS value.
+- **Mandatory field:** required within a reported row; this alone does not require the row to exist.
+
+[Detailed review](terminology.html) · [Short review index](ll-sheet-summaries.html).

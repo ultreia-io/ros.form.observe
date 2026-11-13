@@ -1,0 +1,46 @@
+---
+title: "LL 01 O-INFO summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 01 O-INFO summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Four fields: trip ID, IOTC observer ID, conducted-set count and observed-set count.
+
+This sheet identifies the trip and links its other reported records.
+
+## Available
+
+The 2020–2025 export contains 70 observer-monitored trips and 700 recorded sets.
+
+All 70 source trip IDs and observer links are present; ROS trip-ID construction remains open.
+
+The 15 distinct observers resolve to ObServe person records with full names; IOTC matching remains open.
+
+Agreed: count distinct FishingSet IDs for the selected trip, restricted to activities with VesselActivity code FO.
+
+All 700 activities are FO (fishing operations), each linked to one set. Counts range from 1 to 32 per trip.
+
+Separate observer dates are absent. Observer-specific locations remain unconfirmed.
+
+## To decide
+
+Observed-set count remains unknown until we confirm whether unobserved sets can be recorded.
+
+Do not copy the conducted count or write zero; handling this unresolved mandatory integer remains open.
+
+Agree observer matching, the ROS trip ID and activity-day calculations.
+
+Leaving optional observer dates empty is preferred but unapproved; locations and lost-day reporting remain open.
+
+The source flag called “monitored” means hook-timer use, not observation by a person.
+
+O-INFO is required as this export's trip root. IOTC reporting and importer requirements still need confirmation.
+
+[Full review](ll-01-o-info.html)
+
+[Short review index](ll-sheet-summaries.html).

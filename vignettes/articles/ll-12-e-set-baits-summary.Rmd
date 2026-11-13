@@ -1,0 +1,38 @@
+---
+title: "LL 12 E-SET-BAITS summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 12 E-SET-BAITS summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+ROS 4.2.0 has six fields, five mandatory: trip/set identities, bait condition, species and percentage.
+
+Dye colour is optional.
+
+## Available
+
+The 2025 review covers 67 trips (17 observer-monitored, 50 self-reporting) and 461 sets.
+
+All 879 bait composition rows have type and percentage; 822 have a setting-condition reference.
+
+Natural bait includes 820 defrosted records and one fresh record. No live condition occurs.
+
+There are 49 artificial-squid records and nine plastic trap-line squid records.
+
+## To decide
+
+Agree species and condition mappings. Defrosted does not establish whole versus chopped; fresh does not establish dead.
+
+Artificial bait is not a species: AR cannot populate the species field.
+
+Resolve artificial, absent and unknown bait, plus aggregation where source categories share a target key.
+
+The database allows settings without bait-detail rows. Reporting requirements remain open.
+
+[Full review](ll-12-e-set-baits.html).
+
+[Short review index](ll-sheet-summaries.html).

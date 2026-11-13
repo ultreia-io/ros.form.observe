@@ -1,0 +1,34 @@
+---
+title: "LL 09 E-SET-LIGHTS summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 09 E-SET-LIGHTS summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+All five ROS 4.2.0 fields are mandatory: trip/set identities, light type, colour and number.
+
+## Available
+
+The 2025 review covers 67 trips (17 observer-monitored, 50 self-reporting) and 461 sets.
+
+Light type and colour are populated for 457 sets. Lights-per-basket and basket counts exist for all sets.
+
+Four sets record zero lights per basket. That needs checking before deciding whether to report a light row.
+
+## To decide
+
+Confirm that multiplying lights per basket by basket count gives the requested total.
+
+Agree type/colour conversions, especially mixed and unknown values. Missing information must not become zero.
+
+Mixed categories cannot be split without counts for each type/colour combination.
+
+The database allows settings without light rows. Reporting requirements remain open.
+
+[Full review](ll-09-e-set-lights.html).
+
+[Short review index](ll-sheet-summaries.html).

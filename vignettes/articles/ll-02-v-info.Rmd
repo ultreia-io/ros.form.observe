@@ -1,0 +1,179 @@
+---
+title: "LL 02 V-INFO mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 02 V-INFO mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Scope
+
+Map ObServe 10.0 observations to ROS LL 4.2.0 V-INFO: vessel identification, registration and personnel.
+
+V-INFO follows [O-INFO](ll-01-o-info.html), with one row per observed trip and 16 fields.
+
+The 4.2.0 definition in `ros.form.model` is the authority for field names, types and mandatory status.
+
+Nine fields declare `mandatory: true`; omitted `mandatory` means optional in `form.model`.
+
+This review records source coverage and open decisions. No export rule or implementation is approved here.
+
+See the [export design](export-design.html) and [reference inventory](ll-reference-correspondences.html).
+
+## Database destination and import obligation
+
+[Database review](ll-database-import.html#v-info) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Source coverage
+
+The existing intermediate `trip` sheet contains `vessel`, `captain` and `noOfCrewMembers`.
+
+Resolve vessel and person IDs through the ObServe registries, then match the corresponding ROS registry records.
+
+Use the country catalogue for flag and personnel nationality codes.
+
+These basic values need no new operational sheet. Unresolved roles may require additional information.
+
+The snapshot contains `iotcid`, `imoid`, `radiocallsignid`, `nationalid` and `cfrid` in the vessel registry.
+
+Column availability does not establish that every selected trip has a usable value. No trip queries were run here.
+
+## Field review
+
+M and O below come from the ROS LL 4.2.0 model, not from comments in Philippe's SQL.
+
+Mandatory status comes from `ros.form.model` 4.2.0. Resolve mandatory-field coverage first.
+
+### Mandatory fields (9)
+
+| ROS field                                 | Required | Source / legacy value                                 | Assessment                                                                             |
+| ----------------------------------------- | -------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `observed_trip_id`                        | M        | trip.topiaId; ROS ID from O-INFO                      | Reuse the converted ROS trip ID; the source technical ID is not the target identifier. |
+| `identification_name`                     | M        | trip.vessel → vessel.label1                           | Source available; compare with the matched ROS vessel record.                          |
+| `identification_flag_or_chartering_state` | M        | vessel.flagCountry → country.iso3Code                 | Source flag available; chartering-state treatment remains to be established.           |
+| `identification_iotc_number`              | M        | vessel.iotcId                                         | Match the ROS vessel registry; resolve missing or conflicting IDs.                     |
+| `gear_main_fishing_gear`                  | M        | Fixed DL in legacy SQL                                | Confirm gear for the exported scope; common.gear is an equipment vocabulary.           |
+| `personnel_fishing_master_full_name`      | M        | trip.captain → person firstName + lastName            | Duplicates the captain; distinct fishing-master identity not established.              |
+| `personnel_fishing_master_nationality`    | M        | captain.country → country.iso3Code                    | Duplicates captain nationality; depends on the fishing-master role decision.           |
+| `personnel_skipper_captain_full_name`     | M        | trip.captain → person firstName + lastName            | Source available; establish correspondence with ROS contacts.                          |
+| `personnel_skipper_captain_nationality`   | M        | captain.country → country.iso3Code                    | Source country available; confirm nationality meaning and missing values.              |
+
+<details>
+<summary>Optional fields (7)</summary>
+
+| ROS field                                 | Required | Source / legacy value                                 | Assessment                                                                             |
+| ----------------------------------------- | -------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `identification_imo_number`               | O        | vessel.imoId                                          | Source column available; Philippe extracts it, then clears it in R.                    |
+| `identification_ircs`                     | O        | vessel.radioCallSignId                                | Source column available; Philippe returns NULL.                                        |
+| `registration_country`                    | O        | vessel.flagCountry in legacy SQL                      | Confirm whether flag country establishes registration country.                         |
+| `registration_port`                       | O        | First two characters of vessel.nationalId             | Legacy prefix correspondence; confirm meaning and canonical ROS port.                  |
+| `registration_registration_number`        | O        | vessel.cfrId in legacy SQL; nationalId also available | Confirm the intended registration identifier and target registry correspondence.       |
+| `licensed_target_species`                 | O        | No licence-target source selected                     | SQL NULL, then fixed TS in R; identify supporting licence information.                 |
+| `personnel_crew_number`                   | O        | trip.noOfCrewMembers                                  | Source field already extracted by our model; Philippe returns NULL.                    |
+
+</details>
+
+## What Philippe's export does
+
+The vessel query supplies all 16 V-INFO columns, but several values are empty, duplicated or fixed.
+
+* It leaves IRCS empty despite the source vessel's `radioCallSignId` field.
+* It leaves crew number empty despite `trip.noOfCrewMembers`, already present in the intermediate model.
+* It copies the trip captain into both fishing-master and skipper/captain fields.
+* It uses flag country as registration country and CFR ID as registration number.
+* It derives the registration port from the first two characters of `nationalId`.
+* It fixes fishing gear to `DL`; the R code fixes licensed target species to `TS`.
+
+The R code maps five registration prefixes to ports: `CC`, `DI`, `RU`, `MR` and `00`.
+
+These are local correspondence rules, not a general registration-port extraction rule.
+
+It also replaces missing IOTC vessel identifiers with `IOTCXXXXXX` and clears every extracted IMO value.
+
+The placeholder does not identify a vessel. The reason for discarding IMO values needs clarification.
+
+## Mandatory source gap: main fishing gear
+
+`gear_main_fishing_gear` is mandatory in ROS, but no direct equivalent was found in the checked ObServe sources.
+
+Checked: ObServe 10.0 schema and the frozen IRD reference catalogues extracted on 12 November 2026.
+
+Vessel type identifies longliners; line type describes material, and setting shape describes deployment geometry.
+
+The vessel activities "Drifting" and "Anchored" do not classify the fishing gear as drifting or anchored longline.
+
+The checked gear and equipment-characteristic references provide no direct equivalent either.
+
+Treat this as missing source information for the exporter: the gear must be supplied or confirmed per trip.
+
+Philippe's fixed `DL` value is not extracted data and must not become a universal default across countries.
+
+This conclusion applies to the checked schema and reference snapshot, not to every possible free-text comment.
+
+## Decisions to discuss
+
+1. Establish vessel/contact registry matching and the treatment of missing or conflicting identifiers.
+2. Determine whether the trip captain also fulfils the fishing-master role; both roles are mandatory in the model.
+3. Confirm the meanings of registration country, port and number, including the use of CFR versus national ID.
+4. Identify evidence for fishing gear and licensed target species instead of inheriting fixed values automatically.
+5. Review the available IRCS, IMO and crew fields before deciding their mappings.
+
+Reuse the ROS trip ID established for O-INFO. Do not independently construct another trip identifier for this sheet.
+
+The SQL provides a useful starting point, but it does not resolve all V-INFO meanings or registry correspondences.
+
+## Evidence
+
+Paths are relative to the named project or export directory.
+
+| Project                | Source                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `ros.form.model`       | `inst/models/4.2.0/ll-form.yaml`, V-INFO                                                  |
+| `form.model`           | `vignettes/model-specification.Rmd`, omitted `mandatory` means false                      |
+| `ros.form.observe`     | `inst/models/10.0/ll-form.yaml`, trip fields                                              |
+| `observe-app`          | `core/persistence/migration/src/main/resources/db/migration/v10/10.0/empty-schema-PG.sql` |
+| IRD `ros_ll_iotc_v2.1` | `sql-queries/observe_ll_vessel.sql`, lines 18–35 and source joins                         |
+| IRD `ros_ll_iotc_v2.1` | `r-script/ros_ll_iotc_v2.1.R`, lines 177–228                                              |
+
+Source registry headers were checked in the frozen IRD snapshot:
+
+```text
+~/.cache/ros.form.observe/ird/snapshots/20261112T184113Z/
+```
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retrieve the recorded vessel name, flag, IOTC ID, IMO and radio call sign from the linked vessel record.
+* Retain populated IDs only when their registry correspondence is unambiguous; flag conflicts instead of guessing.
+* Retrieve the recorded captain name and crew count.
+* Use a person's country as nationality only when that source meaning is confirmed.
+
+### What stays unresolved
+
+* Do not copy the captain into the fishing-master role without evidence that the roles coincide.
+* Main fishing gear is a mandatory source gap; supply or confirm the ROS gear category for each trip.
+* Leave registration country, port, number and licensed targets unresolved where source meanings differ.
+* Keep missing IOTC IDs missing; do not manufacture placeholders.
+
+### Complete-row assessment
+
+Fishing-master identity/nationality and gear remain required decisions, alongside missing or conflicting source values.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* Vessel IOTC IDs are populated on 66 of 67 trips; all trips have captain and vessel links.
+* Crew count is populated on 17 trips. Registry correspondence and role/nationality meaning remain separate checks.
+* No new evidence establishes fishing-master identity or validates the constant primary-gear code.

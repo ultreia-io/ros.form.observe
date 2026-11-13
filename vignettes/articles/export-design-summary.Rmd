@@ -1,0 +1,38 @@
+---
+title: "Export design summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Export design summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Purpose
+
+Produce one ROS workbook per selected ObServe trip, then validate it. Longline is the first target.
+
+## Agreed approach
+
+- Level 1 selects trips in R by date overlap and optional programme IDs; level 2 adds a Shiny interface.
+- Export the whole selected trip. Read source data, resolve references, fill the template, then validate.
+- Level 1 extracts the source catalogue from ObServe; level 2 uses a compatible public, versioned catalogue.
+- Keep one catalogue snapshot per export, including historical entries. Metadata comes from the user.
+- V-TRIP uses departure at 00:00 and return at 23:59. Optional vessel attributes await RAV consolidation.
+
+The LL source model contains 18 tables, retaining separate measurements, gear compositions and associations.
+
+Each table has a SQL query using the same single trip ID, with source values and model column order preserved.
+
+[Download the source model](../models/10.0/ll-form.yaml). Equipment-characteristic mappings remain open.
+
+## To decide
+
+Agree source coverage, reference correspondences, identifiers, missing-data rules and failure handling.
+
+Ask Emmanuel which sheets may stay empty, even when their fields are mandatory within a reported row.
+
+ROS database 4.0.0 and form 4.2.0 have independent versions. ROS references need alignment with Reference Data.
+
+The detailed reviews retain field-level evidence and open questions. Resolve these before implementing the exporter.
+
+[Full design](export-design.html) · [Short review index](ll-sheet-summaries.html).
