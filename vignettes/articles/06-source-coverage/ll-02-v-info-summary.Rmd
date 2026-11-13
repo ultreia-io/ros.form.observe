@@ -1,0 +1,44 @@
+---
+title: "LL 02 V-INFO summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 02 V-INFO summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Nine fields: trip ID; vessel name, flag or chartering state, IOTC number and main gear.
+
+Captain and fishing-master names and nationalities complete the required fields.
+
+## Available
+
+All 67 trips in the 2025 selection have vessel and captain links; 66 have a populated vessel IOTC ID.
+
+Crew count is recorded on 17 trips. Names, flag and other identifiers can be read from linked records.
+
+Population does not establish valid ROS registry matches or prove that a person's country means nationality.
+
+## To decide
+
+Resolve vessel/contact matches and missing or conflicting IDs; confirm flag and chartering-state treatment.
+
+Main fishing gear is mandatory but unavailable directly from the checked ObServe data and references.
+
+It must be supplied or confirmed for each trip; Philippe's fixed drifting-longline value is not source data.
+
+**Agreed:** use the trip captain's name and country for both personnel roles throughout the ObServe export.
+
+**IRD proposal:** add a fishing-master person flag and an optional trip link, allowing two distinct people.
+
+Confirm registration country, port and number, licensed targets, and optional identifier mappings.
+
+Reuse the O-INFO trip ID. Do not manufacture missing vessel identifiers.
+
+The database permits an empty sheet; shared vessel details may come from other sheets. IOTC rules remain open.
+
+[Full review](ll-02-v-info.html)
+
+[Short review index](ll-sheet-summaries.html).

@@ -1,0 +1,462 @@
+---
+title: "Initial LL reference correspondence inventory"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Initial LL reference correspondence inventory}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Purpose and boundary
+
+This inventory, dated **12 November 2026**, supports the decisions in [Export design](../export-design.html).
+
+It covers **ObServe 10.0 longline observations → ROS LL 4.2.0**, starting from the frozen IRD catalogue.
+
+The objective is to distinguish direct correspondences, explicit recodes, contextual rules and missing information.
+
+Mapping levels, the R API and implementation remain undecided.
+
+The categories below describe work required. They do not constitute approved export rules.
+
+## Evidence and coverage
+
+The source snapshot contains 95 reference tables: 88 code lists and seven registries, with every column retained.
+
+All 95 tables appear in the source inventory, including disabled entries and tables outside the initial LL scope.
+
+| Source scope                         | Tables | Treatment in this review                          |
+| ------------------------------------ | -----: | ------------------------------------------------- |
+| Common and LL observation references | 55     | Examined as candidate sources for LL              |
+| LL landing references                | 3      | Potential related vocabularies; separate coverage |
+| PS references                        | 37     | Retained; PS correspondences require their review |
+
+The target model binds 139 fields to 47 code lists and four registries, through 57 distinct lookup bindings.
+
+One additional target list, `refs_biology.gear_interactions`, is relevant to an unbound SSI field.
+
+The inventory therefore has 52 target rows: 51 bound tables plus that additional list.
+
+The ROS snapshot contains 56 code lists in total. Eight other lists have no binding in this LL model.
+
+They concern cetacean subsets, scars, FAD designs, school detection/types and surface-fishery activities.
+
+Their catalogue entries are retained in `target_catalogue_scope.csv` for subsequent scope review.
+
+Catalogue hashes were verified before comparison. Source and target fingerprints accompany the detailed inventory.
+
+**These counts measure catalogue coverage, not coverage of selected French trips.**
+
+No trip observations were extracted for this review. Unmatched references may be unused or outside the LL scope.
+
+Disabled entries remain relevant to historical observations; they are included in every count.
+
+## First findings
+
+| Correspondence              | Evidence from the frozen catalogues                                      | Initial assessment                                  |
+| --------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------- |
+| Countries                   | 93 of 97 source ISO3 codes match a canonical ROS code                    | Direct lookup with four exceptions                  |
+| Hull materials              | All six `homeid` values match ROS codes                                  | Direct lookup                                       |
+| Species                     | 220 exact matches plus one declared alias, out of 368 source entries     | Direct lookup for these 221 entries                 |
+| Ports                       | ObServe has `locode`; the frozen ROS CSV has no UN/LOCODE column         | Shared-key availability to resolve                  |
+| Sex, lights, line materials | Small, explicit vocabulary conversions exist                             | Recode tables, with some semantic exceptions        |
+| Hooks and baits             | ROS combines or separates concepts differently                           | Additional source attributes and contextual rules   |
+| Fates, condition, maturity  | The legacy exporter includes assumptions and information loss            | Business interpretation required                    |
+| Sampling and mitigation     | Several legacy outputs are constants rather than source observations     | Source evidence and reporting decisions required    |
+| People and vessels          | Correspondence identifies an entity rather than translating a vocabulary | Separate registry identity decisions                |
+
+### Direct lookup candidates
+
+Resolve the ObServe technical ID first, then use the relevant source attribute to identify a ROS record.
+
+The technical ID and the source business code are different fields.
+
+| Source table          | Attribute  | Target list                        | Matched | Remaining |
+| --------------------- | ---------- | ---------------------------------- | ------: | --------: |
+| `common.country`      | `iso3code` | `refs_admin.countries`             | 93      | 4         |
+| `common.hullmaterial` | `homeid`   | `refs_fishery.hull_material_types` | 6       | 0         |
+| `common.species`      | `faocode`  | `refs_biology.species`             | 221     | 147       |
+
+Species includes the target catalogue's declared `RMJ → RMM` alias; 220 entries match without an alias.
+
+The country exceptions are `YUG`, `MKH`, `XXX` and `XIN`. Their treatment remains unresolved.
+
+The six hull codes are `AL`, `FR`, `OT`, `ST`, `WO` and `UN`; ObServe's numeric `code` is not the matching attribute.
+
+Philippe keeps only `FR`, `ST` and `UN`, mapping other hull values to unknown. That loses available detail.
+
+The species exceptions require review by intended use; the full source catalogue extends beyond ROS LL requirements.
+
+Philippe also recodes `BIL*`, `SBD*`, `VLF*`, `VVL*` and `XXX*`. Those conversions need separate semantic review.
+
+The bait and predator lists are restricted species subsets. Absence from a subset is not a general species error.
+
+### Ports: preserve UN/LOCODE as the intended key
+
+The agreed matching attribute is UN/LOCODE, using ObServe's `common.harbour.locode`.
+
+The frozen ROS port CSV contains `code`, `country_code`, names, coordinates and geometry, but no UN/LOCODE column.
+
+This is a catalogue-field availability issue to investigate before declaring the port correspondence complete.
+
+The ROS reference configuration currently exposes a lookup on `code` only.
+
+Of 153 ObServe harbours, 113 have a nonblank `locode`; 40 have no value in this field.
+
+A diagnostic conversion of the ISO2 prefix to the ROS country code finds 66 target candidates and 47 unmatched values.
+
+That conversion is recorded only as diagnostic evidence. It is not an approved replacement for a shared UN/LOCODE join.
+
+Eleven candidates have a different country prefix from the ObServe harbour's country, all involving Réunion and France.
+
+The target includes both `REULPT` and `FRARELPT`. Their coexistence needs checking when restoring the common key.
+
+Do not infer that all 47 unmatched ports are needed for French LL exports; trip usage remains unmeasured.
+
+### Finite recodes with limited dependencies
+
+These are candidates for explicit correspondence tables once their meanings and exception policies are agreed.
+
+| Domain             | Candidate examples                                    | Remaining issue                                                      |
+| ------------------ | ----------------------------------------------------- | -------------------------------------------------------------------- |
+| Sex                | `1 → M`, `2 → F`, `0 → N`, `3 → J`                    | Confirm `4` (Not available) versus ROS unknown; retain disabled `3`  |
+| Line materials     | `MON → NL`, `MUN → MN`, `SSW → ST`, `GLW → GW`        | Also review `BRL → BR`, `SKW → SK`, `TR3 → TR`; resolve other values |
+| Light type         | `CH → CL`, `EL → EL`                                  | `MX → OT` loses the mixed-type detail                                |
+| Light colour       | `B → BU`, `G → GR`, `R → RD`, `Y → YL`                | Separate other colours, mixed colours and unknown                    |
+| Fate category      | `RET → RE`, `DIS/ESC → DI`, `UNK → UN`                | Disabled `SOLD` and `LOST` require historical treatment              |
+| Observation source | `OB → OB`, `OE → EM`                                  | Source `SR` has no corresponding target data-source category         |
+| Weight type        | `ENT → RD`, `VAT → GO`, `VDK → HD`, `UNK → UN`        | Confirm processing meaning, including tail state                     |
+| Hook position      | The 18 source codes have explicit legacy conversions  | Several detailed positions merge; the ROS model binding is missing   |
+
+For line material `PV`, ObServe has label Polyvinyl and `homeid = CREM`; Philippe writes ROS `MC`.
+
+The target means Multifilament cremona. The relationship needs terminology confirmation, not lexical acceptance alone.
+
+Measurement tools also allow explicit recodes once equivalent instrument categories are confirmed.
+
+Use source `sizeMeasureMethod` and `weightMeasureMethod`; a universal calliper default discards existing information.
+
+## Correspondences requiring more attention
+
+### Hook type and size
+
+ObServe has 14 hook types and 22 sizes. ROS provides 26 combined hook/type-size or terminal-device codes.
+
+Both `hooksComposition` and individual `branchline` records contain hook type and size in the source schema.
+
+Philippe groups types, then fixes sizes as `C14`, `J09`, `H40`, `S01` or `T36` (P-R:620–633).
+
+The hook query joins the size table but does not use its value in the output (P-HOOK:18–28).
+
+His trap-line output is `TTL`; the frozen ROS catalogue contains `TLL`, with no declared `TTL` alias.
+
+The actual type/size combinations used in selected trips still need inspection, including absent or unsupported sizes.
+
+### Bait category, species and condition
+
+The 38 ObServe bait types mix species, artificial bait, preparation and aggregates.
+
+ROS separates these concepts into bait type, bait species and condition lists.
+
+Philippe maps five artificial-bait codes to `AR` in the species field (P-R:661–671).
+
+`AR` belongs to `refs_biology.bait_types`; it is absent from the target bait-species list.
+
+Only 11 source bait types produce a valid species code in those legacy branches; 22 produce no species value.
+
+This is vocabulary coverage, not a count of affected bait observations.
+
+The condition rules map frozen and thawed bait to whole-bait categories without an explicit preparation check.
+
+Source `LIV` is not handled there. The artificial-bait condition branch also follows the frozen/thawed branches.
+
+The review must distinguish setting condition from bait condition observed during hauling or specimen handling.
+
+### Fate and individual condition
+
+The broad fate category is comparatively simple; the detailed reason needs more evidence.
+
+Philippe uses source fate, species group and predator codes to infer detail (P-R:757–769).
+
+For example, a species group does not itself establish the reason why an individual was discarded.
+
+The health rules collapse several distinct source states to alive with unknown condition (P-R:775–783).
+
+Catch-level and specimen-level handling differ, including the source `DFCO` state.
+
+Some specimen rules overwrite capture state using release state or infer release state (P-R:908–924).
+
+These are assumptions about observations. They require explicit reporting decisions before reuse.
+
+### Measurements, processing and maturity
+
+ObServe has 22 length-measurement types. Philippe explicitly handles 13 and always writes `is_straight = TRUE`.
+
+The catalogue also contains curved measurements, including disabled historical entries (P-R:871–885).
+
+A length correspondence therefore includes both the ROS measurement type and its geometry flag.
+
+ROS generic measurement and instrument lists also require length/weight context to identify some codes uniquely.
+
+The source `onboardprocessing` list mixes processing, preservation and product use.
+
+For example, source `DR` means Dried, while ROS fish-processing `DR` means Dressed: equal codes are not equivalent.
+
+That source vocabulary is linked to LL logbook/landing data; no LL observation catch binding was established here.
+
+Source weight types may support specimen processing, but each target field's meaning must be checked.
+
+The target uses weight measurements for catches and fish-processing types for specimen weight processing.
+
+The 18 source maturity entries include numeric stages, ranges and a named WKASMSF scale.
+
+ROS has six broad stages. Numeric equality cannot establish correspondence without scale, species and sex context.
+
+Philippe selects the source stage code while leaving the scale empty; no subsequent stage conversion was found.
+
+### Predators and depredation
+
+Species lookup uses the predator subset. Depredation source is a separate classification of the predator taxon.
+
+The source relation allows multiple predators per catch.
+
+Philippe's first matching branch selects one group from the combined codes (P-R:939–946).
+
+Multiplicity, priority and unknown-taxon handling therefore need explicit decisions.
+
+### Sampling, mitigation and other configuration
+
+Observer presence or commercial-trip type does not establish exhaustive or random sampling.
+
+Philippe fixes `ES` for catch sampling and hauling protocol, and `LH`/`RM` for specimen period/method.
+
+The required protocol evidence is not supplied by the reference catalogue alone.
+
+The source has 15 mitigation types and a set-to-mitigation relation.
+
+These may feed dedicated ROS fields as well as device lists; counts, placement and dimensions need further source data.
+
+Legacy constants include zero tori lines, false hook-pod use and `NO` other mitigation (P-SET:55–62).
+
+They do not establish absence of recorded mitigation in a new dataset.
+
+Likewise, `common.gear` describes vessel equipment and is not the ROS fishing-gear vocabulary.
+
+Philippe fixes gear `DL`, licensed target group `TS` and set target `SWO`; these require scope or source justification.
+
+The `trip_species` relation may describe intended species, but does not by itself establish a vessel's licence targets.
+
+Lost-day reasons may use activity codes such as `FAIL` or `REPAIR`; durations require a separate reporting calculation.
+
+## Source gaps and identity matching
+
+Some required concepts have no established source binding in the reviewed LL schema and exporter.
+
+These include waste management, storage types, streamer design, dehookers and some specimen-handling metadata.
+
+This means a binding is still missing; it is not proof that the information cannot exist elsewhere.
+
+Sample references and tag numbers exist, but do not alone identify biological material, preservation or tag type.
+
+Reporting entity and focal-point information also need explicit reporting metadata.
+
+The current intermediate model has four sheets and binds only 21 source code lists and two source registries.
+
+Further source needs include hook/bait/branchline compositions, measurements, predators and mitigation relations.
+
+Those operational rows are not contained in a reference-only catalogue snapshot.
+
+### Registries remain a separate decision
+
+| Registry                  | Initial finding                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `ros_meta.vessel`         | 102 unique IOTC-ID candidates among 2,741 source vessels                        |
+| `ros_meta.observer`       | No dedicated IOTC observer-ID column in `common.person`; correspondence needed  |
+| `ros_meta.contact`        | Role-specific matching for captain/owner contacts; no automatic name acceptance |
+| `ros_meta.focal_point`    | Reporting liaison metadata, not an automatic observer/operator substitution     |
+
+For vessels, 57 nonblank source IOTC IDs are unmatched and 2,582 source entries have no IOTC ID.
+
+These whole-catalogue counts do not describe the French LL fleet used by a particular export.
+
+Candidate identities still need checks against other identifiers, such as IMO, radio call sign and flag.
+
+Philippe uses a name join for observers and placeholder identifiers when unresolved (P-R:108–114,186).
+
+Those placeholders are not evidence of a ROS identity. No personal registry rows are reproduced in this report.
+
+The registry manifest also lists `ros_meta.observer_identifier_mapping`, outside the four model-bound registries.
+
+Its CSV is not cached and was not inspected. Check it before concluding that no reusable identity mapping exists.
+
+## Catalogue and model issues affecting the review
+
+Some target codes are unique only within a second dimension.
+
+| Target list                       | Repeated codes   | Context needed                                |
+| --------------------------------- | ---------------- | --------------------------------------------- |
+| `refs_biology.fates`              | `FL`, `FR`, `UN` | `type_of_fate_code`                           |
+| `refs_biology.measurements`       | `PD`, `UN`       | `type_of_measurement_code`                    |
+| `refs_biology.measurement_tools`  | `CA`, `LW`, `UN` | `type_of_measurement_code`                    |
+| `refs_fishery_config.gears`       | `UN`, `Un`       | Case matters; configured lookup ignores case  |
+
+For example, `CA` means Calliper for length and Calculation for weight.
+
+The future correspondence discussion must account for these contexts. A target code string alone can be ambiguous.
+
+The LL model has no reference declaration for SSI `gear_interaction` or `leader_material`.
+
+Both are mandatory strings. This review records the missing declarations without changing the model.
+
+Source CSV headers use PostgreSQL spelling, including `topiaid`; the intermediate model expects `topiaId` lookups.
+
+That naming difference must be reconciled when source catalogue configuration is implemented.
+
+## Complete target inventory
+
+The following categories describe the dominant requirement; individual entries may also have exceptions or source gaps.
+
+| Category   | Tables | Meaning                                                        |
+| ---------- | -----: | -------------------------------------------------------------- |
+| Lookup     | 5      | Identify a target through a shared attribute or declared alias |
+| Recode     | 11     | Finite, explicit source-to-target vocabulary correspondence    |
+| Rule       | 20     | Context, multiple attributes, cardinality or reporting policy  |
+| Source gap | 12     | Relevant source binding or reporting metadata still missing    |
+| Identity   | 4      | Establish the same person or vessel across registries          |
+
+These totals include the additional gear-interaction list. They are not counts of mappings ready for production.
+
+| ROS target table                                         | Category   | Source candidates                                                                 | Remaining work                                                                                          |
+| -------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `refs_admin.countries`                                   | Lookup     | common.country                                                                    | 93/97 exact candidates; YUG, MKH, XXX, XIN unresolved.                                                  |
+| `refs_admin.entities`                                    | Source gap | common.country, common.organism, ll_common.program                                | Reporting entity is a country/entity, not an institution name or automatically the vessel flag.         |
+| `refs_admin.ports`                                       | Lookup     | common.harbour, common.country                                                    | Use UN/LOCODE as requested; frozen ROS list lacks this field. Prefix conversion is diagnostic only.     |
+| `refs_biology.bait_conditions`                           | Rule       | ll_common.baitsettingstatus, ll_observation.baithaulingstatus, ll_common.baittype | Frozen/thawed does not determine whole/chopped. Distinguish setting and specimen bait state.            |
+| `refs_biology.bait_types`                                | Rule       | ll_common.baittype                                                                | Separate artificial/natural bait category from species and preparation.                                 |
+| `refs_biology.biological_materials`                      | Source gap | Operational data / metadata                                                       | Free-text sample references do not identify a controlled biological material; legacy SQL writes NULL.   |
+| `refs_biology.depredation_sources`                       | Rule       | common.species, common.speciesgroup                                               | Classify predator taxon and preserve multiple predators; legacy first-match priority loses information. |
+| `refs_biology.fates`                                     | Rule       | ll_common.catchfate, common.species, common.speciesgroup                          | Use fate type plus detail; species group alone does not establish the reason.                           |
+| `refs_biology.handling_methods`                          | Source gap | common.speciesgroupreleasemode                                                    | Shared release modes are linked to PS catchRelease; no LL source binding established.                   |
+| `refs_biology.individual_conditions`                     | Rule       | ll_common.healthstatus                                                            | Keep observations distinct; do not inherit legacy state imputation without approval.                    |
+| `refs_biology.maturity_stages`                           | Rule       | ll_observation.maturitystatus                                                     | 18 source stages include numeric/range and WKASMSF scales; target has six broad stages.                 |
+| `refs_biology.measurement_tools`                         | Recode     | common.sizemeasuremethod                                                          | Six source methods; use actual sizeMeasure method. Target CA also means calculation in weight context.  |
+| `refs_biology.measurements`                              | Rule       | common.sizemeasuretype                                                            | 22 source types; map measurement type and straight/curved flag together.                                |
+| `refs_biology.sample_preservation_methods`               | Source gap | Operational data / metadata                                                       | Legacy SQL writes NULL; no structured LL source binding established.                                    |
+| `refs_biology.sampling_methods_for_catch_estimation`     | Rule       | ll_common.observationmethod, ll_common.triptype                                   | Observer presence is not proof of exhaustive sampling; legacy SQL fixes ES.                             |
+| `refs_biology.sampling_methods_for_sampling_collections` | Rule       | ll_common.observationmethod, ll_common.triptype                                   | Legacy SQL fixes RM; source observation method does not establish random sampling.                      |
+| `refs_biology.sampling_periods`                          | Rule       | Operational data / metadata                                                       | Legacy SQL fixes LH; distinguish hauling observation from biometric sampling.                           |
+| `refs_biology.sampling_protocols`                        | Rule       | ll_common.observationmethod, ll_common.triptype                                   | Requires protocol evidence beyond an observer or commercial-trip code.                                  |
+| `refs_biology.sex`                                       | Recode     | common.sex                                                                        | Candidates 1:M, 2:F, 0:N, 3:J; review 4:U for Not available. Preserve disabled historical entries.      |
+| `refs_biology.species`                                   | Lookup     | common.species                                                                    | 220 exact candidates plus RMJ:RMM catalogue alias; 147 unresolved across the whole source catalogue.    |
+| `refs_biology.bait_species`                              | Rule       | ll_common.baittype, common.species                                                | Bait type mixes species, artificial bait and preparation; AR is not a target bait-species code.         |
+| `refs_biology.predator_species`                          | Lookup     | common.species                                                                    | Use predator subset, not all species. Multiple predators require output cardinality rules.              |
+| `refs_biology.tag_types`                                 | Source gap | Operational data / metadata                                                       | Tag number is available but does not identify tag type; legacy SQL writes NULL.                         |
+| `refs_biology.fate_types`                                | Recode     | ll_common.catchfate                                                               | RET:RE, DIS/ESC:DI, UNK:UN; disabled SOLD/LOST need explicit historical treatment.                      |
+| `refs_biology.weight_measurement_tools`                  | Recode     | common.weightmeasuremethod                                                        | Six methods; distinguish mechanical/electronic weighing, visual assessment and echosounder estimation.  |
+| `refs_biology.weight_measurements`                       | Recode     | common.weightmeasuretype                                                          | ENT:RD, VAT:GO, VDK:HD, UNK:UN are candidates; confirm tail state and measurement meaning.              |
+| `refs_data.data_sources_ro`                              | Recode     | ll_common.observationmethod                                                       | OB:OB and OE:EM candidates; SR has no matching target category in this snapshot.                        |
+| `refs_data.logical_responses`                            | Rule       | Operational data / metadata                                                       | TRUE/FALSE are distinct from NAP/NAV/UNK. Missing data must not silently become FALSE.                  |
+| `refs_fishery.branchline_storages`                       | Source gap | Operational data / metadata                                                       | No LL source binding established; branchline compositions describe material/length, not storage.        |
+| `refs_fishery.dehooker_types`                            | Source gap | Operational data / metadata                                                       | No structured LL source binding established; legacy SQL writes NULL.                                    |
+| `refs_fishery.fish_preservation_methods`                 | Rule       | ll_common.onboardprocessing, ll_landing.conservation                              | Candidate vocabularies exist, but landing/product records do not establish vessel-level methods.        |
+| `refs_fishery.fish_processing_types`                     | Recode     | common.weightmeasuretype, ll_common.onboardprocessing                             | Separate processing from preservation; source DR means dried, target processing DR means dressed.       |
+| `refs_fishery.fish_storage_types`                        | Source gap | Operational data / metadata                                                       | Vessel capacity does not identify storage type; no source binding established.                          |
+| `refs_fishery.hook_and_terminal_devices`                 | Rule       | ll_common.hooktype, ll_common.hooksize                                            | ROS combines type and size; legacy fixed sizes and TTL output require review.                           |
+| `refs_fishery.hull_material_types`                       | Lookup     | common.hullmaterial                                                               | All six source homeid values have exact canonical targets; business code is numeric.                    |
+| `refs_fishery.light_colours`                             | Recode     | ll_common.lightstickscolor                                                        | B:BU, G:GR, R:RD, Y:YL; other/mixed/unknown distinctions need explicit decisions.                       |
+| `refs_fishery.light_types`                               | Recode     | ll_common.lightstickstype                                                         | CH:CL, EL:EL; MX:OT is lossy and requires approval.                                                     |
+| `refs_fishery.line_material_types`                       | Recode     | ll_common.linetype                                                                | Seven close material candidates; confirm PV/CREM:MC and resolve PR, UNK, WR.                            |
+| `refs_fishery.mitigation_devices`                        | Rule       | ll_common.mitigationtype                                                          | Route to dedicated ROS fields or device lists; type alone does not provide counts/dimensions.           |
+| `refs_fishery.offal_management_types`                    | Rule       | ll_common.mitigationtype                                                          | Strategic offal discharge is evidence, but does not determine every ROS disposal timing category.       |
+| `refs_fishery.reasons_days_lost`                         | Rule       | ll_common.vesselactivity                                                          | FAIL/REPAIR may support MB; reason mapping and lost-day calculation remain separate.                    |
+| `refs_fishery.streamer_types`                            | Source gap | ll_common.mitigationtype                                                          | Tori-line presence does not identify streamer design; source detail still needed.                       |
+| `refs_fishery.vessel_sections`                           | Source gap | Operational data / metadata                                                       | LL section is a fishing-line section, not a vessel section; no direct equivalence.                      |
+| `refs_fishery.waste_categories`                          | Source gap | Operational data / metadata                                                       | No structured LL source binding established in the reviewed schema/queries.                             |
+| `refs_fishery.waste_disposal_methods`                    | Source gap | Operational data / metadata                                                       | No structured LL source binding established in the reviewed schema/queries.                             |
+| `refs_fishery_config.gears`                              | Rule       | common.vesseltype                                                                 | common.gear describes equipment, not this fishing-gear classification; UN/Un case collision in target.  |
+| `refs_fishery_config.target_species`                     | Rule       | common.species, common.speciesgroup                                               | Do not infer licence targets from catches; legacy fixes TS and set target SWO.                          |
+| `ros_meta.contact`                                       | Identity   | common.person, common.shipowner                                                   | Owner/captain contacts require role-specific identity resolution; no automatic name acceptance.         |
+| `ros_meta.focal_point`                                   | Identity   | Operational data / metadata                                                       | Reporting liaison is metadata; source observer or data-entry operator is not an automatic substitute.   |
+| `ros_meta.observer`                                      | Identity   | common.person                                                                     | Source has no dedicated IOTC observer-ID field; legacy name join and placeholder need replacement.      |
+| `ros_meta.vessel`                                        | Identity   | common.vessel                                                                     | 102/2741 unique IOTC-ID candidates; 57 nonblank unmatched and 2582 blank; verify identity.              |
+| `refs_biology.gear_interactions`                         | Recode     | ll_observation.hookposition                                                       | 18/18 legacy rules produce valid target codes; several merge positions. ROS model binding is missing.   |
+
+## Evidence files
+
+The local audit directory is separate from the immutable source snapshot:
+
+```text
+~/.cache/ros.form.observe/ird/analysis/20261112T184113Z-ll-correspondences/
+```
+
+| File                             | Contents                                                    |
+| -------------------------------- | ----------------------------------------------------------- |
+| `target_reference_inventory.csv` | All 52 target tables, source candidates and unresolved work |
+| `target_field_bindings.csv`      | All 139 target reference-bound fields                       |
+| `source_reference_inventory.csv` | All 95 source tables, scope, versions, dates and hashes     |
+| `direct_lookup_candidates.csv`   | Countries, hull materials and species, including exceptions |
+| `port_lookup_diagnostics.csv`    | UN/LOCODE availability and diagnostic prefix candidates     |
+| `legacy_rule_coverage.csv`       | Finite legacy branches compared with current vocabularies   |
+| `target_code_collisions.csv`     | Target codes requiring context or case-sensitive handling   |
+| `provenance.json`                | Input paths, hashes, scope, counts and comparison results   |
+| `SHA256SUMS`                     | Checksums of the audit files                                |
+
+The candidate files are review evidence, not a correspondence catalogue consumed by the exporter.
+
+The additional `target_catalogue_scope.csv` inventories all manifest entries, including unbound lists and aliases.
+
+### Frozen inputs
+
+```text
+ObServe snapshot:
+  ~/.cache/ros.form.observe/ird/snapshots/20261112T184113Z/
+
+ROS code-list snapshot:
+  ~/.cache/ros.form.references/code_lists/code_lists--b7c000cba93d/
+  published_at: 2026-11-12T09:54:16Z
+  manifest sha256: bdab19f5ec846b9d021e602827ba7ced295c0155e003dceff181bc3f70d1d839
+
+ROS registry snapshot:
+  ~/.cache/ros.form.references/registries/registries--b31a2ce063bc/
+  published_at: 2026-11-12T09:08:14Z
+  manifest sha256: 1cf0aef3d71f0c88e6e7befb51b102e7de89bef87f6e5b860f889cd8d9aef05f
+```
+
+### Code evidence keys
+
+Philippe's reviewed export is `ros_ll_iotc_v2.1`, under this local directory:
+
+```text
+/home/tchemit/projects/iotc/2025/iotc-observe-export/ird/ros_ll_iotc_v2.1/
+```
+
+| Key      | File                                 | Main relevant lines                           |
+| -------- | ------------------------------------ | --------------------------------------------- |
+| P-R      | `r-script/ros_ll_iotc_v2.1.R`        | 108–114, 186–205, 271–274, 440–445            |
+| P-R      | Same R script                        | 534–538, 620–681, 747–783, 871–946, 1012–1040 |
+| P-HOOK   | `sql-queries/observe_ll_hook.sql`    | 18–28: type extraction and unused size        |
+| P-SAMPLE | `sql-queries/observe_ll_sample.sql`  | 21–39: sampling, tool, maturity and NULLs     |
+| P-SAMPLE | Same SQL query                       | 45–64: SSI and tag outputs                    |
+| P-CATCH  | `sql-queries/observe_ll_catch.sql`   | 24–28: sampling and weight outputs            |
+| P-SET    | `sql-queries/observe_ll_set.sql`     | 43, 55–62, 81: targets, mitigation, sampling  |
+| P-VESSEL | `sql-queries/observe_ll_vessel.sql`  | 30, 47–53: gear and missing storage data      |
+
+Source schema evidence comes from ObServe's `core/persistence/migration` resource for version 10.0.
+
+Target bindings come from `ros.form.model/inst/models/4.2.0/ll-form.yaml`.
+
+Lookup policies come from `ros.form.references/inst/references.yaml`.
+
+Exact absolute paths and SHA-256 fingerprints are recorded in `provenance.json`.
+
+## Decisions left for the next review
+
+1. Review the direct candidates and the exceptional values actually used by selected French trips.
+2. Establish UN/LOCODE availability in the ROS port catalogue.
+3. Confirm finite recodes and distinguish semantic equivalence from information loss.
+4. Review hooks, baits, fates, conditions, measurements and maturity with their necessary context.
+5. Identify missing operational inputs and reporting metadata.
+6. Settle registry identity policy and target catalogue/model ambiguities.
+7. Use these findings to decide delivery levels, then discuss the R API when implementation is considered.
+
+No API structure or implementation choice is proposed by this inventory.

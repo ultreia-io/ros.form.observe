@@ -1,0 +1,45 @@
+---
+title: "08 — Files and failures"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{08 — Files and failures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Files and failures — What CSV conventions and output names do we use, and what happens when a trip export fails? {#files-and-failures-what-csv-conventions-and-output-names-do-we-use-and-what-happens-when-a-trip-export-fails}
+
+Agree CSV encoding, missing values, date-time serialization, header handling and output names.
+
+Decide what to retain and whether to continue with other trips when one export fails.
+
+## Export selected trips
+
+Export one trip at a time, producing one ROS Excel workbook for that trip.
+
+For each selected trip ID:
+
+1. Extract its ObServe dataset, with one CSV per ObServe sheet.
+2. Transform that dataset into the selected ROS form model.
+3. Populate one ROS workbook for that trip.
+4. Validate that workbook and retain its validation result.
+
+A multi-trip selection produces multiple workbooks. It does not produce a combined workbook that needs splitting.
+
+```text
+Selection criteria
+        ↓
+List of ObServe trip IDs
+        ↓ for each trip ID
+ObServe CSV dataset → ROS sheet data → One ROS workbook → ROS validation
+```
+
+## Populate and validate the ROS form
+
+Use `form.tools` to populate the matching ROS template and `ros.form.validation` to validate the resulting workbook.
+
+Keep the generated form and its validation result associated with the selected ObServe trip.
+
+Output naming, per-trip failure handling and batch summaries remain to be defined.

@@ -1,0 +1,30 @@
+---
+title: "07 — Reporting"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{07 — Reporting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Reporting rules — How do we handle missing values, unknown times, set counts and activity durations? {#reporting-rules-how-do-we-handle-missing-values-unknown-times-set-counts-and-activity-durations}
+
+Agree the meaning and calculation of reported values, including unknown times, set counts and activity durations.
+
+Keep field-specific decisions in the sheet reviews.
+
+## Transform one trip
+
+The transformation receives one trip's dataset and the reference data required for its target ROS form.
+
+It builds named ROS sheet tables using the target form model's fields and relationships.
+
+Create the ROS trip identifier once, retain its correspondence to the ObServe trip ID, and reuse it across sheets.
+
+O-INFO contains one row for this trip. Set and catch sheets contain the corresponding child records.
+
+Preserve the difference between missing information and a recorded zero or false value.
+
+Resolve source meaning before implementing counts, durations, aggregation or specimen construction.

@@ -1,0 +1,277 @@
+---
+title: "Discussion avec l’IRD"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Discussion avec l’IRD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Questions et propositions d’évolution à discuter avec l’IRD.
+
+## Questions transversales
+
+### Sélection des marées à exporter
+
+**Question :** quels programmes l’IRD utilise-t-il pour sélectionner les marées à exporter, et que couvre chacun ?
+
+Expliquer le rôle des différents programmes retenus dans les requêtes de Philippe et les raisons de leur sélection.
+
+Préciser les critères d’inclusion et d’exclusion des marées, notamment la méthode d’observation, le pavillon et l’océan.
+
+### Références obligatoires lorsqu’une entrée « Unknown » existe
+
+**Proposition :** examiner les références facultatives disposant d’une entrée « Unknown » pour les rendre obligatoires.
+
+Renseigner la valeur connue, sinon « Unknown », lorsque ce sens convient au champ ; éviter les références vides.
+
+## LL 01 — O-INFO
+
+### Calées observées et effectuées dans O-INFO
+
+**Question :** pour les marées avec observateur, toutes les calées effectuées sont-elles enregistrées et observées ?
+
+Des calées non observées peuvent-elles être enregistrées ou omises ? Cela varie-t-il selon le pays ou le programme ?
+
+**Si confirmé :** compter les calées distinctes de la marée liées aux activités de pêche (`FO`).
+
+Utiliser ce total pour les deux champs uniquement si toutes les calées sont enregistrées et observées.
+
+**Statut :** question ouverte pour l’IRD ; l’égalité des deux nombres n’est pas encore établie.
+
+### Indicateurs de jours dans O-INFO
+
+**Constat :** les cinq totaux ne sont pas directement disponibles dans les champs de la marée.
+
+Ils couvrent les jours de recherche, de pêche active, en zone de pêche, de transit et les jours perdus.
+
+Activités, positions, horaires des calées et commentaires donnent des indices, mais pas de totaux validés.
+
+**Question :** existe-t-il des sources et règles de calcul fiables, ou faut-il compléter la saisie dans ObServe ?
+
+Ces cinq champs ROS sont facultatifs. Les laisser vides pour le moment ; une information absente ne vaut pas zéro.
+
+## LL 02 — V-INFO
+
+### Distinguer le patron de pêche du capitaine
+
+**Constat :** ObServe ne lie la marée qu’à un capitaine. L’exporteur utilise cette personne pour les deux rôles ROS.
+
+**Proposition :** ajouter un indicateur « patron de pêche » au référentiel personne et un lien facultatif sur la marée.
+
+**Question :** peut-on permettre aux pays de renseigner un patron de pêche distinct du capitaine ?
+
+[Analyse détaillée de V-INFO](../06-source-coverage/ll-02-v-info.html#ird-proposal-distinguish-fishing-master-from-captain).
+
+### Engin principal dans les référentiels ObServe
+
+**Constat :** aucun référentiel directement équivalent à l’engin principal demandé par ROS n’a été identifié.
+
+**Question :** faut-il intégrer cette information aux référentiels ObServe, avec une correspondance vers les codes ROS ?
+
+**Statut :** discussion ouverte ; la structure du référentiel et son rattachement restent à définir.
+
+## LL 05 — G-GENERAL
+
+**Constat :** Philippe fixe le lance-ligne à non, le vire-ligne à oui et la machine à lancer les appâts à non.
+
+**Question :** sur quoi reposent ces constantes, et pour quels pays ou programmes sont-elles valables ?
+
+**Proposition :** ajouter ces équipements au référentiel et les renseigner sur la marée via `GearUseFeatures`.
+
+La présence à bord et l’utilisation seraient traitées via la saisie des équipements de la marée.
+
+## LL 06 — G-CONFIG-BRANCHLINES
+
+**Question :** confirmer si ObServe fournit les détails des sections attendus dans G-CONFIG-BRANCHLINES.
+
+**Périmètre retenu :** exporter uniquement l’identifiant de marée et celui de la configuration d’avançon.
+
+L’absence de détails au niveau demandé par ROS reste à confirmer avec l’IRD.
+
+## LL 07 — G-CONFIG-MITIGATION-DEVICES
+
+**Constat :** ObServe propose « Tori lines » comme mesure d’atténuation par calée, sans les détails ROS identifiés.
+
+Aucune table dédiée ni correspondance dans les équipements inspectés ne fournit les cinq détails obligatoires.
+
+**Question :** les observateurs disposent-ils de ces mesures, par exemple dans leurs fiches ou rapports ?
+
+**Proposition :** compléter le modèle ObServe pour saisir la configuration des lignes et des banderoles demandée par ROS.
+
+En attendant, l’export laisse cette feuille vide ; l’acceptation d’une feuille vide par le validateur est confirmée.
+
+## LL 08 — E-SET
+
+### Vitesses du navire manquantes dans E-SET
+
+**Constat :** sur les 70 marées exportées de 2020 à 2025, six calées sur 700 n’ont pas de vitesse, dans six marées.
+
+**Question :** pourquoi ces valeurs manquent-elles et peut-on les retrouver dans les fiches ou rapports d’observation ?
+
+La vitesse est facultative dans ObServe, mais obligatoire dans ROS. Ne pas remplacer les valeurs absentes par zéro.
+
+### Longueurs de lignes de flotteurs à vérifier
+
+**Constat :** sur les 700 calées exportées de 2020 à 2025, sept nécessitent une vérification.
+
+Une calée n’a aucune composition de ligne de flotteurs ; six autres comportent une longueur à zéro.
+
+**Demande :** compléter la donnée manquante, vérifier le sens des zéros et corriger les valeurs erronées côté IRD.
+
+Les six longueurs égales à zéro ne sont pas encore confirmées comme des erreurs de saisie.
+
+#### Calées concernées
+
+Le libellé combine le navire, les dates de départ et de retour, et le programme d’observation.
+
+| Marée (navire, dates et programme)                                 | Topia ID marée                                                  | Topia ID activité                                                        | Topia ID calée                                                            | Point à vérifier      |
+| ------------------------------------------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- | --------------------- |
+| MAB-SIYAD — 2021-11-23 au 2021-11-26 — DCF Palangre (IRD) (IRD-1)  | `fr.ird.data.ll.common.Trip#1643043495280#0.6866632330766844`   | `fr.ird.data.ll.observation.Activity#1643609134055#0.3784169686927249`   | `fr.ird.data.ll.observation.FishingSet#1643609428895#0.18614366805203197` | Longueur égale à zéro |
+| MAB-SIYAD — 2021-11-23 au 2021-11-26 — DCF Palangre (IRD) (IRD-1)  | `fr.ird.data.ll.common.Trip#1643043495280#0.6866632330766844`   | `fr.ird.data.ll.observation.Activity#1643622303567#0.40272656496822`     | `fr.ird.data.ll.observation.FishingSet#1643622602772#0.718377325748578`   | Longueur égale à zéro |
+| CLIPPERTON — 2023-09-26 au 2023-11-01 — DCF Palangre (IRD) (IRD-1) | `fr.ird.data.ll.common.Trip#1694766700271#0.6125547569208294`   | `fr.ird.data.ll.observation.Activity#1696470238799#0.24511691262150548`  | `fr.ird.data.ll.observation.FishingSet#1696470587881#0.04454472201921034` | Composition absente   |
+| VETYVER 6 — 2025-08-04 au 2025-08-16 — DCF Palangre (IRD) (IRD-1)  | `fr.ird.data.ll.common.Trip#1754481176635#0.014063975262169404` | `fr.ird.data.ll.observation.Activity#1754659507333#0.0655227943133484`   | `fr.ird.data.ll.observation.FishingSet#1754659736286#0.4728396518725463`  | Longueur égale à zéro |
+| VETYVER 6 — 2025-08-04 au 2025-08-16 — DCF Palangre (IRD) (IRD-1)  | `fr.ird.data.ll.common.Trip#1754481176635#0.014063975262169404` | `fr.ird.data.ll.observation.Activity#1754746873984#0.4153236476427119`   | `fr.ird.data.ll.observation.FishingSet#1754747163537#0.4680377828463389`  | Longueur égale à zéro |
+| VETYVER 6 — 2025-08-04 au 2025-08-16 — DCF Palangre (IRD) (IRD-1)  | `fr.ird.data.ll.common.Trip#1754481176635#0.014063975262169404` | `fr.ird.data.ll.observation.Activity#1754832320389#0.602793264676962`    | `fr.ird.data.ll.observation.FishingSet#1754832479154#0.2653245808060154`  | Longueur égale à zéro |
+| VETYVER 6 — 2025-08-04 au 2025-08-16 — DCF Palangre (IRD) (IRD-1)  | `fr.ird.data.ll.common.Trip#1754481176635#0.014063975262169404` | `fr.ird.data.ll.observation.Activity#1755673419529#0.036444357197899846` | `fr.ird.data.ll.observation.FishingSet#1755673766438#0.4086977672824298`  | Longueur égale à zéro |
+
+### Longueurs minimale et maximale des avançons
+
+**Constat :** Philippe calcule le minimum et le maximum par calée à partir de `branchlinesComposition.length`.
+
+Avec une seule longueur enregistrée, les deux valeurs sont identiques. Ce ne sont pas deux mesures saisies séparément.
+
+**Définition ROS :** minimum et maximum des longueurs totales des avançons déployés pendant la calée.
+
+**Question :** `branchlinesComposition.length` inclut-il bien tout l’avançon, notamment le bas de ligne ?
+
+Préciser les éléments inclus dans la longueur et comment retrouver l'information si la composition est absente.
+
+## LL 09 — E-SET-LIGHTS
+
+**Constat :** une calée sur 700 indique des lampes, mais aucune couleur (`FishingSet.lightsticksColor`).
+
+La source indique 8 lampes par panier et 102 paniers ; le type de lampe est renseigné.
+
+**Question :** peut-on retrouver la couleur dans les fiches d’observation et compléter cette calée dans ObServe ?
+
+Chemin de recherche : marée → activité → calée.
+
+| Marée                                                            | Topia ID marée                                                 | Topia ID activité                                                       | Topia ID calée                                                           |
+| ---------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| CAP CLOE — 2022-11-03 au 2022-11-22 — DCF Palangre (IRD) (IRD-1) | `fr.ird.data.ll.common.Trip#1674565434806#0.45522642337422403` | `fr.ird.data.ll.observation.Activity#1676549069267#0.06450807105952205` | `fr.ird.data.ll.observation.FishingSet#1676550034047#0.9728318015539142` |
+
+## LL 10 — E-SET-MITIGATION-MEASURES
+
+**Constat :** ObServe fournit des indicateurs de lestage, des poids de pièces et des longueurs d’avançon.
+
+Ces données ne donnent pas directement tous les nombres et mesures exigés par ROS.
+
+**Questions à l’IRD :**
+
+- Peut-on observer et enregistrer le nombre de lignes d’effarouchement déployées par calée ? Philippe impose zéro.
+- Comment établir le pourcentage réel d’avançons lestés ? Philippe applique 0 % ou 100 % selon les indicateurs.
+- La distance hameçon-lest est-elle connue ? Philippe utilise la moitié de la longueur d’avançon.
+- Comment obtenir le poids moyen du lest demandé par ROS à partir des poids de pièces enregistrés ?
+- Si ces informations ne sont pas saisies, peut-on les collecter et compléter le modèle ObServe ?
+
+« Tori lines » existe comme catégorie, sans comptage identifié. Compter les lignes, pas leurs banderoles.
+
+Distinguer zéro et information non collectée. Ne pas reprendre les calculs supposés sans justification.
+
+## LL 11 — E-SET-HOOKS
+
+**Constat :** sur 1 554 compositions d’hameçons exportées (70 marées, 2020–2025), 18 ont la taille « Unknown ».
+
+Quatre autres compositions n’ont aucune taille renseignée. Le champ `hooksComposition.hookSize` est facultatif.
+
+**Question :** peut-on renseigner les quatre tailles absentes directement dans ObServe avec l’entrée « Unknown » ?
+
+**Proposition :** rendre `hooksComposition.hookSize` obligatoire dans le modèle ObServe.
+
+Utiliser la taille réelle lorsqu’elle est connue, sinon l’entrée existante « Unknown ».
+
+Cela garantit une valeur renseignée sans inventer de taille. Prévoir la reprise des valeurs absentes existantes.
+
+Évolution du modèle et correction des données à discuter avec l’IRD ; aucune modification appliquée à ObServe.
+
+## LL 12 — E-SET-BAITS
+
+**Proposition :** rendre `baitsComposition.baitSettingStatus` obligatoire dans le modèle ObServe.
+
+Sur 1 290 compositions exportées, cinq états sont absents et 13 utilisent déjà l’entrée « Unknown ».
+
+**Question :** peut-on reprendre les cinq valeurs absentes avec « Unknown » et appliquer cette règle à la saisie ?
+
+La taille des hameçons est traitée sous LL 11 — E-SET-HOOKS. Cette proposition concerne ObServe, pas les codes ROS.
+
+## LL 13 — E-SET-HAULING
+
+ROS exige les deux comptages observés, l’indicateur d’effarouchement et le protocole d’échantillonnage.
+
+**Questions à l’IRD :**
+
+- **Comptages :** Philippe reprend les totaux déployés. Tout est-il remonté et observé ? Sinon, quels nombres utiliser ?
+- **Effarouchement :** Philippe fixe « non ». Cette information est-elle enregistrée pour la remontée, et où ?
+- **Protocole :** Philippe fixe « exhaustif ». Est-ce le protocole appliqué, et quelle source ObServe permet de l’établir ?
+
+Préciser le traitement des pertes et des périodes non observées. Une information absente ne signifie pas « non ».
+
+## LL 15 — E-SET-CATCHES
+
+**Constat :** ROS exige une méthode d’échantillonnage des captures ; Philippe impose « ES — exhaustif ».
+
+Dans ObServe, `acquisitionMode` distingue la saisie individuelle ou groupée, sans indiquer cette méthode.
+
+**Questions à l’IRD :**
+
+- Le mode exhaustif correspond-il à la méthode réellement appliquée aux captures exportées ?
+- Peut-on ajouter la méthode d’échantillonnage au niveau de chaque capture dans le modèle ObServe ?
+
+L’objectif est d’exporter une information enregistrée, plutôt qu’une valeur fixe supposée.
+
+## LL 16 — E-SET-CATCH-SPECIMENS
+
+**Constat :** aucun champ dédié à la période et à la méthode d’échantillonnage n’a été identifié côté capture/mesure.
+
+Sur les 70 marées exportées (2020–2025), 40 individus ont deux longueurs ; aucun n’en a plus de deux.
+
+**Questions à l’IRD :**
+
+- Quel protocole détermine la période et la méthode d’échantillonnage des individus ? Peut-on les saisir dans ObServe ?
+- Ce protocole prévoit-il au maximum deux mesures de longueur par individu, ou davantage dans certains cas ?
+
+La limite de deux longueurs vient du formulaire ROS ; les données inspectées ne prouvent pas une limite du protocole.
+
+## LL 17 — E-SET-CATCH-SPECIMENS-SSI
+
+**Constat :** aucun matériau de bas de ligne individuel n’est renseigné pour les 5 827 captures candidates SSI.
+
+Toutes sont liées à une calée avec une seule composition d’avançon : 100 % nylon monofilament.
+
+**Questions à l’IRD :**
+
+- Peut-on appliquer le matériau d’une composition unique à 100 % au bas de ligne de chaque animal de la calée ?
+- Si plusieurs matériaux sont présents, comment identifier celui du bas de ligne de l’animal concerné ?
+- Cette information peut-elle être renseignée sur l’avançon individuel lorsqu’elle est connue ?
+
+Plusieurs compositions du même matériau ne créent pas la même ambiguïté qu’un mélange de matériaux différents.
+
+Ne pas attribuer arbitrairement le matériau majoritaire à un individu ; la règle reste à confirmer.
+
+## LL 18 — E-SET-TAG-DETAILS
+
+**Constat :** ObServe contient `tagNumber`, sans indicateur dédié de récupération ou de remise à l’eau avec une marque.
+
+La documentation ROS décrit cette feuille pour les marques récupérées ; ses indicateurs sont facultatifs.
+
+**Questions à l’IRD :**
+
+- `tagNumber` désigne-t-il une marque récupérée, une marque posée pendant la marée, ou les deux ?
+- Comment distinguer ces cas et savoir si l’animal a été remis à l’eau avec une marque attachée ?
+
+Le devenir de la capture ne suffit pas à établir la présence d’une marque lors de la remise à l’eau.
+
+Source : [documentation officielle ROS-LL][ros-ll-tags].
+
+[ros-ll-tags]: https://data.iotc.org/reference/latest/forms/ros/Form-ROS-LL.html

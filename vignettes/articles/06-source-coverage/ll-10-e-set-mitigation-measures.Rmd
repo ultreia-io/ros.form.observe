@@ -1,0 +1,207 @@
+---
+title: "LL 10 E-SET-MITIGATION-MEASURES mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 10 E-SET-MITIGATION-MEASURES mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Set-level mitigation deployment, weighting and related branchline configuration.
+
+ROS LL **4.2.0**: **15 fields**, including **12 mandatory fields**.
+
+Initial source review recorded. Several legacy values are constants or unconfirmed derivations.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-mitigation-measures) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+The set source is `ll_observation.fishingSet`. Candidate sources below do not prove populated observations.
+
+| ROS field                                  | Required | Type    | ROS reference                     | Source / legacy value                    | Assessment                                                                                   |
+| ------------------------------------------ | -------- | ------- | --------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `observed_trip_id`                         | M        | string  | —                                 | Set activity links to trip               | Reuse the shared trip identifier rule.                                                       |
+| `set_id`                                   | M        | string  | —                                 | Set topiaId                              | Reuse the E-SET identifier rule.                                                             |
+| `number_tori_lines_deployed`               | M        | integer | —                                 | SQL constant 0; mitigation type 08       | Recorded tori-line use is a candidate, but the relation contains no count.                   |
+| `minimum_deck_lighting_used`               | M        | string  | `refs_data.logical_responses`     | SQL constant FALSE                       | No measurement or observation source established; night setting is a different fact.         |
+| `average_sinker_weight_g`                  | M        | number  | —                                 | (snapWeight + swivelWeight) * 1000       | kg-to-g conversion is supported by UI labels; sum-as-average and missing values need review. |
+| `percent_branchline_weighted`              | M        | number  | —                                 | R: 100 if weighted, otherwise 0          | Set-level flags do not themselves provide a measured percentage.                             |
+| `hook_sinker_distance_cm`                  | M        | number  | —                                 | R: mean branchline length / 2 * 100      | An assumed position, not a measured distance; mean ignores composition proportions.          |
+| `hook_pods`                                | M        | string  | `refs_data.logical_responses`     | SQL constant FALSE                       | No confirmed hook-pod source; this field is omitted from the final R selection.              |
+| `other_mitigation_measures_used_measure_1` | M        | string  | `refs_fishery.mitigation_devices` | SQL constant NO; set mitigation relation | Extract recorded types and define their ROS destination before declaring none.               |
+| `other_mitigation_measures_used_measure_2` | M        | string  | `refs_fishery.mitigation_devices` | SQL NULL; set mitigation relation        | Mandatory in 4.2.0; policy for fewer than four measures remains open.                        |
+| `other_mitigation_measures_used_measure_3` | M        | string  | `refs_fishery.mitigation_devices` | SQL NULL; set mitigation relation        | Mandatory in 4.2.0; policy for fewer than four measures remains open.                        |
+| `other_mitigation_measures_used_measure_4` | M        | string  | `refs_fishery.mitigation_devices` | SQL NULL; set mitigation relation        | Mandatory in 4.2.0; policy for fewer than four measures remains open.                        |
+
+<details>
+<summary>Optional fields (3)</summary>
+
+| ROS field                                 | Required | Type    | ROS reference                 | Source / legacy value          | Assessment                                                                     |
+| ----------------------------------------- | -------- | ------- | ----------------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
+| `branchline_weighted`                     | O        | string  | `refs_data.logical_responses` | weightedSnap OR weightedSwivel | Candidate indication; recorded mitigation types may describe other weighting.  |
+| `branchline_details_configuration_number` | O        | string  | —                             | branchlinesComposition.topiaId | Define configuration identity and handling of multiple compositions per set.   |
+| `branchline_details_num_branchlines_set`  | O        | integer | —                             | SQL uses totalHooksCount       | Confirm hooks-to-branchlines equivalence and allocation across configurations. |
+
+</details>
+
+Parent: **E-SET**, linked through `observed_trip_id`, `set_id`.
+
+## Source coverage
+
+The current set extraction includes weighted-snap/swivel flags and their weights.
+
+ObServe labels both weights in kilograms; multiplication by 1000 converts those values to grams.
+
+Whether their sum represents ROS average sinker weight remains a separate question about the gear configuration.
+
+The source schema makes both flags NOT NULL with false defaults, while the weights are nullable.
+
+The observation editor clears the corresponding weight when a weighted-snap/swivel flag is false.
+
+A zero substituted for an absent weight is therefore not automatically an observed zero-weight sinker.
+
+Recorded mitigation types are linked through `ll_observation.fishingSet_mitigationType`.
+
+Its columns are `fishingSet` and `mitigationType`; it stores membership, without quantities or distances.
+
+The observation editor exposes this association as a selection of mitigation types.
+
+The frozen IRD catalogue includes tori lines (08), night setting (09), and single/double weighted leaders (10/11).
+
+It also includes underwater setting devices (12); that label alone does not establish hook-pod use.
+
+Selected types can supply evidence of measures recorded for a set, subject to their meaning and data completeness.
+
+An absent association does not establish that no mitigation was used.
+
+Neither Philippe's set query nor the current four-sheet extraction reads this association.
+
+Reading it is a candidate extension of source coverage; its records require routing to ROS fields or device codes.
+
+For example, tori-line membership cannot provide the required deployed-line count.
+
+No measured source has been established for reduced deck lighting or hook-to-sinker distance.
+
+This is an unresolved source search, not a confirmed absence of those observations throughout ObServe.
+
+The existing branchline-detail question remains open with Pascal; do not derive section geometry from whole-line length.
+
+No set observations were queried. Catalogue entries and source columns do not establish actual population.
+
+## Philippe’s existing export
+
+SQL sets tori-line count to zero, reduced deck lighting and hook pods to FALSE, and the first other-device slot to NO.
+
+It leaves the remaining three other-device slots NULL despite their mandatory status in the current form model.
+
+It substitutes false for missing weighting flags and zero for missing snap/swivel weights.
+
+The weight calculation is a sum of component weights, not an average over observed sinkers or branchlines.
+
+R converts the weighting flag to 0 or 100 percent without a distribution of weighted branchlines.
+
+For hook-sinker distance, R averages composition lengths without using their proportions, then halves the result.
+
+That calculation assumes a sinker position; conversion from metres to centimetres does not validate that assumption.
+
+SQL joins branchline compositions, so several compositions can produce multiple rows for the same trip/set key.
+
+The mitigation block does not resolve those rows to the form's single row per trip/set.
+
+The final R selection contains 14 columns and omits hook_pods; the 4.2.0 form requires 15 columns including that field.
+
+Writing that selection positionally into the 4.2.0 layout would shift subsequent fields from the hook_pods column.
+
+These findings concern reuse of the legacy export; this review changes no exporter implementation.
+
+## Questions for the sheet review
+
+1. Verify the set mitigation association's meaning and population, then define its extraction and ROS correspondence.
+2. Find measured tori-line counts, reduced deck-lighting information and hook-pod use, or record their source limits.
+3. Confirm whether snap/swivel weights describe the ROS sinker measure and how to handle missing weights.
+4. Establish weighted-branchline percentages and hook-sinker distances without adopting the legacy assumptions.
+5. Resolve multiple configurations within the one-row-per-set form key, with Pascal's source-model review.
+6. Ask Emmanuel how the four mandatory other-measure slots apply when fewer measures exist or are known.
+7. Agree missing-data representations by field; numeric requirements cannot simply receive logical-response codes.
+
+The device list contains NO (None) and UN (Unknown); logical responses use FALSE, TRUE, NAP, NAV and UNK.
+
+These codes are not interchangeable, and the availability of a code does not decide when it should be reported.
+
+All decisions remain open. Delivery levels will follow the source and reporting review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+Philippe SQL: `observe_ll_set.sql`, lines 51-65 and the composition join at line 92.
+
+Philippe R: lines 567-609 (derivations and selected columns), and line 1133 (positional workbook write).
+
+Branchline source: `observe_ll_branchline.sql`, lines 15-40, including length and proportion.
+
+Current extraction: `inst/sql/10.0/ll/set.sql`; source model: `inst/models/10.0/ll-form.yaml`.
+
+ObServe 10.0 DDL: `empty-schema-PG.sql`, lines 110, 115-116, for compositions, sets and mitigation membership.
+
+Unit labels: `services_en_GB.properties`, lines 343 and 365, in ObServe core/services/i18n.
+
+Editor: observation `FishingSetUIHandler.java`, lines 130-139; `FishingSetGlobalCompositionUI.jaxx`, lines 86-88.
+
+IRD snapshot `20261112T184113Z`: `ll_common.mitigationtype`.
+
+ROS snapshot `code_lists--b7c000cba93d`: mitigation devices and logical responses.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retain the verified trip/set IDs, recorded weighting flags, component weights and selected mitigation categories.
+* Convert recorded kilograms to grams where the source component is the requested ROS measure.
+* Map a recorded measure only when its meaning and set-level scope match the target field or device code.
+
+### What stays unresolved
+
+* Adding component weights does not establish average sinker weight or the percentage of weighted branchlines.
+* Whole-branchline length does not locate a sinker; do not halve it to fabricate hook-to-sinker distance.
+* Tori-line membership gives no deployed-line count; an underwater-setting device does not establish hook-pod use.
+* Reduced deck lighting has no established source. Empty selections and default-false flags do not prove absence.
+* Do not fill required numbers with zero, or unknown device slots with NO, merely to complete a row.
+* NAV/UNK and device-list codes require the appropriate field and an established reason for missing information.
+
+### Complete-row assessment
+
+The recorded facts are insufficient to demonstrate a complete row with all 12 required fields.
+
+Resolve quantities, distances and the four required device slots before defining an export rule.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* Snap weights are populated on 264 sets and swivel weights on 70; use the recorded kg values as components.
+* No set-to-mitigation selections were found. That does not justify FALSE, zero or NO responses.
+* Required counts, distances and weighting distributions still lack sufficient evidence.
+* The measured population therefore does not establish a complete row for this sheet.

@@ -1,0 +1,143 @@
+---
+title: "02 — Data extraction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{02 — Data extraction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Data extraction {#data-extraction}
+
+The R extraction script receives the selected ObServe trip IDs and extracts each trip in full.
+
+Two source access options are envisaged: a direct database connection or the public ObServe API.
+
+Choose the access mechanism explicitly; the connector implementation and API capabilities remain to be specified.
+
+Both options should produce the same intermediate ObServe dataset, with one CSV per model sheet and trip.
+
+Preserve source identifiers and parent links so the later transformation can navigate the trip's records.
+
+Keep trip-selection criteria in point 01; all per-trip extraction operations use the selected trip identifier.
+
+The SQL queries and intermediate model below describe the database extraction path.
+
+Output conventions and failure handling are covered in point 08.
+
+## ObServe intermediate form model
+
+The model describes ObServe data using its field names, types, identifiers and relationships.
+
+It has no META sheet. ROS-specific metadata is supplied when preparing the ROS output.
+
+The LL model defines 18 source tables, including repeated measurements, gear compositions and associations.
+
+| Sheet                        | Source table                               | Parent sheet      |
+| ---------------------------- | ------------------------------------------ | ----------------- |
+| `trip`                       | `ll_common.trip`                           | —                 |
+| `activity`                   | `ll_observation.activity`                  | `trip`            |
+| `set`                        | `ll_observation.fishingSet`                | `activity`        |
+| `catch`                      | `ll_observation.catch`                     | `set`             |
+| `trip_species`               | `ll_common.trip_species`                   | `trip`            |
+| `gearUseFeatures`            | `ll_common.gearUseFeatures`                | `trip`            |
+| `gearUseFeaturesMeasurement` | `ll_common.gearUseFeaturesMeasurement`     | `gearUseFeatures` |
+| `hooksComposition`           | `ll_observation.hooksComposition`          | `set`             |
+| `baitsComposition`           | `ll_observation.baitsComposition`          | `set`             |
+| `floatlinesComposition`      | `ll_observation.floatlinesComposition`     | `set`             |
+| `branchlinesComposition`     | `ll_observation.branchlinesComposition`    | `set`             |
+| `fishingSet_mitigationType`  | `ll_observation.fishingSet_mitigationType` | `set`             |
+| `section`                    | `ll_observation.section`                   | `set`             |
+| `basket`                     | `ll_observation.basket`                    | `section`         |
+| `branchline`                 | `ll_observation.branchline`                | `basket`          |
+| `sizeMeasure`                | `ll_observation.sizeMeasure`               | `catch`           |
+| `weightMeasure`              | `ll_observation.weightMeasure`             | `catch`           |
+| `catch_predator`             | `ll_observation.catch_predator`            | `catch`           |
+
+The model belongs conceptually to `observe.form.model`; its YAML lives in `ros.form.observe`.
+
+[Download the ObServe 10.0 LL model](../../models/10.0/ll-form.yaml).
+
+Source NOT NULL flags define mandatory values within source rows; they do not require an empty table to have rows.
+
+Each added table retains its domain fields. Persistence audit columns and internal list indexes are excluded.
+
+Retain every measurement and composition row with its source key and parent; combine them only during transformation.
+
+The three membership tables retain composite keys. They have no invented `topiaId`.
+
+Optional catch links to section, basket and branchline stay as source fields, alongside its required set parent.
+
+The form schema has one `parent_key` per sheet; it does not enforce those additional catch links.
+
+Source references use `topiaId` in the code-list or registry catalogue. Countries and species groups supply context.
+
+Equipment values remain text until interpreted through characteristic units, types and allowed list items.
+
+Trip equipment and characteristic measurements are additional source candidates; their ROS use remains unconfirmed.
+
+Their existence does not establish populated tori-line measurements or resolve branchline-section questions.
+
+Tags and photo references remain on catch rows. People, vessels and reference values remain in their catalogues.
+
+META uses user input. Optional V-ATTRIBUTES remains outside ObServe population, pending RAV consolidation.
+
+No established LL mapping requires instrument recordings or encounter sightings; these do not become catch records.
+
+Keep ObServe meanings intact. ROS identifiers, code conversions and reporting calculations belong to transformation.
+
+This source model does not resolve missing observations, sampling protocols or the agreed open reporting questions.
+
+## SQL extraction and CSV files
+
+Use one parameterized query per ObServe sheet. Bind the same selected trip ID to every query for that export.
+
+The 18 PostgreSQL queries live in `inst/sql/10.0/ll/`, with one `<sheet>.sql` file per model sheet.
+
+Each query binds `$1::text` to one `ll_common.trip.topiaId`, directly or through its owning parent records.
+
+Date, programme and observation-method filters belong to trip selection; these queries retain the whole selected trip.
+
+Join only owning ancestors. Do not combine independent measurements, compositions or reference records in extraction.
+
+Order entity rows by `topiaId` and association rows by their full composite key. Preserve source nulls and values.
+
+<details>
+<summary>SQL files for all 18 source tables</summary>
+
+* [trip.sql](../../sql/10.0/ll/trip.sql)
+* [activity.sql](../../sql/10.0/ll/activity.sql)
+* [set.sql](../../sql/10.0/ll/set.sql)
+* [catch.sql](../../sql/10.0/ll/catch.sql)
+* [trip_species.sql](../../sql/10.0/ll/trip_species.sql)
+* [gearUseFeatures.sql](../../sql/10.0/ll/gearUseFeatures.sql)
+* [gearUseFeaturesMeasurement.sql](../../sql/10.0/ll/gearUseFeaturesMeasurement.sql)
+* [hooksComposition.sql](../../sql/10.0/ll/hooksComposition.sql)
+* [baitsComposition.sql](../../sql/10.0/ll/baitsComposition.sql)
+* [floatlinesComposition.sql](../../sql/10.0/ll/floatlinesComposition.sql)
+* [branchlinesComposition.sql](../../sql/10.0/ll/branchlinesComposition.sql)
+* [fishingSet_mitigationType.sql](../../sql/10.0/ll/fishingSet_mitigationType.sql)
+* [section.sql](../../sql/10.0/ll/section.sql)
+* [basket.sql](../../sql/10.0/ll/basket.sql)
+* [branchline.sql](../../sql/10.0/ll/branchline.sql)
+* [sizeMeasure.sql](../../sql/10.0/ll/sizeMeasure.sql)
+* [weightMeasure.sql](../../sql/10.0/ll/weightMeasure.sql)
+* [catch_predator.sql](../../sql/10.0/ll/catch_predator.sql)
+
+</details>
+
+Queries must return exactly the model fields, in declaration order, with their declared names.
+
+The CSV header occupies row 1; data begins on row 2. The model declares `start_row: 2`.
+
+A reader that removes CSV headers must adapt the input before using worksheet-oriented diagnostics.
+
+The extraction contract preserves source identifiers, row meaning and parent relationships.
+
+Verify that contract during SQL development, including checks for duplicated rows and broken relationships.
+
+The normal export pipeline trusts the extraction contract; it has no intermediate diagnostic validation stage.
+
+CSV encoding, missing-value representation and date-time serialization remain to be specified.

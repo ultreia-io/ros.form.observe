@@ -1,0 +1,234 @@
+---
+title: "LL 17 E-SET-CATCH-SPECIMENS-SSI mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 17 E-SET-CATCH-SPECIMENS-SSI mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Condition, gear interaction, handling and related detail for specimens of special interest.
+
+ROS LL **4.2.0**: **20 fields**, including **8 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-catch-specimens-ssi) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field              | Required | Type   | ROS reference / fixed values                  |
+| ---------------------- | -------- | ------ | --------------------------------------------- |
+| `observed_trip_id`     | M        | string | —                                             |
+| `set_id`               | M        | string | —                                             |
+| `catch_id`             | M        | string | —                                             |
+| `specimen_id`          | M        | string | —                                             |
+| `condition_at_capture` | M        | string | `refs_biology.individual_conditions` / `code` |
+| `condition_at_release` | M        | string | `refs_biology.individual_conditions` / `code` |
+| `gear_interaction`     | M        | string | —                                             |
+| `leader_material`      | M        | string | —                                             |
+
+<details>
+<summary>Optional fields (12)</summary>
+
+| ROS field                                | Required | Type   | ROS reference / fixed values                      |
+| ---------------------------------------- | -------- | ------ | ------------------------------------------------- |
+| `hook_type`                              | O        | string | `refs_fishery.hook_and_terminal_devices` / `code` |
+| `bait_condition`                         | O        | string | `refs_biology.bait_conditions` / `code`           |
+| `bait_type`                              | O        | string | `refs_biology.bait_types` / `code`                |
+| `leader_diameter_mm`                     | O        | number | —                                                 |
+| `dehooker_device`                        | O        | string | `refs_fishery.dehooker_types` / `code`            |
+| `light_attached`                         | O        | string | `refs_data.logical_responses` / `code`            |
+| `brought_onboard`                        | O        | string | `refs_data.logical_responses` / `code`            |
+| `handling_method`                        | O        | string | `refs_biology.handling_methods` / `code`          |
+| `revival`                                | O        | string | `refs_data.logical_responses` / `code`            |
+| `photo_id`                               | O        | string | —                                                 |
+| `depredation_details_depredation_source` | O        | string | `refs_biology.depredation_sources` / `code`       |
+| `depredation_details_observed_predator`  | O        | string | `refs_biology.predator_species` / `code`          |
+
+</details>
+
+Parent: **E-SET-CATCH-SPECIMENS**, linked through `observed_trip_id`, `set_id`, `catch_id`, `specimen_id`.
+
+## Source coverage
+
+Four mandatory identifiers must match the parent specimen; the specimen identity rule remains unresolved.
+
+The other mandatory fields have these candidates:
+
+* Capture and release conditions: `catchHealthStatus` and `discardHealthStatus`.
+* Gear interaction: `catch.hookPosition`, requiring a correspondence to ROS interaction categories.
+* Leader material: the linked individual branchline's `tracelineType`, when that link is available.
+
+The current catch extraction includes health, hook position, branchline ID and photo references.
+
+The individual branchline attributes require additional extraction and population checks.
+
+The source health states and hook position can be null. Structural availability is not complete observation coverage.
+
+This review checks source structures, legacy code and frozen catalogues, not affected counts in actual trips.
+
+## Philippe’s existing export
+
+SSI rows come from the specimen data after measurement joins, count expansion and specimen-ID creation.
+
+The identity and row-multiplication issues identified in the specimen review therefore also affect this sheet.
+
+### Inclusion
+
+* The sample query requires a length measurement; an animal without one never reaches SSI selection.
+* R keeps only English groups Cetaceans, Rays, Sharks, Turtles and Whale shark.
+* Seabirds are not in that list, although ROS marks albatrosses such as DAM as SSI.
+
+Agree inclusion against the relevant species catalogue after correspondence, rather than adopting this filter as policy.
+
+Unmeasured SSI animals also raise the parent sheet's mandatory-length question for Emmanuel.
+
+### Capture and release conditions
+
+SQL reads the two recorded health states. R then collapses A, AUSC and AW into AU (alive, condition unknown).
+
+This loses the explicitly recorded injury in AW (active but wounded).
+
+D becomes DE, and UNK becomes UN. DFCO (dorsal fin cut off) is not explicitly handled in the specimen recoding.
+
+R also uses release condition to replace capture condition, and capture condition to infer or replace release condition.
+
+These are observation assumptions, not simple catalogue correspondences.
+
+A missing release observation must be distinguished from an observed state and from a specimen that was not released.
+
+The earlier catch recoding handles DFCO differently; neither rule is approved by this review.
+
+### Gear interaction and leader material
+
+The 18 source hook-position codes all receive ROS codes in Philippe's mapping; several positions collapse together.
+
+Examples include jaws to HJ, throat to HI and external positions to HO. Entangled becomes EL (entangled in line).
+
+Review semantic losses and the entanglement assumption; missing values also become UK (unknown).
+
+The form declares gear_interaction and leader_material as strings without reference bindings.
+
+ROS has gear-interaction and line-material catalogues; the missing bindings are a separate model-review point.
+
+SQL takes leader material from every set-level branchline composition, not from the specimen's own branchline.
+
+Multiple compositions can both duplicate a specimen and attribute a material that was not used for that individual.
+
+R handles only five source material codes. SSW, GLW and SKW become missing despite target ST, GW and SK candidates.
+
+Its PV-to-MC conversion needs confirmation: source polyvinyl and target multifilament cremona are not matching labels.
+
+Leader diameter is fixed to 12 mm without a measured source in this query. This is not an approved value.
+
+### Optional information
+
+* Hook type and size exist on individual branchlines, but the export leaves the combined hook code empty.
+* Bait type and setting/hauling states are also candidates; the correct state and category need agreement.
+* Dehooker, attached light, brought-onboard, handling and revival fields are empty in the query.
+* Photo ID is empty even though the current catch extraction includes `photoReferences`.
+* Depredation source is inherited from the first matching predator-category rule; observed predator stays empty.
+
+Set-level equipment or lighting does not establish the equipment associated with an individual animal.
+
+No dedicated handling or revival source was identified in the inspected catch and branchline structures.
+
+That remains a bounded source finding, not proof that no other source exists.
+
+The source photo-reference format and multiple-predator reporting need review before filling the optional fields.
+
+## Questions for the sheet review
+
+1. Agree SSI inclusion, including seabirds and animals without lengths, and preserve the shared specimen identity.
+2. Map recorded health states without silently inferring or replacing observations; clarify non-release cases.
+3. Validate hook-position correspondence and the missing interaction/material reference bindings.
+4. Prefer verified individual leader information; resolve missing links and reject unsupported diameter assumptions.
+5. Review optional hook, bait, equipment, handling, photo and predator evidence independently.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 908-924 and 995-1067; sample query; reference correspondence inventory.
+
+* `sql-queries/observe_ll_sample.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* Current extraction: `inst/sql/10.0/ll/catch.sql`.
+* ObServe 10.0 DDL: observation `catch`, `branchline` and `branchlinesComposition`.
+* IRD snapshot: `20261112T184113Z`; health states, hook positions, line types and bait states.
+* ROS snapshot: `code_lists--b7c000cba93d`; individual conditions, gear interactions and line materials.
+* ROS species example: DAM, Amsterdam Island albatross, has `is_ssi = 1`.
+* Form 4.2.0: eight mandatory fields, parent specimen key and absent interaction/material bindings.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retain the same verified specimen identity; determine SSI inclusion from matched ROS species classification.
+* Keep capture and release health observations separate, using only correspondences that preserve their meaning.
+* Use recorded hook position for a verified interaction code and the individual's own leader material when linked.
+* Optional hook type/size, bait details and photo references are candidates with verified individual context.
+
+### What stays unresolved
+
+* Do not replace one health observation with the other, infer death from fin damage or erase recorded injuries.
+* A missing release state is distinct from a known release state and from an animal that was not released.
+* Do not assign every set-level leader material to a specimen or retain the unsupported 12 mm diameter.
+* Entanglement location, handling, revival and attached equipment need their own observations.
+* Confirm photo format, bait observation timing and the missing interaction/material reference bindings.
+* Include seabirds in the eligibility review; unmeasured SSI animals require the shared parent-row decision.
+
+### Complete-row assessment
+
+A row can be complete only with four valid IDs and supported health, interaction and leader-material values.
+
+Missing evidence remains unresolved; set-level equipment and arbitrary constants cannot complete these fields.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* Across all 8,703 catches, capture health has 5,918 values, release health 2,829 and hook position 4,889.
+* These are whole-cohort counts, not SSI-specific coverage; SSI classification and correspondence remain necessary.
+* Only 20 catches link an individual branchline, and individual leader material is empty throughout the cohort.
+* Global compositions record MON at 100%; applying that to individual SSI remains a rule to validate.
+* Photo references exist on 1,267 catches. Their format, referenced files and SSI eligibility still need review.
+* Do not infer release state or equipment from another observation simply to complete mandatory fields.
+
+## Export safeguard: ambiguous leader composition
+
+Using the set composition for an individual's leader material remains conditional on IRD confirmation.
+
+If that fallback is used, more than one composition entry must trigger an explicit anomaly for review.
+
+Do not select a material automatically or silently omit the animal. Retain its trip, set and catch identifiers.
+
+Whether this blocks the row or the whole trip export remains to be decided. The safeguard is not yet implemented.

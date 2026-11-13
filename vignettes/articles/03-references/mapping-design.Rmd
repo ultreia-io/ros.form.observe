@@ -1,0 +1,177 @@
+---
+title: "Mapping architecture for form.references"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mapping architecture for form.references}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Purpose
+
+Preserve the mapping design discussion so implementation can resume without reconstructing its requirements.
+
+This document covers neutral reference mapping, illustrated by the ObServe-to-ROS export.
+
+See [Export design](../export-design.html) for the overall workflow.
+
+See the [LL reference inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue-specific evidence and gaps.
+
+## Design status
+
+These are working proposals, not final design decisions or authorization to implement them.
+
+## Shared engine for code lists and registries
+
+The mapping mechanism applies to both catalogue types; code lists and registries do not need separate engines.
+
+Reuse each target lookup's configured matching behaviour rather than assuming every lookup is exact.
+
+Existing `form.references` lookups try exact matches, then catalogue aliases, then normalized-name matching if enabled.
+
+With `matching: name`, comparison keys normalize accents, punctuation and word order.
+
+This is a normalized comparison key, not fuzzy matching or a cryptographic hash.
+
+For example, “Jean Dupont” and “Dupont Jean” yield the same normalized name key.
+
+Multiple matching rows remain candidates; the engine must not select one arbitrarily.
+
+Mapping-owned alias tables remain distinct from aliases already declared on a catalogue lookup.
+
+Concrete code-list and registry choices belong in their respective topic documents.
+
+## Independent mapping schema
+
+Propose a versioned `mapping` schema and a separate `mapping.yaml` file in `form.references`.
+
+Keep catalogue configuration and validation independent from mapping configuration.
+
+A mapping references one source catalogue and one target catalogue without duplicating their definitions.
+
+Named rules declare the source table, lookup key and property to read.
+
+They also declare the target table, lookup column and property to return.
+
+For example: source Topia ID → source record → FAO code → target lookup → canonical target code.
+
+Keep the engine neutral: ObServe and ROS identifiers belong in configuration, not package-specific logic.
+
+## Three mapping modes
+
+Support direct lookup, explicit aliases, or a named business rule.
+
+Direct lookup compares a source property with the declared target lookup.
+
+Explicit correspondences belong to the mapping, without changing either catalogue.
+
+For alias mode, the YAML could reference a companion CSV with `source_value` and `target_value` columns.
+
+The rule declares the source and target columns, so the CSV values have an explicit scope.
+
+Several source values may share a target; conflicting targets for one source value are reported as ambiguous.
+
+Existing catalogue aliases remain distinct from these mapping-specific correspondences.
+
+For business mode, the YAML names a separately implemented R function and its parameters.
+
+The generic engine invokes the function; country-specific assumptions remain outside the generic package.
+
+## Context for business rules
+
+Provide the current value, current record and a shared context to the function.
+
+The context follows relationships declared by the model to retrieve parents or records in other sheets.
+
+For example, a rule processing a set can retrieve target species recorded on its trip.
+
+Navigation remains generic; the business rule decides whether that trip-level information applies to the set.
+
+Execute contextual rules per record; the same catalogue value may produce different results in different contexts.
+
+Direct lookups and explicit aliases can be resolved once per distinct source value within the selected mapping.
+
+Validate mapping YAML structure without catalogue data; resolving actual matches requires both catalogues.
+
+## Coverage of encountered values
+
+Check only reference values encountered in the trip being exported.
+
+Load the trip, collect distinct referenced IDs by source table, and resolve the required catalogue records.
+
+Include references reached indirectly when a mapping needs them, such as a harbour's country.
+
+Require a unique target result for each encountered value covered by a direct mapping rule.
+
+Report missing source records, missing matching properties, unmatched values and ambiguous matches explicitly.
+
+Unused source catalogue entries do not affect the trip's mapping coverage.
+
+The YAML defines reusable rules; the trip data supplies the subset of values to check.
+
+The exporter decides how unresolved results affect export; do not substitute values automatically.
+
+## Delivery scopes
+
+- **Scope 1:** one shared mapping configuration and one business-rule set, without country-specific selection.
+- **Scope 2:** allow mappings and business rules to vary by country, with explicit configuration selection.
+
+Scope 1 aims to provide a functional first implementation; country-specific overrides are deferred to scope 2.
+
+A shared configuration does not prove that its assumptions apply everywhere; their valid scope must stay explicit.
+
+This delivery split does not authorize implementation or settle the outstanding business assumptions.
+
+## Open design questions
+
+- For scope 2, define country-specific selection and any programme variants; avoid unapproved fallback rules.
+- Distinguish missing input, no correspondence and multiple matches; define their effect on export.
+- Record the catalogue versions, mapping version and business-rule versions used for reproducibility.
+- Declare whether a rule returns a reference value or a calculated measurement, and validate that result accordingly.
+
+These are design questions rather than established blockers. The concrete API and schema remain to be defined.
+
+## Proposed declaration contents
+
+The separate YAML declares its schema version, source catalogue, target catalogue and named mapping rules.
+
+Each rule identifies its source table, key and property, plus its target table, lookup and returned property.
+
+Its mode selects direct lookup, an alias file, or a named R business function with explicit parameters.
+
+The export's field mapping refers to the named rule; catalogue-specific identifiers remain configuration values.
+
+For alias files, `source_value,target_value` is a proposed CSV layout, not a finalized format contract.
+
+## Implementation details still to specify
+
+- Exact YAML field names, schema version and configuration-reference syntax.
+- Alias-file path resolution, validation and interaction with existing target-catalogue aliases.
+- Registration and signature of R functions, and the public context navigation API.
+- Result structure, expected value types and how source-to-target provenance is recorded.
+- Whether each unresolved result blocks a field, row or trip; no silent substitution or record loss.
+- How to declare dependencies on other sheets and handle missing or multiple related records.
+
+The shared context supplies source records; calculated outputs and dependencies between rules need a separate contract.
+
+Business assumptions require justification for their scope; declaring a function does not validate its assumptions.
+
+## Shared resolution constraints
+
+For a direct correspondence, use the existing target lookup. Do not maintain a second copy of the ROS code list.
+
+For explicit source-to-target recoding, declare aliases in the mapping rather than hardcoding them in SQL or R.
+
+An alias must have one unambiguous meaning within its target table and column.
+
+If the same source code means different things across source tables, an unqualified alias is insufficient.
+
+If conversion depends on species, gear or another field, describe that conditional rule in the sheet mapping.
+
+Lossy conversions also require an explicit reporting decision; they are not merely alternate spellings.
+
+Unknown or ambiguous values remain unresolved and are reported with their source field and intended ROS target.
+
+Do not replace them automatically with a generic unknown code unless the mapping explicitly requires it.
+
+Resolve reusable correspondences once for the selected source values, then reuse them across trip exports.

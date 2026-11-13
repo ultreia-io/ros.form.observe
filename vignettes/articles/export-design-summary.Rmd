@@ -35,4 +35,4 @@ ROS database 4.0.0 and form 4.2.0 have independent versions. ROS references need
 
 The detailed reviews retain field-level evidence and open questions. Resolve these before implementing the exporter.
 
-[Full design](export-design.html) · [Short review index](ll-sheet-summaries.html).
+[Full design](export-design.html) · [Short review index](06-source-coverage/ll-sheet-summaries.html).

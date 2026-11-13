@@ -1,0 +1,58 @@
+---
+title: "04 — References - Code lists"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{04 — References - Code lists}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Topic documents
+
+- [Reference correspondence inventory — detailed](ll-reference-correspondences.html)
+- [Reference correspondences — short](ll-reference-correspondences-summary.html)
+
+## Code-list mappings — How do we map ObServe code lists to ROS code lists and maintain these mappings? {#catalogue-correspondences-how-do-we-map-the-observe-catalogue-to-ros-and-maintain-these-correspondences}
+
+Define correspondences between values in ObServe source code lists and ROS target code lists.
+
+This topic concerns code-list values, such as species, countries, ports and gear types.
+
+Define an initial mapping for French data and how other countries can reuse and enrich it for their own referential.
+
+Agree how to handle new source entries and missing or ambiguous correspondences. These choices remain unresolved.
+
+See the [initial LL correspondence inventory](ll-reference-correspondences.html) for evidence and open questions.
+
+Set delivery levels after reviewing the inventory. Defer the R API design until implementation is considered.
+
+### Shared mechanism
+
+Use the [shared mapping design](../03-references/mapping-design.html) described under 03 — References.
+
+This page defines concrete source fields, target code lists and correspondences for the ObServe-to-ROS export.
+
+## Map ObServe code lists to ROS code lists
+
+The ObServe foreign key identifies a source record. It is not itself the ROS code to write into the form.
+
+For each mapped field:
+
+1. Resolve the extracted `topiaId` in the declared ObServe code list.
+2. Read the source attribute identified by the sheet mapping.
+3. Match that value against the target ROS code-list lookup, including its existing aliases.
+4. Write the canonical ROS value from the matched record.
+
+The target code list comes from the ROS field binding. The source attribute comes from the sheet mapping.
+
+Do not assume that every ObServe table's `code` column uses the ROS coding system.
+
+| ObServe table    | Source attribute | ROS target table        |
+| ---------------- | ---------------- | ----------------------- |
+| `common.species` | `faoCode`        | `refs_biology.species`  |
+| `common.country` | `iso3Code`       | `refs_admin.countries`  |
+| `common.harbour` | `locode`         | `refs_admin.ports`      |
+
+These are candidate correspondences to verify against the selected ROS fields and code-list values.

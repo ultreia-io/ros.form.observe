@@ -1,0 +1,353 @@
+# ObServe 10.0 LL extraction model.
+# Source: observe-app/core/persistence/migration/src/main/resources/
+#         db/migration/v10/10.0/empty-schema-PG.sql
+# One CSV per sheet, with field names on row 1 and data starting on row 2.
+# Column order follows field declaration order. IDs retain their ObServe values.
+# Reference fields retain ObServe topiaId values and use code_lists or registries.
+# Basket, branchline and section IDs are data links, not code-list values.
+# Scope: source candidates for all ROS LL 4.2.0 sheets; no ROS-specific recoding.
+# mandatory follows source NOT NULL, not ROS requirements or a minimum row count.
+# Keep all domain columns in the added tables, with source types and nullability.
+# Persistence audit/version columns and internal list indexes are excluded.
+# Do not replace missing values or interpret default false flags as observed absence.
+# Keep repeated measurements/compositions separate; do not join independent collections.
+# parent_key describes ownership; optional catch links to section/basket/branchline remain fields.
+# Country, species-group and gear-characteristic metadata are transitive catalogue dependencies.
+schema_version: "1.0.0"
+form: {id: ll, version: "10.0"}
+references:
+  code_lists:
+    - common.country
+    - common.dataquality
+    - common.fpazone
+    - common.gear
+    - common.gearcharacteristic
+    - common.gearcharacteristiclistitem
+    - common.gearcharacteristictype
+    - common.harbour
+    - common.ocean
+    - common.sex
+    - common.sizemeasuremethod
+    - common.sizemeasuretype
+    - common.species
+    - common.speciesgroup
+    - common.weightmeasuremethod
+    - common.weightmeasuretype
+    - ll_common.baitsettingstatus
+    - ll_common.baittype
+    - ll_common.catchfate
+    - ll_common.healthstatus
+    - ll_common.hooksize
+    - ll_common.hooktype
+    - ll_common.lightstickscolor
+    - ll_common.lightstickstype
+    - ll_common.linetype
+    - ll_common.mitigationtype
+    - ll_common.observationmethod
+    - ll_common.program
+    - ll_common.settingshape
+    - ll_common.triptype
+    - ll_common.vesselactivity
+    - ll_observation.baithaulingstatus
+    - ll_observation.hookposition
+    - ll_observation.maturitystatus
+    - ll_observation.stomachfullness
+  registries:
+    - common.person
+    - common.vessel
+sheets:
+  # Source: ll_common.trip.
+  trip:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    fields:
+      topiaId: {mandatory: true, type: string}
+      endDate: {mandatory: true, type: date}
+      ersId: {type: string}
+      generalComment: {type: string}
+      logbookAvailability: {mandatory: true, type: boolean}
+      logbookComment: {type: string}
+      noOfCrewMembers: {type: integer}
+      observationAvailability: {mandatory: true, type: boolean}
+      observationComment: {type: string}
+      startDate: {mandatory: true, type: date}
+      captain: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaId}}
+      departureHarbour: {type: string, reference: {catalogue: code_lists, table: common.harbour, lookup: topiaId}}
+      landingDataEntryOperator: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaId}}
+      landingHarbour: {type: string, reference: {catalogue: code_lists, table: common.harbour, lookup: topiaId}}
+      logbookDataEntryOperator: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaId}}
+      logbookDataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaId}}
+      logbookProgram: {type: string, reference: {catalogue: code_lists, table: ll_common.program, lookup: topiaId}}
+      observationDataEntryOperator: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaId}}
+      observationDataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaId}}
+      observationMethod: {type: string, reference: {catalogue: code_lists, table: ll_common.observationmethod, lookup: topiaId}}
+      observationProgram: {type: string, reference: {catalogue: code_lists, table: ll_common.program, lookup: topiaId}}
+      observer: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaId}}
+      ocean: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.ocean, lookup: topiaId}}
+      sampleDataEntryOperator: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaId}}
+      tripType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.triptype, lookup: topiaId}}
+      vessel: {mandatory: true, type: string, reference: {catalogue: registries, table: common.vessel, lookup: topiaId}}
+  # Source: ll_observation.activity.
+  activity:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      latitude: {mandatory: true, type: latitude}
+      longitude: {mandatory: true, type: longitude}
+      seaSurfaceTemperature: {type: number}
+      timeStamp: {mandatory: true, type: datetime}
+      dataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaId}}
+      fpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaId}}
+      trip: {mandatory: true, type: string}
+      vesselActivity: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.vesselactivity, lookup: topiaId}}
+  # Source: ll_observation.fishingSet.
+  set:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: activity, fields: [activity]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      basketsPerSectionCount: {mandatory: true, type: integer}
+      branchlinesPerBasketCount: {mandatory: true, type: integer}
+      comment: {type: string}
+      haulingBreaks: {type: integer}
+      haulingDirectionSameAsSetting: {mandatory: true, type: boolean}
+      haulingEndLatitude: {mandatory: true, type: latitude}
+      haulingEndLongitude: {mandatory: true, type: longitude}
+      haulingEndTimeStamp: {mandatory: true, type: datetime}
+      haulingStartLatitude: {mandatory: true, type: latitude}
+      haulingStartLongitude: {mandatory: true, type: longitude}
+      haulingStartTimeStamp: {mandatory: true, type: datetime}
+      lightsticksPerBasketCount: {type: integer}
+      maxDepthTargeted: {type: number}
+      monitored: {mandatory: true, type: boolean}
+      number: {type: integer}
+      settingEndLatitude: {mandatory: true, type: latitude}
+      settingEndLongitude: {mandatory: true, type: longitude}
+      settingEndTimeStamp: {mandatory: true, type: datetime}
+      settingStartLatitude: {mandatory: true, type: latitude}
+      settingStartLongitude: {mandatory: true, type: longitude}
+      settingStartTimeStamp: {mandatory: true, type: datetime}
+      settingVesselSpeed: {type: number}
+      shooterSpeed: {type: number}
+      shooterUsed: {mandatory: true, type: boolean}
+      snapWeight: {type: number}
+      swivelWeight: {type: number}
+      timeBetweenHooks: {type: integer}
+      totalBasketsCount: {type: integer}
+      totalHooksCount: {type: integer}
+      totalSectionsCount: {mandatory: true, type: integer}
+      weightedSnap: {mandatory: true, type: boolean}
+      weightedSwivel: {mandatory: true, type: boolean}
+      activity: {mandatory: true, type: string, unique: true}
+      lightsticksColor: {type: string, reference: {catalogue: code_lists, table: ll_common.lightstickscolor, lookup: topiaId}}
+      lightsticksType: {type: string, reference: {catalogue: code_lists, table: ll_common.lightstickstype, lookup: topiaId}}
+      lineType: {type: string, reference: {catalogue: code_lists, table: ll_common.linetype, lookup: topiaId}}
+      settingShape: {type: string, reference: {catalogue: code_lists, table: ll_common.settingshape, lookup: topiaId}}
+  # Source: ll_observation.catch.
+  catch:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      acquisitionMode: {mandatory: true, type: integer}
+      beatDiameter: {type: number}
+      comment: {type: string}
+      count: {mandatory: true, type: integer}
+      depredated: {mandatory: true, type: boolean}
+      gonadeWeight: {type: number}
+      hookWhenDiscarded: {type: boolean}
+      number: {type: integer}
+      photoReferences: {type: string}
+      sampleReferences: {type: string}
+      tagNumber: {type: string}
+      totalWeight: {type: number}
+      basket: {type: string}
+      branchline: {type: string}
+      catchFate: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.catchfate, lookup: topiaId}}
+      catchHealthStatus: {type: string, reference: {catalogue: code_lists, table: ll_common.healthstatus, lookup: topiaId}}
+      discardHealthStatus: {type: string, reference: {catalogue: code_lists, table: ll_common.healthstatus, lookup: topiaId}}
+      fishingSet: {mandatory: true, type: string}
+      hookPosition: {type: string, reference: {catalogue: code_lists, table: ll_observation.hookposition, lookup: topiaId}}
+      maturityStatus: {type: string, reference: {catalogue: code_lists, table: ll_observation.maturitystatus, lookup: topiaId}}
+      section: {type: string}
+      sex: {type: string, reference: {catalogue: code_lists, table: common.sex, lookup: topiaId}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaId}}
+      stomachFullness: {type: string, reference: {catalogue: code_lists, table: ll_observation.stomachfullness, lookup: topiaId}}
+      weightMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaId}}
+      weightMeasureType: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuretype, lookup: topiaId}}
+  # Source: ll_common.trip_species. Trip targets are not automatically set targets.
+  trip_species:
+    layout: {kind: table, start_row: 2}
+    primary_key: [trip, species]
+    parent_key: {sheet: trip, fields: [trip]}
+    fields:
+      trip: {mandatory: true, type: string}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaId}}
+  # Source: ll_common.gearUseFeatures. A source candidate, not an agreed ROS mapping.
+  gearUseFeatures:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      number: {mandatory: true, type: integer}
+      usedInTrip: {type: boolean}
+      gear: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.gear, lookup: topiaId}}
+      trip: {mandatory: true, type: string}
+  # Source: ll_common.gearUseFeaturesMeasurement.
+  # Keep measurementValue as source text; interpret it through the characteristic metadata.
+  gearUseFeaturesMeasurement:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: gearUseFeatures, fields: [gearUseFeatures]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      measurementValue: {mandatory: true, type: string}
+      gearCharacteristic: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.gearcharacteristic, lookup: topiaId}}
+      gearUseFeatures: {mandatory: true, type: string}
+  # Source: ll_observation.hooksComposition.
+  hooksComposition:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      hookOffset: {type: integer}
+      proportion: {mandatory: true, type: integer}
+      fishingSet: {mandatory: true, type: string}
+      hookSize: {type: string, reference: {catalogue: code_lists, table: ll_common.hooksize, lookup: topiaId}}
+      hookType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.hooktype, lookup: topiaId}}
+  # Source: ll_observation.baitsComposition.
+  baitsComposition:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      individualSize: {type: integer}
+      individualWeight: {type: number}
+      proportion: {mandatory: true, type: integer}
+      baitSettingStatus: {type: string, reference: {catalogue: code_lists, table: ll_common.baitsettingstatus, lookup: topiaId}}
+      baitType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.baittype, lookup: topiaId}}
+      fishingSet: {mandatory: true, type: string}
+  # Source: ll_observation.floatlinesComposition.
+  floatlinesComposition:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      length: {mandatory: true, type: number}
+      proportion: {mandatory: true, type: integer}
+      fishingSet: {mandatory: true, type: string}
+      lineType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.linetype, lookup: topiaId}}
+  # Source: ll_observation.branchlinesComposition.
+  branchlinesComposition:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      length: {mandatory: true, type: number}
+      proportion: {mandatory: true, type: integer}
+      tracelineLength: {type: number}
+      fishingSet: {mandatory: true, type: string}
+      topType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.linetype, lookup: topiaId}}
+      tracelineType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.linetype, lookup: topiaId}}
+  # Source: ll_observation.fishingSet_mitigationType.
+  fishingSet_mitigationType:
+    layout: {kind: table, start_row: 2}
+    primary_key: [fishingSet, mitigationType]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      fishingSet: {mandatory: true, type: string}
+      mitigationType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ll_common.mitigationtype, lookup: topiaId}}
+  # Source: ll_observation.section.
+  section:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: set, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      haulingIdentifier: {type: integer}
+      settingIdentifier: {mandatory: true, type: integer}
+      fishingSet: {mandatory: true, type: string}
+  # Source: ll_observation.basket.
+  basket:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: section, fields: [section]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      floatline1Length: {type: number}
+      floatline2Length: {type: number}
+      haulingIdentifier: {type: integer}
+      settingIdentifier: {mandatory: true, type: integer}
+      section: {mandatory: true, type: string}
+  # Source: ll_observation.branchline.
+  branchline:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: basket, fields: [basket]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      branchlineLength: {type: number}
+      comment: {type: string}
+      depthRecorder: {mandatory: true, type: boolean}
+      haulingIdentifier: {type: integer}
+      hookLost: {mandatory: true, type: boolean}
+      hookOffset: {type: integer}
+      settingIdentifier: {mandatory: true, type: integer}
+      snapWeight: {type: number}
+      swivelWeight: {type: number}
+      timeSinceContact: {type: integer}
+      timer: {mandatory: true, type: boolean}
+      timerTimeOnBoard: {type: datetime}
+      traceCutOff: {mandatory: true, type: boolean}
+      tracelineLength: {type: number}
+      weightedSnap: {mandatory: true, type: boolean}
+      weightedSwivel: {mandatory: true, type: boolean}
+      baitHaulingStatus: {type: string, reference: {catalogue: code_lists, table: ll_observation.baithaulingstatus, lookup: topiaId}}
+      baitSettingStatus: {type: string, reference: {catalogue: code_lists, table: ll_common.baitsettingstatus, lookup: topiaId}}
+      baitType: {type: string, reference: {catalogue: code_lists, table: ll_common.baittype, lookup: topiaId}}
+      basket: {mandatory: true, type: string}
+      hookSize: {type: string, reference: {catalogue: code_lists, table: ll_common.hooksize, lookup: topiaId}}
+      hookType: {type: string, reference: {catalogue: code_lists, table: ll_common.hooktype, lookup: topiaId}}
+      topType: {type: string, reference: {catalogue: code_lists, table: ll_common.linetype, lookup: topiaId}}
+      tracelineType: {type: string, reference: {catalogue: code_lists, table: ll_common.linetype, lookup: topiaId}}
+  # Source: ll_observation.sizeMeasure.
+  sizeMeasure:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: catch, fields: [catch]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      size: {mandatory: true, type: number}
+      sizeMeasureMethod: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.sizemeasuremethod, lookup: topiaId}}
+      sizeMeasureType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.sizemeasuretype, lookup: topiaId}}
+      catch: {mandatory: true, type: string}
+  # Source: ll_observation.weightMeasure.
+  weightMeasure:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: catch, fields: [catch]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      weight: {mandatory: true, type: number}
+      catch: {mandatory: true, type: string}
+      weightMeasureMethod: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaId}}
+      weightMeasureType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.weightmeasuretype, lookup: topiaId}}
+  # Source: ll_observation.catch_predator.
+  catch_predator:
+    layout: {kind: table, start_row: 2}
+    primary_key: [catch, species]
+    parent_key: {sheet: catch, fields: [catch]}
+    fields:
+      catch: {mandatory: true, type: string}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaId}}

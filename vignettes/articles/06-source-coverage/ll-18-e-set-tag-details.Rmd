@@ -1,0 +1,173 @@
+---
+title: "LL 18 E-SET-TAG-DETAILS mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 18 E-SET-TAG-DETAILS mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Tag release/recovery information and finder details linked to a specimen.
+
+ROS LL **4.2.0**: **11 fields**, including **4 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-tag-details) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field          | Required | Type   | ROS reference / fixed values |
+| ------------------ | -------- | ------ | ---------------------------- |
+| `observed_trip_id` | M        | string | —                            |
+| `set_id`           | M        | string | —                            |
+| `catch_id`         | M        | string | —                            |
+| `specimen_id`      | M        | string | —                            |
+
+<details>
+<summary>Optional fields (7)</summary>
+
+| ROS field                | Required | Type   | ROS reference / fixed values           |
+| ------------------------ | -------- | ------ | -------------------------------------- |
+| `release`                | O        | string | `refs_data.logical_responses` / `code` |
+| `recovery`               | O        | string | `refs_data.logical_responses` / `code` |
+| `type`                   | O        | string | `refs_biology.tag_types` / `code`      |
+| `tag_id_1`               | O        | string | —                                      |
+| `tag_id_2`               | O        | string | —                                      |
+| `finder_name`            | O        | string | —                                      |
+| `finder_contact_details` | O        | string | —                                      |
+
+</details>
+
+Parent: **E-SET-CATCH-SPECIMENS**, linked through `observed_trip_id`, `set_id`, `catch_id`, `specimen_id`.
+
+## Source coverage
+
+Only the four parent identifiers are mandatory. They must identify the same specimen as the parent sheet.
+
+ObServe stores an optional `catch.tagNumber` text value, already preserved by the current intermediate extraction.
+
+The catch UI enables this field for individual entry. Its contents and population still need inspection.
+
+It is a candidate for a ROS tag identifier, but does not establish tag type, tagging or recovery by itself.
+
+No separate tag-event, second-tag or finder fields were identified in the inspected LL observation catch structure.
+
+That is a bounded source finding; other source material or collection conventions remain to be checked.
+
+This review does not establish how many selected catches have usable tag information.
+
+## Philippe’s existing export
+
+* The sample query returns NULL for release, recovery, type, both tag IDs and finder contact details.
+* It does not select `catch.tagNumber`.
+* R starts from the specimen data and retains only rows whose `tag_id_1` is not missing.
+* No intervening rule fills tag_id_1, so this path constructs an empty tag table as written.
+
+This conclusion comes from code inspection, not a run against the selected trips.
+
+The shared sample query also requires a length, so merely adding the tag number would still omit unmeasured animals.
+
+The specimen identity and row-multiplication issues would also affect that route.
+
+The final selection has ten columns; form 4.2.0 has eleven, with a separate finder_name before contact details.
+
+Reusing the positional write unchanged would put contact details into finder_name if tag rows were produced.
+
+## Interpretation and row inclusion
+
+A tag number alone must not be used to infer a new tagging event, a recovery event or a tag type.
+
+The catch's retained/discarded fate does not resolve those tag-event questions.
+
+The source has one text field and ROS offers two identifiers. Any splitting rule needs actual source examples.
+
+The target catalogue distinguishes ten tag types; choosing a type needs evidence beyond the identifier's existence.
+
+Finder name and contact details have no established source in this review.
+
+The database allows this sheet to remain empty; no ID-only placeholder is structurally required.
+
+If a tag is reported, preserve its link to the existing specimen rather than creating a new specimen for the tag.
+
+Tagging or recovery without a recorded length raises the parent specimen's mandatory-length question for Emmanuel.
+
+## Questions for the sheet review
+
+1. Confirm what tagNumber represents in actual collection: newly attached tag, recovered tag, or either.
+2. Establish the shared specimen identity and how to report tags on unmeasured animals.
+3. Inspect identifier formats before assigning tag_id_1 or tag_id_2; establish type and event information separately.
+4. Identify any source for finder details and retain the unresolved ROS database destination for contact details.
+5. Agree row inclusion for usable tag information and align the eleven-field form layout.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 1069-1090; sample query tag section and size filter.
+
+* `sql-queries/observe_ll_sample.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* Current extraction: `inst/sql/10.0/ll/catch.sql` selects `tagNumber`.
+* ObServe 10.0 DDL: `ll_observation.catch.tagNumber`.
+* UI: `FishingSetCatchUI.jaxx` and `FishingSetCatchUIHandler.updateCatchAcquisitionMode()`.
+* Philippe's tag selection: R lines 1069-1090; positional write: line 1140.
+* Form 4.2.0: four mandatory IDs, seven optional fields and the parent specimen key.
+* ROS snapshot: `code_lists--b7c000cba93d`; `refs_biology.tag_types`.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retain the four verified parent identifiers for the actual individual.
+* Use catch.tagNumber as a tag-ID candidate once its contents and association with that individual are verified.
+* Preserve a confirmed identifier even when optional event or finder details have no source.
+
+### What stays unresolved
+
+* A tag number does not establish whether the tag was newly attached or recovered, or identify its type.
+* Do not equate fish release with tag deployment, or split one source text value into two invented tag identifiers.
+* Leave unsupported release/recovery responses, type, second tag and finder details empty.
+* Keep unmeasured tagged animals in the review; the mandatory parent length requires a reporting decision.
+
+### Complete-row assessment
+
+Four valid parent IDs plus a confirmed tag identifier can meet this sheet's mandatory-field requirements.
+
+Parent specimen validity remains a separate prerequisite; no ID-only placeholder is justified by absent tag information.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* One measured ALB individual has a nonempty, five-character tag value with an identifier-like format.
+* This supplies a concrete tag-ID candidate; it does not establish deployment, recovery or tag type.
+* No second identifier or finder information was established by this check.
+* Preserve the same specimen identity as its length record; the other optional details need separate evidence.
