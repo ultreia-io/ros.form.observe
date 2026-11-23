@@ -1,0 +1,689 @@
+# ObServe 10.0 PS extraction model.
+# Sheet names are the qualified source table names: schema.table.
+# Source: observe-app/core/persistence/migration/src/main/resources/
+#         db/migration/v10/10.0/empty-schema-PG.sql
+# Ownership: observe-app/model/persistence/src/main/resources/
+#            META-INF/navigation/Observe-parent-model.json
+# One CSV per sheet, with field names on row 1 and data starting on row 2.
+# Column order follows field declaration order. IDs retain their ObServe values.
+# Scope: every trip-owned PS data table, including association tables.
+# Observation, logbook, landing and local-market records remain separate.
+# Catalogue data remain external; references.yaml declares their lookups.
+# Reference fields retain ObServe IDs and use the catalogue lookup topiaid.
+# mandatory follows source NOT NULL, not ROS requirements or a minimum row count.
+# Persistence audit/version columns, homeId and internal list indexes are excluded.
+# Source time-only values remain strings; no date or timezone is inferred.
+# Do not replace nulls or interpret default false flags as observed absence.
+# parent_key describes ownership; other data links remain fields.
+# Do not merge observation and logbook records or join independent collections.
+schema_version: "1.0.0"
+form: {id: ps, version: "10.0"}
+references:
+  code_lists:
+    - common.country
+    - common.dataquality
+    - common.enginemake
+    - common.fpazone
+    - common.gear
+    - common.gearcharacteristic
+    - common.gearcharacteristiclistitem
+    - common.gearcharacteristictype
+    - common.harbour
+    - common.hullmaterial
+    - common.ocean
+    - common.organism
+    - common.sex
+    - common.sizemeasuremethod
+    - common.sizemeasuretype
+    - common.species
+    - common.speciesgroup
+    - common.speciesgroupreleasemode
+    - common.vesseltype
+    - common.weightmeasuremethod
+    - common.weightmeasuretype
+    - common.wind
+    - ps_common.acquisitionstatus
+    - ps_common.objectmaterial
+    - ps_common.objectmaterialtype
+    - ps_common.objectoperation
+    - ps_common.observedsystem
+    - ps_common.program
+    - ps_common.reasonfornofishing
+    - ps_common.reasonfornullset
+    - ps_common.sampletype
+    - ps_common.schooltype
+    - ps_common.speciesfate
+    - ps_common.transmittingbuoyoperation
+    - ps_common.transmittingbuoyownership
+    - ps_common.transmittingbuoytype
+    - ps_common.vesselactivity
+    - ps_common.weightcategory
+    - ps_common.wellcontentstatus
+    - ps_landing.destination
+    - ps_landing.fate
+    - ps_localmarket.batchcomposition
+    - ps_localmarket.batchweighttype
+    - ps_localmarket.buyer
+    - ps_localmarket.packaging
+    - ps_logbook.informationsource
+    - ps_logbook.samplequality
+    - ps_logbook.setsuccessstatus
+    - ps_logbook.wellsamplingconformity
+    - ps_logbook.wellsamplingstatus
+    - ps_observation.catchreleaseconformity
+    - ps_observation.catchreleasehandlingplace
+    - ps_observation.catchreleasestatus
+    - ps_observation.catchreleasingtime
+    - ps_observation.detectionmode
+    - ps_observation.informationsource
+    - ps_observation.reasonfordiscard
+    - ps_observation.speciesstatus
+    - ps_observation.surroundingactivity
+  registries:
+    - common.person
+    - common.shipowner
+    - common.vessel
+    - common.vesselsizecategory
+sheets:
+  # Source: ps_common.trip.
+  ps_common.trip:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    fields:
+      topiaId: {mandatory: true, type: string}
+      activitiesAcquisitionMode: {mandatory: true, type: string}
+      endDate: {mandatory: true, type: date}
+      ersId: {type: string}
+      fishingTime: {type: integer}
+      formsUrl: {type: string}
+      generalComment: {type: string}
+      historicalData: {mandatory: true, type: boolean}
+      landingTotalWeight: {type: number}
+      localMarketTotalWeight: {type: number}
+      loch: {type: integer}
+      logbookComment: {type: string}
+      observationComment: {type: string}
+      reportsUrl: {type: string}
+      startDate: {mandatory: true, type: date}
+      timeAtSea: {type: integer}
+      advancedSamplingAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      captain: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaid}}
+      departureHarbour: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.harbour, lookup: topiaid}}
+      departureWellContentStatus: {type: string, reference: {catalogue: code_lists, table: ps_common.wellcontentstatus, lookup: topiaid}}
+      landingAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      landingHarbour: {type: string, reference: {catalogue: code_lists, table: common.harbour, lookup: topiaid}}
+      landingWellContentStatus: {type: string, reference: {catalogue: code_lists, table: ps_common.wellcontentstatus, lookup: topiaid}}
+      localMarketAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      localMarketSurveySamplingAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      localMarketWellsSamplingAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      logbookAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      logbookDataEntryOperator: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaid}}
+      logbookDataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaid}}
+      logbookProgram: {type: string, reference: {catalogue: code_lists, table: ps_common.program, lookup: topiaid}}
+      observationAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      observationDataEntryOperator: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaid}}
+      observationDataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaid}}
+      observationProgram: {type: string, reference: {catalogue: code_lists, table: ps_common.program, lookup: topiaid}}
+      observer: {type: string, reference: {catalogue: registries, table: common.person, lookup: topiaid}}
+      ocean: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.ocean, lookup: topiaid}}
+      targetWellsSamplingAcquisitionStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.acquisitionstatus, lookup: topiaid}}
+      vessel: {mandatory: true, type: string, reference: {catalogue: registries, table: common.vessel, lookup: topiaid}}
+  # Source: ps_common.gearUseFeatures.
+  ps_common.gearUseFeatures:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      number: {mandatory: true, type: integer}
+      usedInTrip: {type: boolean}
+      gear: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.gear, lookup: topiaid}}
+      trip: {mandatory: true, type: string}
+  # Source: ps_common.gearUseFeaturesMeasurement.
+  ps_common.gearUseFeaturesMeasurement:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.gearUseFeatures, fields: [gearUseFeatures]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      measurementValue: {mandatory: true, type: string}
+      gearCharacteristic: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.gearcharacteristic, lookup: topiaid}}
+      gearUseFeatures: {mandatory: true, type: string}
+  # Source: ps_observation.route.
+  ps_observation.route:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      date: {mandatory: true, type: date}
+      endLogValue: {type: number}
+      startLogValue: {type: number}
+      trip: {mandatory: true, type: string}
+  # Source: ps_observation.activity.
+  ps_observation.activity:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.route, fields: [route]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      ersId: {type: string}
+      latitude: {type: latitude}
+      longitude: {type: longitude}
+      observedSystemDistance: {type: number}
+      seaSurfaceTemperature: {type: number}
+      time: {mandatory: true, type: string}
+      vesselSpeed: {type: number}
+      currentFpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaid}}
+      dataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaid}}
+      detectionMode: {type: string, reference: {catalogue: code_lists, table: ps_observation.detectionmode, lookup: topiaid}}
+      nextFpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaid}}
+      previousFpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaid}}
+      reasonForNoFishing: {type: string, reference: {catalogue: code_lists, table: ps_common.reasonfornofishing, lookup: topiaid}}
+      route: {mandatory: true, type: string}
+      surroundingActivity: {type: string, reference: {catalogue: code_lists, table: ps_observation.surroundingactivity, lookup: topiaid}}
+      vesselActivity: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.vesselactivity, lookup: topiaid}}
+      wind: {type: string, reference: {catalogue: code_lists, table: common.wind, lookup: topiaid}}
+  # Source: ps_observation.fishingSet.
+  ps_observation.fishingSet:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.activity, fields: [activity]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      currentDirection: {type: integer}
+      currentMeasureDepth: {type: integer}
+      currentSpeed: {type: number}
+      endTimeStamp: {type: datetime}
+      haulingEndTimeStamp: {type: datetime}
+      haulingStartTimeStamp: {type: datetime}
+      maxGearDepth: {type: integer}
+      schoolMeanDepth: {type: integer}
+      schoolThickness: {type: integer}
+      schoolTopDepth: {type: integer}
+      startTime: {type: string}
+      supportVesselName: {type: string}
+      activity: {mandatory: true, type: string, unique: true}
+      reasonForNullSet: {type: string, reference: {catalogue: code_lists, table: ps_common.reasonfornullset, lookup: topiaid}}
+      schoolType: {type: string, reference: {catalogue: code_lists, table: ps_common.schooltype, lookup: topiaid}}
+  # Source: ps_observation.schoolEstimate.
+  ps_observation.schoolEstimate:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.fishingSet, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      meanWeight: {type: integer}
+      totalWeight: {type: integer}
+      fishingSet: {mandatory: true, type: string}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      weightMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaid}}
+  # Source: ps_observation.catch.
+  ps_observation.catch:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.fishingSet, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      catchWeight: {type: number}
+      catchWeightComputedSource: {type: integer}
+      comment: {type: string}
+      maxWeight: {type: number}
+      meanLength: {type: number}
+      meanLengthComputedSource: {type: integer}
+      meanWeight: {type: number}
+      meanWeightComputedSource: {type: integer}
+      minWeight: {type: number}
+      totalCount: {type: integer}
+      totalCountComputedSource: {type: integer}
+      well: {type: string}
+      fishingSet: {mandatory: true, type: string}
+      informationSource: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_observation.informationsource, lookup: topiaid}}
+      reasonForDiscard: {type: string, reference: {catalogue: code_lists, table: ps_observation.reasonfordiscard, lookup: topiaid}}
+      sizeMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.sizemeasuremethod, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      speciesFate: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.speciesfate, lookup: topiaid}}
+      weightMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaid}}
+  # Source: ps_observation.sample.
+  ps_observation.sample:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.fishingSet, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      fishingSet: {mandatory: true, type: string}
+  # Source: ps_observation.sampleMeasure.
+  ps_observation.sampleMeasure:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.sample, fields: [sample]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      acquisitionMode: {mandatory: true, type: integer}
+      count: {mandatory: true, type: integer}
+      isLengthComputed: {mandatory: true, type: boolean}
+      isWeightComputed: {mandatory: true, type: boolean}
+      length: {type: number}
+      picturesReferences: {type: string}
+      tagNumber: {type: string}
+      weight: {type: number}
+      sample: {mandatory: true, type: string}
+      sex: {type: string, reference: {catalogue: code_lists, table: common.sex, lookup: topiaid}}
+      sizeMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.sizemeasuremethod, lookup: topiaid}}
+      sizeMeasureType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.sizemeasuretype, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      speciesFate: {type: string, reference: {catalogue: code_lists, table: ps_common.speciesfate, lookup: topiaid}}
+      weightMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaid}}
+      weightMeasureType: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuretype, lookup: topiaid}}
+  # Source: ps_observation.catchRelease.
+  ps_observation.catchRelease:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.fishingSet, fields: [fishingSet]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      acquisitionMode: {mandatory: true, type: integer}
+      brailNumber: {type: integer}
+      comment: {type: string}
+      count: {mandatory: true, type: integer}
+      length: {type: number}
+      catchReleaseConformity: {type: string, reference: {catalogue: code_lists, table: ps_observation.catchreleaseconformity, lookup: topiaid}}
+      catchReleaseHandlingPlace: {type: string, reference: {catalogue: code_lists, table: ps_observation.catchreleasehandlingplace, lookup: topiaid}}
+      catchReleaseStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_observation.catchreleasestatus, lookup: topiaid}}
+      catchReleasingTime: {type: string, reference: {catalogue: code_lists, table: ps_observation.catchreleasingtime, lookup: topiaid}}
+      fishingSet: {mandatory: true, type: string}
+      sex: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.sex, lookup: topiaid}}
+      sizeMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.sizemeasuremethod, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      speciesGroupReleaseMode: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.speciesgroupreleasemode, lookup: topiaid}}
+  # Source: ps_observation.floatingObject.
+  ps_observation.floatingObject:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.activity, fields: [activity]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      computedWhenArrivingBiodegradable: {type: string}
+      computedWhenArrivingNonEntangling: {type: string}
+      computedWhenArrivingSimplifiedObjectType: {type: string}
+      computedWhenLeavingBiodegradable: {type: string}
+      computedWhenLeavingNonEntangling: {type: string}
+      computedWhenLeavingSimplifiedObjectType: {type: string}
+      supportVesselName: {type: string}
+      activity: {mandatory: true, type: string}
+      objectOperation: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.objectoperation, lookup: topiaid}}
+  # Source: ps_observation.objectSchoolEstimate.
+  ps_observation.objectSchoolEstimate:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.floatingObject, fields: [floatingObject]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      totalWeight: {mandatory: true, type: integer}
+      floatingObject: {mandatory: true, type: string}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      weightMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaid}}
+  # Source: ps_observation.objectObservedSpecies.
+  ps_observation.objectObservedSpecies:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.floatingObject, fields: [floatingObject]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      count: {mandatory: true, type: integer}
+      floatingObject: {mandatory: true, type: string}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      speciesStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_observation.speciesstatus, lookup: topiaid}}
+  # Source: ps_observation.transmittingBuoy.
+  ps_observation.transmittingBuoy:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.floatingObject, fields: [floatingObject]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      code: {type: string}
+      comment: {type: string}
+      latitude: {type: latitude}
+      longitude: {type: longitude}
+      country: {type: string, reference: {catalogue: code_lists, table: common.country, lookup: topiaid}}
+      floatingObject: {mandatory: true, type: string}
+      transmittingBuoyOperation: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.transmittingbuoyoperation, lookup: topiaid}}
+      transmittingBuoyOwnership: {type: string, reference: {catalogue: code_lists, table: ps_common.transmittingbuoyownership, lookup: topiaid}}
+      transmittingBuoyType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.transmittingbuoytype, lookup: topiaid}}
+      vessel: {type: string, reference: {catalogue: registries, table: common.vessel, lookup: topiaid}}
+  # Source: ps_observation.floatingObjectPart.
+  ps_observation.floatingObjectPart:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_observation.floatingObject, fields: [floatingObject]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      whenArriving: {type: string}
+      whenLeaving: {type: string}
+      floatingObject: {mandatory: true, type: string}
+      objectMaterial: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.objectmaterial, lookup: topiaid}}
+  # Source: ps_observation.activity_observedSystem.
+  ps_observation.activity_observedSystem:
+    layout: {kind: table, start_row: 2}
+    primary_key: [activity, observedSystem]
+    parent_key: {sheet: ps_observation.activity, fields: [activity]}
+    fields:
+      activity: {mandatory: true, type: string}
+      observedSystem: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.observedsystem, lookup: topiaid}}
+  # Source: ps_logbook.route.
+  ps_logbook.route:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      date: {mandatory: true, type: date}
+      fishingTime: {type: integer}
+      timeAtSea: {type: integer}
+      trip: {mandatory: true, type: string}
+  # Source: ps_logbook.activity.
+  ps_logbook.activity:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.route, fields: [route]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      currentDirection: {type: integer}
+      currentSpeed: {type: number}
+      latitude: {type: latitude}
+      latitudeOriginal: {type: latitude}
+      longitude: {type: longitude}
+      longitudeOriginal: {type: longitude}
+      number: {mandatory: true, type: integer}
+      originalDataModified: {mandatory: true, type: boolean}
+      positionCorrected: {mandatory: true, type: boolean}
+      seaSurfaceTemperature: {type: number}
+      setCount: {type: integer}
+      time: {type: string}
+      totalWeight: {type: number}
+      vmsDivergent: {mandatory: true, type: boolean}
+      windDirection: {type: integer}
+      currentFpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaid}}
+      dataQuality: {type: string, reference: {catalogue: code_lists, table: common.dataquality, lookup: topiaid}}
+      informationSource: {type: string, reference: {catalogue: code_lists, table: ps_logbook.informationsource, lookup: topiaid}}
+      nextFpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaid}}
+      previousFpaZone: {type: string, reference: {catalogue: code_lists, table: common.fpazone, lookup: topiaid}}
+      reasonForNoFishing: {type: string, reference: {catalogue: code_lists, table: ps_common.reasonfornofishing, lookup: topiaid}}
+      reasonForNullSet: {type: string, reference: {catalogue: code_lists, table: ps_common.reasonfornullset, lookup: topiaid}}
+      relatedObservedActivity: {type: string}
+      route: {mandatory: true, type: string}
+      schoolType: {type: string, reference: {catalogue: code_lists, table: ps_common.schooltype, lookup: topiaid}}
+      setSuccessStatus: {type: string, reference: {catalogue: code_lists, table: ps_logbook.setsuccessstatus, lookup: topiaid}}
+      vesselActivity: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.vesselactivity, lookup: topiaid}}
+      wind: {type: string, reference: {catalogue: code_lists, table: common.wind, lookup: topiaid}}
+  # Source: ps_logbook.catch.
+  ps_logbook.catch:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.activity, fields: [activity]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      count: {type: integer}
+      weight: {type: number}
+      well: {type: string}
+      activity: {mandatory: true, type: string}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      speciesFate: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.speciesfate, lookup: topiaid}}
+      weightCategory: {type: string, reference: {catalogue: code_lists, table: ps_common.weightcategory, lookup: topiaid}}
+      weightMeasureMethod: {type: string, reference: {catalogue: code_lists, table: common.weightmeasuremethod, lookup: topiaid}}
+  # Source: ps_logbook.floatingObject.
+  ps_logbook.floatingObject:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.activity, fields: [activity]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      computedWhenArrivingBiodegradable: {type: string}
+      computedWhenArrivingNonEntangling: {type: string}
+      computedWhenArrivingSimplifiedObjectType: {type: string}
+      computedWhenLeavingBiodegradable: {type: string}
+      computedWhenLeavingNonEntangling: {type: string}
+      computedWhenLeavingSimplifiedObjectType: {type: string}
+      supportVesselName: {type: string}
+      activity: {mandatory: true, type: string}
+      objectOperation: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.objectoperation, lookup: topiaid}}
+  # Source: ps_logbook.transmittingBuoy.
+  ps_logbook.transmittingBuoy:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.floatingObject, fields: [floatingObject]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      code: {type: string}
+      comment: {type: string}
+      latitude: {type: latitude}
+      longitude: {type: longitude}
+      country: {type: string, reference: {catalogue: code_lists, table: common.country, lookup: topiaid}}
+      floatingObject: {mandatory: true, type: string}
+      transmittingBuoyOperation: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.transmittingbuoyoperation, lookup: topiaid}}
+      transmittingBuoyOwnership: {type: string, reference: {catalogue: code_lists, table: ps_common.transmittingbuoyownership, lookup: topiaid}}
+      transmittingBuoyType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.transmittingbuoytype, lookup: topiaid}}
+      vessel: {type: string, reference: {catalogue: registries, table: common.vessel, lookup: topiaid}}
+  # Source: ps_logbook.floatingObjectPart.
+  ps_logbook.floatingObjectPart:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.floatingObject, fields: [floatingObject]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      whenArriving: {type: string}
+      whenLeaving: {type: string}
+      floatingObject: {mandatory: true, type: string}
+      objectMaterial: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.objectmaterial, lookup: topiaid}}
+  # Source: ps_logbook.activity_observedSystem.
+  ps_logbook.activity_observedSystem:
+    layout: {kind: table, start_row: 2}
+    primary_key: [activity, observedSystem]
+    parent_key: {sheet: ps_logbook.activity, fields: [activity]}
+    fields:
+      activity: {mandatory: true, type: string}
+      observedSystem: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.observedsystem, lookup: topiaid}}
+  # Source: ps_logbook.well.
+  ps_logbook.well:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      well: {mandatory: true, type: string}
+      wellFactory: {type: string}
+      wellVessel: {type: string}
+      trip: {mandatory: true, type: string}
+      wellSamplingConformity: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_logbook.wellsamplingconformity, lookup: topiaid}}
+      wellSamplingStatus: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_logbook.wellsamplingstatus, lookup: topiaid}}
+  # Source: ps_logbook.wellActivity.
+  ps_logbook.wellActivity:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.well, fields: [well]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      activity: {mandatory: true, type: string}
+      well: {mandatory: true, type: string}
+  # Source: ps_logbook.wellActivitySpecies.
+  ps_logbook.wellActivitySpecies:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.wellActivity, fields: [wellActivity]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      count: {type: integer}
+      setSpeciesNumber: {type: integer}
+      weight: {mandatory: true, type: number}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      weightCategory: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.weightcategory, lookup: topiaid}}
+      wellActivity: {mandatory: true, type: string}
+  # Source: ps_logbook.sample.
+  ps_logbook.sample:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      bigsWeight: {type: number}
+      comment: {type: string}
+      number: {mandatory: true, type: integer}
+      smallsWeight: {type: number}
+      superSample: {mandatory: true, type: boolean}
+      totalWeight: {type: number}
+      weightsComputed: {mandatory: true, type: boolean}
+      well: {mandatory: true, type: string}
+      sampleQuality: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_logbook.samplequality, lookup: topiaid}}
+      sampleType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.sampletype, lookup: topiaid}}
+      trip: {mandatory: true, type: string}
+  # Source: ps_logbook.sampleActivity.
+  ps_logbook.sampleActivity:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.sample, fields: [sample]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      weightedWeight: {type: number}
+      weightedWeightComputed: {mandatory: true, type: boolean}
+      activity: {mandatory: true, type: string}
+      sample: {mandatory: true, type: string}
+  # Source: ps_logbook.sampleSpecies.
+  ps_logbook.sampleSpecies:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.sample, fields: [sample]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      endTime: {type: string}
+      measuredCount: {mandatory: true, type: integer}
+      startTime: {type: string}
+      subSampleNumber: {mandatory: true, type: integer}
+      totalCount: {mandatory: true, type: integer}
+      sample: {mandatory: true, type: string}
+      sizeMeasureType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.sizemeasuretype, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+  # Source: ps_logbook.sampleSpeciesMeasure.
+  ps_logbook.sampleSpeciesMeasure:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_logbook.sampleSpecies, fields: [sampleSpecies]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      count: {mandatory: true, type: integer}
+      sizeClass: {mandatory: true, type: number}
+      sampleSpecies: {mandatory: true, type: string}
+  # Source: ps_logbook.sample_person.
+  ps_logbook.sample_person:
+    layout: {kind: table, start_row: 2}
+    primary_key: [sample, person]
+    parent_key: {sheet: ps_logbook.sample, fields: [sample]}
+    fields:
+      sample: {mandatory: true, type: string}
+      person: {mandatory: true, type: string, reference: {catalogue: registries, table: common.person, lookup: topiaid}}
+  # Source: ps_landing.landing.
+  ps_landing.landing:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      date: {type: date}
+      weight: {mandatory: true, type: number}
+      destination: {type: string, reference: {catalogue: code_lists, table: ps_landing.destination, lookup: topiaid}}
+      fate: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_landing.fate, lookup: topiaid}}
+      fateVessel: {type: string, reference: {catalogue: registries, table: common.vessel, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      trip: {mandatory: true, type: string}
+      weightCategory: {type: string, reference: {catalogue: code_lists, table: ps_common.weightcategory, lookup: topiaid}}
+  # Source: ps_localmarket.batch.
+  ps_localmarket.batch:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      count: {type: integer}
+      date: {type: date}
+      origin: {type: string}
+      weight: {type: number}
+      weightComputedSource: {type: integer}
+      buyer: {type: string, reference: {catalogue: code_lists, table: ps_localmarket.buyer, lookup: topiaid}}
+      packaging: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_localmarket.packaging, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      survey: {type: string}
+      trip: {mandatory: true, type: string}
+  # Source: ps_localmarket.survey.
+  ps_localmarket.survey:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      date: {mandatory: true, type: date}
+      number: {mandatory: true, type: integer}
+      trip: {mandatory: true, type: string}
+  # Source: ps_localmarket.surveyPart.
+  ps_localmarket.surveyPart:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_localmarket.survey, fields: [survey]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      proportion: {mandatory: true, type: integer}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+      survey: {mandatory: true, type: string}
+  # Source: ps_localmarket.sample.
+  ps_localmarket.sample:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_common.trip, fields: [trip]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      date: {type: date}
+      number: {mandatory: true, type: string}
+      sampleType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: ps_common.sampletype, lookup: topiaid}}
+      trip: {mandatory: true, type: string}
+  # Source: ps_localmarket.sampleSpecies.
+  ps_localmarket.sampleSpecies:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_localmarket.sample, fields: [sample]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      comment: {type: string}
+      measuredCount: {mandatory: true, type: integer}
+      sample: {mandatory: true, type: string}
+      sizeMeasureType: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.sizemeasuretype, lookup: topiaid}}
+      species: {mandatory: true, type: string, reference: {catalogue: code_lists, table: common.species, lookup: topiaid}}
+  # Source: ps_localmarket.sampleSpeciesMeasure.
+  ps_localmarket.sampleSpeciesMeasure:
+    layout: {kind: table, start_row: 2}
+    primary_key: [topiaId]
+    parent_key: {sheet: ps_localmarket.sampleSpecies, fields: [sampleSpecies]}
+    fields:
+      topiaId: {mandatory: true, type: string}
+      count: {mandatory: true, type: integer}
+      sizeClass: {mandatory: true, type: number}
+      sampleSpecies: {mandatory: true, type: string}
+  # Source: ps_localmarket.sample_well.
+  ps_localmarket.sample_well:
+    layout: {kind: table, start_row: 2}
+    primary_key: [sample, well]
+    parent_key: {sheet: ps_localmarket.sample, fields: [sample]}
+    fields:
+      sample: {mandatory: true, type: string}
+      well: {mandatory: true, type: string}
