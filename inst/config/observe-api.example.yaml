@@ -1,0 +1,8 @@
+# Copy to an application-owned configuration file and select the API and database.
+url: https://observe.example.org/api/public
+login: REPLACE_WITH_OBSERVE_LOGIN
+database: REPLACE_WITH_OBSERVE_DATABASE
+password: !env OBSERVE_API_PASSWORD
+locale: en_GB
+zone_offset: "+00:00"
+timeout: 240
