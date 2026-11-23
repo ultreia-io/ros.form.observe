@@ -1,0 +1,73 @@
+# ObServe 10.0 LL code-list correspondences to ROS LL 4.2.0.
+# Configuration names are supplied by the caller, not filenames or catalogue URLs.
+# Mapping keys are ROS target tables; values still flow from ObServe to ROS.
+# CSV declarations identify separate correspondence files; values are maintained there.
+# Each CSV uses source_value,target_value with ObServe technical IDs as source_value.
+# The active files cover encountered values; correspondences-extended holds additional catalogue candidates.
+schema_version: "1.0.0"
+catalogues:
+  source:
+    configuration: observe
+    catalogue: code_lists
+    lookup: topiaid
+  target:
+    configuration: ros
+    catalogue: code_lists
+    lookup: code
+mappings:
+  refs_admin.countries:
+    source:
+      table: common.country
+      property: iso3code
+  refs_fishery.hull_material_types:
+    source:
+      table: common.hullmaterial
+      property: homeid
+  refs_biology.species:
+    source:
+      table: common.species
+      property: faocode
+  refs_biology.predator_species:
+    source:
+      table: common.species
+      property: faocode
+  refs_biology.sex:
+    source:
+      table: common.sex
+    file: correspondences/refs_biology.sex.csv
+  refs_biology.measurement_tools:
+    source:
+      table: common.sizemeasuremethod
+    file: correspondences/refs_biology.measurement_tools.csv
+  refs_biology.weight_measurement_tools:
+    source:
+      table: common.weightmeasuremethod
+    file: correspondences/refs_biology.weight_measurement_tools.csv
+  refs_biology.weight_measurements:
+    source:
+      table: common.weightmeasuretype
+    file: correspondences/refs_biology.weight_measurements.csv
+  refs_fishery.fish_processing_types:
+    source:
+      table: common.weightmeasuretype
+    file: correspondences/refs_fishery.fish_processing_types.csv
+  refs_biology.fate_types:
+    source:
+      table: ll_common.catchfate
+    file: correspondences/refs_biology.fate_types.csv
+  refs_fishery.light_colours:
+    source:
+      table: ll_common.lightstickscolor
+    file: correspondences/refs_fishery.light_colours.csv
+  refs_fishery.light_types:
+    source:
+      table: ll_common.lightstickstype
+    file: correspondences/refs_fishery.light_types.csv
+  refs_fishery.line_material_types:
+    source:
+      table: ll_common.linetype
+    file: correspondences/refs_fishery.line_material_types.csv
+  refs_data.data_sources_ro:
+    source:
+      table: ll_common.observationmethod
+    file: correspondences/refs_data.data_sources_ro.csv
