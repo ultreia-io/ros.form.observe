@@ -1,0 +1,607 @@
+# ObServe 10.0 LL catalogue definitions shared by ROS target versions.
+# Lookup definitions come from the 20261112T184113Z reference snapshot.
+# Includes common tables and ll_* schemas only.
+# Catalogue data are supplied externally through the two environment variables.
+# Cache paths are omitted to use temporary caches by default.
+schema_version: "1.0.0"
+catalogues:
+  code_lists:
+    label: ObServe LL code lists
+    source:
+      url: !env OBSERVE_CODE_LISTS_URL
+    tables:
+      common.country:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.dataquality:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.enginemake:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.fpazone:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.gear:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.gearcharacteristic:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.gearcharacteristiclistitem:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.gearcharacteristictype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.harbour:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.hullmaterial:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.ocean:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.organism:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.sex:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.sizemeasuremethod:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.sizemeasuretype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.species:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.speciesgroup:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.speciesgroupreleasemode:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.specieslist:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.vesseltype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.weightmeasuremethod:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.weightmeasuretype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.wind:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.baitsettingstatus:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.baittype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.catchfate:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.healthstatus:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.hooksize:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.hooktype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.lightstickscolor:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.lightstickstype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.linetype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.mitigationtype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.observationmethod:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.onboardprocessing:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.program:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.settingshape:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.triptype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_common.vesselactivity:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_landing.company:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_landing.conservation:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_landing.datasource:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.baithaulingstatus:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.encountertype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.hookposition:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.itemhorizontalposition:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.itemverticalposition:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.maturitystatus:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.sensordataformat:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.sensortype:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      ll_observation.stomachfullness:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+  registries:
+    label: ObServe LL registries
+    source:
+      url: !env OBSERVE_REGISTRIES_URL
+    tables:
+      common.lengthlengthparameter:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+      common.lengthweightparameter:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+      common.person:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+      common.shipowner:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+      common.vessel:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+        label1: {matching: name, ignore_case: true}
+        label2: {matching: name, ignore_case: true}
+        label3: {matching: name, ignore_case: true}
+        label4: {matching: name, ignore_case: true}
+        label5: {matching: name, ignore_case: true}
+        label6: {matching: name, ignore_case: true}
+        label7: {matching: name, ignore_case: true}
+        label8: {matching: name, ignore_case: true}
+      common.vesselsizecategory:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
+      ll_observation.sensorbrand:
+        topiaid: {matching: exact, ignore_case: false}
+        code: {matching: exact, ignore_case: false}
