@@ -1,0 +1,40 @@
+---
+title: "LL 17 E-SET-CATCH-SPECIMENS-SSI summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 17 E-SET-CATCH-SPECIMENS-SSI summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Eight fields: four IDs; capture and release conditions; gear interaction; leader material.
+
+## Available
+
+Health and hook-position data are partly filled. Photo references exist on 1,267 catches across the full selection.
+
+Only 20 catches link an individual branchline, and individual leader material is empty.
+
+Global set compositions record monofilament leader material, but using that for an individual needs agreement.
+
+## To decide
+
+Identify eligible animals, including seabirds and unmeasured animals, and retain their actual health observations.
+
+Validate interaction and material correspondence; do not infer a missing release condition or invent a diameter.
+
+An empty sheet is structurally possible; the reporting rule remains open.
+
+[Detailed review](ll-17-e-set-catch-specimens-ssi.html) · [Short review index](ll-sheet-summaries.html).
+
+## Export safeguard: ambiguous leader composition
+
+Using the set composition for an individual's leader material remains conditional on IRD confirmation.
+
+If that fallback is used, more than one composition entry must trigger an explicit anomaly for review.
+
+Do not select a material automatically or silently omit the animal. Retain its trip, set and catch identifiers.
+
+Whether this blocks the row or the whole trip export remains to be decided. The safeguard is not yet implemented.

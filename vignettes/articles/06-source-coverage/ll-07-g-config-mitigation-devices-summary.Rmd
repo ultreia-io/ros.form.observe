@@ -1,0 +1,48 @@
+---
+title: "LL 07 G-CONFIG-MITIGATION-DEVICES summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 07 G-CONFIG-MITIGATION-DEVICES summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+ROS 4.2.0 has 17 fields, six mandatory: trip identity and five tori-line configuration details.
+
+These are line length, streamer type, maximum streamer length, streamer count and attachment height.
+
+## Available
+
+The 2025 review covers 67 trips (17 observer-monitored, 50 self-reporting) and 461 sets.
+
+No mitigation categories were selected. This does not prove that equipment was absent or unused.
+
+The five required equipment details remain unsupported by the inspected sources.
+
+## To decide
+
+Find configuration details and distinguish trip equipment from its use during individual sets.
+
+Agree device correspondences and reporting when tori lines are absent or their details are unknown.
+
+The database allows an empty sheet without a blank tori-line record. Reporting requirements remain open.
+
+[Full review](ll-07-g-config-mitigation-devices.html).
+
+[Short review index](ll-sheet-summaries.html).
+
+## Agreed export scope
+
+Leave G-CONFIG-MITIGATION-DEVICES without data rows for the current export; no ID-only placeholder row.
+
+An ID-only row lacks five mandatory configuration values and violates the form's required-field rules.
+
+Omitting the row avoids generating an incomplete record; this is a validation requirement, not a display preference.
+
+No usable tori-line configuration details were found in the inspected sources; this does not prove device absence.
+
+Philippe instead writes trip IDs with NULL device details. His code does not leave the sheet entirely empty.
+
+The database permits omission. Empty-sheet acceptance by the form validator is confirmed by the project owner.

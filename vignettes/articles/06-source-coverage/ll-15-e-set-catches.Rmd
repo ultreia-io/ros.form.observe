@@ -1,0 +1,217 @@
+---
+title: "LL 15 E-SET-CATCHES mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 15 E-SET-CATCHES mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Catch identity, species, fate, sampling and catch quantities.
+
+ROS LL **4.2.0**: **11 fields**, including **8 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-catches) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes, if specimen descendants are absent.**
+
+See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field          | Required | Type    | ROS reference / fixed values                                  |
+| ------------------ | -------- | ------- | ------------------------------------------------------------- |
+| `observed_trip_id` | M        | string  | —                                                             |
+| `set_id`           | M        | string  | —                                                             |
+| `catch_id`         | M        | string  | —                                                             |
+| `species`          | M        | string  | `refs_biology.species` / `code`                               |
+| `fate_type`        | M        | string  | `refs_biology.fate_types` / `code`                            |
+| `fate_code`        | M        | string  | `refs_biology.fates` / `code`                                 |
+| `sampling_method`  | M        | string  | `refs_biology.sampling_methods_for_catch_estimation` / `code` |
+| `number_of_fish`   | M        | integer | —                                                             |
+
+<details>
+<summary>Optional fields (3)</summary>
+
+| ROS field                  | Required | Type   | ROS reference / fixed values                     |
+| -------------------------- | -------- | ------ | ------------------------------------------------ |
+| `weight_processing_type`   | O        | string | `refs_biology.weight_measurements` / `code`      |
+| `weight_value_kg`          | O        | number | —                                                |
+| `weight_estimation_method` | O        | string | `refs_biology.weight_measurement_tools` / `code` |
+
+</details>
+
+Parent: **E-SET**, linked through `observed_trip_id`, `set_id`.
+
+## Source coverage
+
+Five mandatory fields have direct source candidates: trip ID, set ID, catch ID, species and number of fish.
+
+Species still needs the catalogue correspondence; identifiers need the shared ROS identity rules.
+
+The other three mandatory fields are fate type, detailed fate and sampling method.
+
+Source `catchFate` supports the broad category; it does not necessarily establish the detailed reason.
+
+The current catch extraction already includes identity, species, fate, count, acquisition mode and weight candidates.
+
+The source schema requires species, fate and count; the form also requires `number_of_fish` to be at least one.
+
+This review checks code, schema, UI and frozen catalogues. Actual selected-trip population remains unmeasured.
+
+## Philippe’s existing export
+
+* SQL returns one source catch identifier with its count; R retains that identifier and count.
+* Predator codes are aggregated per catch before joining, avoiding one output row per predator.
+* Species comes from `common.species.faoCode`, with selected legacy-code replacements in R.
+* SQL leaves fate type empty; R derives both fate fields from source fate, species group and predator codes.
+* Sampling method is fixed to `ES` (exhaustive sampling).
+* All three optional weight fields are `NULL`, despite source weight candidates.
+
+Capture and release conditions are also processed in this R section, but are not fields of this 11-field sheet.
+
+### Species correspondence
+
+R replaces `BIL*` with `BIL`, `SBD*` with `AG51`, and `VLF*`, `VVL*`, `XXX*` with `MZZ`.
+
+`BIL` and `MZZ` exist in the target snapshot; `AG51` does not. Meaning and target coverage still need review.
+
+Other species pass through unchanged. That does not establish that every source code exists in ROS.
+
+### Fate correspondence
+
+The broad candidates are `RET` to `RE`, `DIS` or `ESC` to `DI`, and `UNK` to `UN`.
+
+Historical disabled source codes `SOLD` and `LOST` fall through to unknown in Philippe's code.
+
+Detailed legacy rules require independent review:
+
+* Retained non-turtles become `RE/FL` (for landing or sale), although retention alone does not establish sale.
+* Retained turtles become `RE/UN`; escaped catches become `DI/ES`.
+* Discarded catches with predator code ODN become `DI/DM`; SKH becomes `DI/DS`.
+* Mammal depredation takes precedence if both predator codes occur. Specific predator species are not expanded.
+* Several broad species groups become `DI/UD` (IOTC retention ban); others become `DI/US` (unwanted species).
+
+Species group alone does not establish a retention ban or the actual reason for discarding.
+
+Philippe compares the source English group label, making those branches dependent on catalogue wording.
+
+Validate fate type and code together: `FL`, for example, means different things under `RE` and `DI`.
+
+The frozen fate-type list has `UN`, but its detailed-fate list has no pair for type `UN`.
+
+Philippe's fallback `UN/UN` needs reporting guidance and a check of Reference Data alignment.
+
+### Sampling and record granularity
+
+The ROS list distinguishes exhaustive sampling (`ES`) from exhaustive sampling with observer presence (`EP`).
+
+It also supports vessel estimates and other methods. The constant `ES` is not an established source rule.
+
+ObServe's `CatchAcquisitionMode` distinguishes individual from grouped entry, not these ROS estimation methods.
+
+The UI sets count to one for a new individual entry; grouped entry accepts a count.
+
+Preserve that distinction and the parent catch identifier when reviewing the following specimen sheet.
+
+A grouped catch must not automatically become one measured specimen, nor have its count repeated per measurement.
+
+### Optional weight information
+
+`catch.totalWeight`, `weightMeasureType` and `weightMeasureMethod` already exist in the current extraction.
+
+The observation UI enables those total-weight fields for grouped catches.
+
+Individual weights are stored separately in `ll_observation.weightMeasure`, with their own type and method.
+
+These measurements require extra extraction. Multiple measurements may describe the same fish and must not be summed.
+
+Check population, units, processing correspondence and measurement methods before filling the ROS weight fields.
+
+Philippe's empty outputs do not establish that ObServe lacks weight information.
+
+## Questions for the sheet review
+
+1. Agree species correspondence, including legacy aggregate codes and the unsupported `AG51` output.
+2. Validate broad and detailed fate separately, including unknown fate and historical source values.
+3. Replace species-group and predator assumptions only with an agreed reporting rule backed by source evidence.
+4. Establish the catch-estimation method; individual/grouped entry alone does not determine it.
+5. Preserve catch counts and parent identifiers across the catch and specimen sheets.
+6. Review optional grouped weights and individual measurements, including units and processing types.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 737-830; catch query; reference correspondence inventory.
+
+* `sql-queries/observe_ll_catch.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* Current extraction: `inst/10.0/ll/sql/ll_observation.catch.sql`.
+* ObServe 10.0 DDL: observation `catch`, `catch_predator` and `weightMeasure`.
+* Entry modes: `CatchAcquisitionMode.java` and `FishingSetCatchUIHandler.updateCatchAcquisitionMode()`.
+* IRD snapshot: `20261112T184113Z`; `ll_common.catchfate` and `common.species`.
+* ROS snapshot: `code_lists--b7c000cba93d`; species, fate types, fates and catch-estimation methods.
+* ROS weight references: weight measurements and weight measurement tools.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Preserve each recorded catch, its parent links and its count; do not repeat the count for each measurement.
+* Match the recorded species to a verified ROS entry, including any independently validated historical aliases.
+* Map broad fate where definitions agree: retained to RE, discarded or escaped to DI, and unknown to UN.
+* A recorded escape supports candidate detail DI/ES; detailed reasons otherwise need their own source evidence.
+* Use recorded grouped total weights with matched units, processing and methods when those optional values exist.
+
+### What stays unresolved
+
+* Retention does not establish sale; species or predators do not by themselves establish the reason for discarding.
+* An unknown-reason code needs an applicable reporting rule; the UN fate-type/detail pairing is also unresolved.
+* Individual versus grouped acquisition does not establish exhaustive sampling or another catch-estimation method.
+* Do not sum repeated individual measurements, or manufacture individual weights from a grouped total.
+* Unmatched species and counts outside the model's allowed range need explicit treatment, not replacement guesses.
+
+### Complete-row assessment
+
+Identity, species and counts offer direct coverage; broad fate can often be recoded without adding information.
+
+A complete row still requires justified detailed fate and sampling method, alongside valid source values and parents.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* The selection contains 8,703 catch rows: 5,243 individual entries and 3,460 grouped entries.
+* Every count is positive, and individual entries have count one.
+* Positive grouped weights occur on 1,350 rows, spanning 49 trips and 311 sets; all belong to SR trips.
+* Of these, 1,123 have specified processing and method, 224 have Unknown processing, and three lack a method.
+* Most weights are visual estimates: 1,268 rows; 79 use scales. Preserve that distinction in correspondence.
+* Species, fate reasons and sampling still require verified mappings; positive population does not settle them.

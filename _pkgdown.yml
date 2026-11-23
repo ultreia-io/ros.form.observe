@@ -14,14 +14,35 @@ navbar:
     articles:
       text: Articles
       menu:
-        - text: Terminology
-          href: articles/terminology.html
+        - text: Architecture topics — 01 to 09
+          href: articles/export-design.html
+        - text: Short reviews - start here
+          href: articles/06-source-coverage/ll-sheet-summaries.html
+        - text: Discussion with Emmanuel
+          href: articles/discussions/emmanuel-discussion.html
+        - text: Discussion with IRD
+          href: articles/discussions/ird-discussion.html
+        - text: Export design - short
+          href: articles/export-design-summary.html
+        - text: Database overview - short
+          href: articles/09-database-import/ll-database-import-summary.html
+        - text: Source data - short
+          href: articles/06-source-coverage/ll-live-data-coverage-summary.html
+        - text: "-------"
+        - text: Detailed sheet reviews
+          href: articles/06-source-coverage/ll-sheet-reviews.html
+        - text: Detailed database overview
+          href: articles/09-database-import/ll-database-import.html
+        - text: Detailed export design
+          href: articles/export-design.html
+        - text: All articles
+          href: articles/index.html
     coverage:
       text: Coverage
       href: https://app.codecov.io/gh/ultreia-io/ros.form.observe
     intro:
-      text: Getting started
-      href: articles/ros.form.observe.html
+      text: Start here
+      href: articles/06-source-coverage/ll-sheet-summaries.html
     community:
       text: Community
       menu:
@@ -34,10 +55,117 @@ navbar:
         - text: Code of conduct
           href: CODE_OF_CONDUCT.html
 articles:
-  - title: Guides
+  - title: Architecture overview
     navbar: ~
-    contents: [ros.form.observe, terminology]
+    contents:
+      - articles/export-design-summary
+      - articles/export-design
+  - title: 01 — Trip selection
+    navbar: ~
+    contents:
+      - articles/01-trip-selection/index
+  - title: 02 — Data extraction
+    navbar: ~
+    contents:
+      - source-loading
+      - articles/02-data-extraction/index
+      - articles/02-data-extraction/ps-extraction
+  - title: 03 — References
+    navbar: ~
+    contents:
+      - articles/03-references/index
+      - articles/03-references/mapping-design
+  - title: 04 — References - Code lists
+    navbar: ~
+    contents:
+      - articles/04-references-code-lists/index
+      - articles/04-references-code-lists/ll-reference-correspondences-summary
+      - articles/04-references-code-lists/ll-reference-correspondences
+  - title: 05 — References - Registries
+    navbar: ~
+    contents:
+      - articles/05-references-registries/index
+  - title: 06 — Source coverage
+    navbar: ~
+    contents:
+      - articles/06-source-coverage/index
+      - articles/06-source-coverage/export-configuration
+      - articles/06-source-coverage/ll-00-meta-summary
+      - articles/06-source-coverage/ll-01-o-info-summary
+      - articles/06-source-coverage/ll-02-v-info-summary
+      - articles/06-source-coverage/ll-03-v-trip-summary
+      - articles/06-source-coverage/ll-04-v-attributes-summary
+      - articles/06-source-coverage/ll-05-g-general-summary
+      - articles/06-source-coverage/ll-06-g-config-branchlines-summary
+      - articles/06-source-coverage/ll-07-g-config-mitigation-devices-summary
+      - articles/06-source-coverage/ll-08-e-set-summary
+      - articles/06-source-coverage/ll-09-e-set-lights-summary
+      - articles/06-source-coverage/ll-10-e-set-mitigation-measures-summary
+      - articles/06-source-coverage/ll-11-e-set-hooks-summary
+      - articles/06-source-coverage/ll-12-e-set-baits-summary
+      - articles/06-source-coverage/ll-13-e-set-hauling-summary
+      - articles/06-source-coverage/ll-14-e-set-hauling-biteoffs-summary
+      - articles/06-source-coverage/ll-15-e-set-catches-summary
+      - articles/06-source-coverage/ll-16-e-set-catch-specimens-summary
+      - articles/06-source-coverage/ll-17-e-set-catch-specimens-ssi-summary
+      - articles/06-source-coverage/ll-18-e-set-tag-details-summary
+      - articles/06-source-coverage/ll-live-data-coverage-summary
+      - articles/06-source-coverage/ll-00-meta
+      - articles/06-source-coverage/ll-01-o-info
+      - articles/06-source-coverage/ll-02-v-info
+      - articles/06-source-coverage/ll-03-v-trip
+      - articles/06-source-coverage/ll-04-v-attributes
+      - articles/06-source-coverage/ll-05-g-general
+      - articles/06-source-coverage/ll-06-g-config-branchlines
+      - articles/06-source-coverage/ll-07-g-config-mitigation-devices
+      - articles/06-source-coverage/ll-08-e-set
+      - articles/06-source-coverage/ll-09-e-set-lights
+      - articles/06-source-coverage/ll-10-e-set-mitigation-measures
+      - articles/06-source-coverage/ll-11-e-set-hooks
+      - articles/06-source-coverage/ll-12-e-set-baits
+      - articles/06-source-coverage/ll-13-e-set-hauling
+      - articles/06-source-coverage/ll-14-e-set-hauling-biteoffs
+      - articles/06-source-coverage/ll-15-e-set-catches
+      - articles/06-source-coverage/ll-16-e-set-catch-specimens
+      - articles/06-source-coverage/ll-17-e-set-catch-specimens-ssi
+      - articles/06-source-coverage/ll-18-e-set-tag-details
+      - articles/06-source-coverage/ll-live-data-coverage
+      - articles/06-source-coverage/ll-sheet-reviews
+      - articles/06-source-coverage/ll-sheet-summaries
+  - title: 07 — Reporting
+    navbar: ~
+    contents:
+      - articles/07-reporting/index
+  - title: 08 — Files and failures
+    navbar: ~
+    contents:
+      - articles/08-files-and-failures/index
+  - title: 09 — Database import
+    navbar: ~
+    contents:
+      - articles/09-database-import/index
+      - articles/09-database-import/ll-database-import-summary
+      - articles/09-database-import/ll-database-import
+  - title: Discussion documents
+    navbar: ~
+    contents:
+      - articles/discussions/ird-discussion
+      - articles/discussions/emmanuel-discussion
+  - title: General guides
+    navbar: ~
+    contents:
+      - articles/guides/ros.form.observe-summary
+      - articles/guides/terminology-summary
+      - ros.form.observe
+      - terminology
 reference:
+  - title: Source table loading
+    contents: [read_observe_trip_tables, observe_sql_table_loader]
+  - title: H2 backup connections
+    contents: [observe_h2_backup_connection_provider]
+  - title: API sessions
+    contents: [observe_password_variable, observe_set_password, observe_connect_from_yaml,
+      observe_disconnect, with_observe_connection, observe_api_connection-class]
   - title: Package
     contents: [ros.form.observe-package]
 

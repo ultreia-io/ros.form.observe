@@ -9,8 +9,25 @@ The files organize functions in one package namespace. You do not source each fi
 | File                         | Responsibility                       |
 | ---------------------------- | ------------------------------------ |
 | `ros.form.observe-package.R` | Provide package-level documentation. |
+| `observe-connection.R`       | Configure and manage API sessions.   |
+| `observe-h2.R`               | Adapt H2 SQL backups for extraction. |
+| `observe-tables.R`           | Prepare SQL and decode source rows.  |
 
 Public operations appear before internal helpers in each R file.
+
+Every named function has roxygen documentation, including internal helpers and the connection print method.
+
+Model-driven SQL loading belongs to `form.tools`; H2 restoration belongs to `db.tools`.
+
+ObServe API requests stay in this package.
+
+`read_observe_trip_tables()` selects the packaged version and gear; its table loader selects the transport.
+
+H2 integration tests restore synthetic backups and check that LL and PS queries keep trips and related records separate.
+
+Set `H2_JAR` to the compatible H2 driver jar and install `RJDBC` for local H2 tests.
+
+CI configures Java 21 and H2 2.5.252 for package checks and documentation.
 
 ## Local verification
 
@@ -24,7 +41,9 @@ This generates documentation, runs tests, builds and checks the archive with `--
 
 Local and CI checks share the CRAN mirror settings in `tools/check.Renviron`. All CRAN checks remain enabled.
 
-The **Build** workflow measures coverage with `covr` on Linux after successful checks and uploads it to Codecov.
+**Build** runs one Linux R-release job for development pushes and ordinary PRs and uploads coverage to Codecov.
+
+Run **Actions → Check All Platforms** for Linux with R release and R-devel, macOS, and Windows.
 
 The README coverage badges link to the Codecov report.
 
@@ -49,18 +68,26 @@ Check source mappings, reference matching and generated forms before a release.
 
    1. Open **Actions → Start Release**.
    2. Click **Run workflow**, select `develop`, then click **Run workflow** to confirm.
-   3. Open the release PR created by the workflow.
+   3. The workflow checks the selected commit on all four environments and saves the checked Linux archive.
+   4. After all four checks pass, it opens the release PR at the checked commit.
 
 3. **Merge the release PR:**
 
-   1. **Wait for the checks:** all checks on the release PR must be green.
-   2. **Merge:** click **Merge pull request**, then **Confirm merge**.
-   3. Merging automatically starts the **Publish Release** workflow.
+   1. Review the release PR and merge it. Its checks already passed in **Start Release**.
+   2. Merging starts **Publish Release**, which verifies that the merged files match the checked candidate.
 
-The **Publish Release** workflow:
+**Publish Release** publishes the checked archive and checksum, then deploys the documentation.
 
-1. Publishes the package archive, checksum and documentation.
-2. **Submits the same archive to CRAN**.
+If the merge changes the checked files, update `develop` and rerun **Start Release** before merging a new PR.
+
+### Enable CRAN submission
+
+The **Submit to CRAN** job is skipped by default. Enable it when the package's required dependencies are on CRAN.
+
+1. Open the repository's **Settings → Secrets and variables → Actions → Variables**.
+2. Click **New repository variable** and set `SUBMIT_TO_CRAN` to `true`.
+
+To disable submission, remove the variable or set it to `false`.
 
 ## Manual CRAN submission
 

@@ -1,0 +1,219 @@
+---
+title: "Mapping architecture for form.references"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mapping architecture for form.references}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Purpose and boundary
+
+`form.references` describes correspondences between reference catalogues, for both code lists and registries.
+
+Business calculations, related-record navigation and destination-row creation belong to the exporter API.
+
+The exporter keeps those decisions in configuration and registered functions, outside its generic execution engine.
+
+See [Export design](../export-design.html) for the overall workflow.
+
+The [LL reference inventory][inventory] records catalogue-specific evidence and decisions.
+
+[inventory]: ../04-references-code-lists/ll-reference-correspondences.html
+
+## Independent schema and configuration
+
+The neutral schema is `form.references/inst/schema/mapping-1.0.0.yaml`.
+
+It is separate from the reference-catalogue configuration schema.
+
+The concrete ObServe 10.0 to ROS LL 4.2.0 file is `inst/10.0/ll/4.2.0/mapping.yaml`.
+
+The source configuration is `inst/10.0/ll/references.yaml`, registered by the caller as `observe`.
+
+The gear's source model and SQL queries are shared across its ROS form versions.
+
+```yaml
+schema_version: "1.0.0"
+
+catalogues:
+  source: {configuration: observe, catalogue: code_lists, lookup: topiaid}
+  target: {configuration: ros, catalogue: code_lists, lookup: code}
+
+mappings:
+  refs_fishery.light_colours:
+    source:
+      table: ll_common.lightstickscolor
+    file: correspondences/refs_fishery.light_colours.csv
+
+  refs_admin.countries:
+    source:
+      table: common.country
+      property: iso3code
+
+  refs_biology.species:
+    source:
+      table: common.species
+      property: faocode
+
+  refs_biology.predator_species:
+    source:
+      table: common.species
+      property: faocode
+```
+
+`configuration` selects a reference configuration registered by the caller under that name.
+
+`catalogue` selects its `code_lists` or `registries` entry without duplicating the catalogue definition.
+
+The ROS target table name is the mapping entry point; `source.table` identifies the ObServe source catalogue table.
+
+Source remains ObServe and target remains ROS. Values always translate from ObServe to ROS.
+
+Use one object for a single source mapping and a list of alternatives if a target accepts several source mappings.
+
+Select by the supplied source identity and effective lookups; never choose the first alternative automatically.
+
+The list is not a sequence of transformations or a fallback order.
+
+Separate target entries for general and predator species both declare `common.species` as their source.
+
+Weight measurements and fish-processing types likewise declare `common.weightmeasuretype`, with separate CSV files.
+
+## Target-driven selection
+
+The exporter starts from the ROS model field's target reference.
+
+It selects the corresponding mapping and supplies the ObServe value together with its source catalogue table.
+
+```text
+ROS field requires refs_biology.predator_species / code
+  -> select mappings.refs_biology.predator_species
+  -> receive an ObServe common.species technical ID
+  -> find the source record and read faocode
+  -> resolve the value in refs_biology.predator_species
+  -> return its code
+```
+
+The exporter declares which source record field supplies the value; the catalogue mapping does not navigate records.
+
+## Defaults and correspondence sources
+
+The catalogue selections declare default source and target lookups.
+
+An entry's `source.lookup` overrides the source default; its `lookup` overrides the target default.
+
+The entry's omitted `property` defaults to its effective target lookup, normally `code` for ROS code lists.
+
+There is no `mode` or nested `correspondence` property.
+
+Choose at most one of `source.property` and `file`; omitting both sends the input unchanged to the target lookup.
+
+### Explicit correspondence: direct
+
+`file` identifies a CSV with `source_value,target_value` columns, both read as text.
+
+For these ObServe declarations, `source_value` contains technical IDs, not business codes such as `B` or `CH`.
+
+`target_value` contains a ROS code submitted to the selected target lookup.
+
+```text
+Supplied light-colour topiaId
+  -> explicit CSV correspondence
+  -> ROS light-colour lookup on code
+  -> canonical target code
+```
+
+There is no source lookup. The target lookup applies its own catalogue aliases and configured matching behaviour.
+
+Relative file paths resolve beside `mapping.yaml`.
+
+Repeated identical pairs are equivalent; different target values for one source value are ambiguous.
+
+An absent correspondence remains unresolved. It does not silently fall back to the original technical ID.
+
+### Source property: rebound
+
+`source.property` identifies the value to read after finding the source record with its effective lookup.
+
+```text
+Supplied species topiaId
+  -> source common.species lookup on topiaid
+  -> read faocode
+  -> selected ROS species lookup on code
+  -> canonical target code
+```
+
+Both catalogue lookups include their existing aliases.
+
+The `RMJ -> RMM` alias belongs to `refs_biology.species`; it is not a correspondence added to this mapping.
+
+Do not assume that another target list, including predator species, owns the same aliases.
+
+Source lookup names must match the registered reference configuration exactly; there is no implicit column renaming.
+
+Port conversion is an export business rule, outside this catalogue-mapping file.
+
+The rule uses the ObServe harbour's `locode` to determine a candidate ROS port code.
+
+`form.references` then resolves that code through the existing `refs_admin.ports` lookup on `code`.
+
+This does not add a function mechanism or require a UN/LOCODE column in the ROS catalogue.
+
+## LL 4.2.0 coverage
+
+The model declares 47 code lists used by 128 fields, plus four registries used by 11 fields.
+
+The file covers the 14 target lists selected from the inventory's lookup and recoding categories.
+
+It declares four source-property mappings and ten CSV correspondences.
+
+Those 14 target entries use 12 source tables; species and weight-measurement types each supply two targets.
+
+The ten CSV declarations keep explicit correspondence values separate from the mapping structure.
+
+Files are named after their ROS target table: `correspondences/schema.table.csv`.
+
+They contain 28 initial pairs drawn from values encountered in the 70 saved trips from 2020–2025.
+
+The sibling `correspondences-extended/` set adds 14 catalogue candidates, including unused historical values.
+
+It contains the original pairs too; `mapping.yaml` continues to select only `correspondences/`.
+
+Each directory's README records its scope, remaining gaps and target catalogue ambiguities.
+
+The 21 export-rule lists include ports; 12 lists require source information to be identified.
+
+Registry identity mapping remains separate from this code-list configuration.
+
+## Validation and resolution
+
+Validate the YAML structure and lookup defaults without loading catalogue data.
+
+Check declared configuration, catalogue, table and lookup names separately from actual record resolution.
+
+Check column availability and correspondence CSV contents when the relevant data are loaded.
+
+Only property-based mappings require source catalogue data; file-based mappings do not perform a source lookup.
+
+All catalogue lookups use exact matching, then catalogue aliases, then configured normalized-name matching.
+
+Normalized names are comparison keys, not proof of identity. Preserve multiple matching records as candidates.
+
+Check only encountered reference values, grouped by selected target mapping and source table.
+
+Unused source catalogue entries do not create export-coverage failures.
+
+Keep missing input, missing source record, missing property value, no match and ambiguity distinct.
+
+Preserve source and target values, the selected mapping, catalogue revisions and correspondence-file checksums.
+
+The caller decides whether unresolved results block a field, row or export; no implicit unknown value is substituted.
+
+## Delivery scopes
+
+Scope 1 uses one explicitly selected mapping configuration for the source and target versions.
+
+Country and programme variants, selection and overrides belong to scope 2.
+
+Business-rule configuration and output bindings are separate exporter contracts.

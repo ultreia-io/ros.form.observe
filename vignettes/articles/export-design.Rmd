@@ -1,0 +1,53 @@
+---
+title: "Export design"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Export design}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Numbered architecture topics
+
+Each topic has its own folder, with its design notes and supporting documents.
+
+**Do not write further implementation code until the outstanding decisions are resolved.**
+
+| No. | Done | Topic                                                          | Question                                                                                    |
+|-----|------|----------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| 01  | ☑   | [Trip selection](01-trip-selection/index.html)                 | How do we choose the trips and supply their IDs?                                            |
+| 02  | ☐   | [Data extraction](02-data-extraction/index.html)               | How does R extract a selected trip from the database or API into ObServe CSV files?         |
+| 03  | ☑   | [References](03-references/index.html)                         | How do we obtain and prepare the code-list and registry catalogues?                         |
+| 04  | ☐   | [References - Code lists](04-references-code-lists/index.html) | How do we map ObServe code lists to ROS code lists and maintain these mappings?             |
+| 05  | ☐   | [References - Registries](05-references-registries/index.html) | How do we match people and vessels, and construct ROS trip IDs?                             |
+| 06  | ☐   | [Source coverage](06-source-coverage/index.html)               | What ObServe source data is needed for the ROS rows that must be reported?                  |
+| 07  | ☐   | [Reporting](07-reporting/index.html)                           | How do we handle missing values, unknown times, set counts and activity durations?          |
+| 08  | ☐   | [Files and failures](08-files-and-failures/index.html)         | What CSV conventions and output names do we use, and what happens when a trip export fails? |
+| 09  | ☐   | [Database import](09-database-import/index.html)               | Where does each sheet go in ROS, and which records or associations are required?            |
+
+## Purpose
+
+Populate ROS forms from ObServe data, with **one ROS workbook per selected trip**.
+
+This document records the agreed design and the decisions to settle before implementation.
+
+Field-level mappings belong in separate documents, one per ROS sheet.
+
+## Scope
+
+The first target is ObServe **10.0**, longline observations, and ROS LL **4.2.0**.
+
+ObServe source versions use major.minor. ROS target versions retain their own version numbering.
+
+The design must also support purse-seine exports, with separate LL and PS mappings.
+
+## Discussion documents
+
+- [Discussion with IRD](discussions/ird-discussion.html)
+- [Discussion with Emmanuel / IOTC](discussions/emmanuel-discussion.html)
+
+## Reading paths
+
+- [LL exporter configuration draft](06-source-coverage/export-configuration.html)
+- [Short sheet reviews](06-source-coverage/ll-sheet-summaries.html)
+- [Detailed sheet reviews](06-source-coverage/ll-sheet-reviews.html)

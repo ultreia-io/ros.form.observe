@@ -1,0 +1,46 @@
+---
+title: "06 — Source coverage"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{06 — Source coverage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Topic documents
+
+- [LL exporter configuration draft](export-configuration.html)
+- [Source data coverage — detailed](ll-live-data-coverage.html)
+- [Source data coverage — short](ll-live-data-coverage-summary.html)
+- [Sheet reviews — detailed index](ll-sheet-reviews.html)
+- [Sheet reviews — short index](ll-sheet-summaries.html)
+
+## Source coverage — What source data is needed for the rows to report? {#source-coverage-what-source-data-is-needed-for-the-rows-to-report}
+
+Use the database-import review to establish which records and associations must be supplied.
+
+For each ROS sheet, identify the source fields, references and any additional ObServe sheets needed.
+
+Record the details in its sheet review before deciding whether the intermediate model is sufficient.
+
+If a row is required, resolve its mandatory data and any permitted missing-data representation explicitly.
+
+## Review mappings before implementation
+
+Review each ROS sheet in its own document. Use the same structure for every review:
+
+* What one output row represents and which keys identify it.
+* Source tables, fields and reference records.
+* Joins, lookups, calculations and missing information.
+* Philippe's relevant SQL and R code, with source locations.
+* Decisions required before implementation and their effect on the intermediate model.
+
+Philippe's code is evidence to examine, not the extraction architecture to reproduce.
+
+Trip selection is already a separate stage in our design; his query filters do not define our export scope.
+
+### LL sheet reviews
+
+* [O-INFO mapping](ll-01-o-info.html): observer identity, embarkation, disembarkation and trip summaries.

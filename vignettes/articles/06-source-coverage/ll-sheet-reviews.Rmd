@@ -1,0 +1,85 @@
+---
+title: "LL sheet reviews"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL sheet reviews}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Purpose
+
+Review every sheet of the ROS LL 4.2.0 model in a separate, concise document.
+
+This index follows model/workbook order, including META. O-INFO and V-INFO retain their existing review notes.
+
+The model defines mandatory status. Field meaning, source coverage and reporting rules are reviewed separately.
+
+Mandatory fields are displayed first. Optional fields are grouped in one collapsible section per sheet.
+
+META supplies the import entry point; its detailed user-supplied metadata review remains deferred.
+
+Review [database destinations and import obligations](../09-database-import/ll-database-import.html) before continuing source coverage.
+
+Complete the sheet review before selecting the questions to raise with Emmanuel (IOTC).
+
+## Review order
+
+| Order | Sheet                                                                 | Fields | Mandatory | Review state                            |
+| ----- | --------------------------------------------------------------------- | ------ | --------- | --------------------------------------- |
+| 00    | [META](ll-00-meta.html)                                               | 12     | 11        | Entry point mapped; inputs deferred     |
+| 01    | [O-INFO](ll-01-o-info.html)                                           | 24     | 4         | Initial review recorded; decisions open |
+| 02    | [V-INFO](ll-02-v-info.html)                                           | 16     | 9         | Initial review recorded; decisions open |
+| 03    | [V-TRIP](ll-03-v-trip.html)                                           | 11     | 1         | Fixed departure/return times agreed     |
+| 04    | [V-ATTRIBUTES](ll-04-v-attributes.html)                               | 41     | 1         | Optional fields empty; ID row open      |
+| 05    | [G-GENERAL](ll-05-g-general.html)                                     | 4      | 4         | Initial review recorded; decisions open |
+| 06    | [G-CONFIG-BRANCHLINES](ll-06-g-config-branchlines.html)               | 10     | 1         | Coverage open; review with Pascal       |
+| 07    | [G-CONFIG-MITIGATION-DEVICES](ll-07-g-config-mitigation-devices.html) | 17     | 6         | Initial review recorded; decisions open |
+| 08    | [E-SET](ll-08-e-set.html)                                             | 33     | 19        | Initial review recorded; decisions open |
+| 09    | [E-SET-LIGHTS](ll-09-e-set-lights.html)                               | 5      | 5         | Initial review recorded; decisions open |
+| 10    | [E-SET-MITIGATION-MEASURES](ll-10-e-set-mitigation-measures.html)     | 15     | 12        | Initial review recorded; decisions open |
+| 11    | [E-SET-HOOKS](ll-11-e-set-hooks.html)                                 | 5      | 3         | Initial review recorded; decisions open |
+| 12    | [E-SET-BAITS](ll-12-e-set-baits.html)                                 | 6      | 5         | Initial review recorded; decisions open |
+| 13    | [E-SET-HAULING](ll-13-e-set-hauling.html)                             | 17     | 12        | Initial review recorded; decisions open |
+| 14    | [E-SET-HAULING-BITEOFFS](ll-14-e-set-hauling-biteoffs.html)           | 4      | 2         | Initial review recorded; decisions open |
+| 15    | [E-SET-CATCHES](ll-15-e-set-catches.html)                             | 11     | 8         | Initial review recorded; decisions open |
+| 16    | [E-SET-CATCH-SPECIMENS](ll-16-e-set-catch-specimens.html)             | 23     | 9         | Initial review recorded; decisions open |
+| 17    | [E-SET-CATCH-SPECIMENS-SSI](ll-17-e-set-catch-specimens-ssi.html)     | 20     | 8         | Initial review recorded; decisions open |
+| 18    | [E-SET-TAG-DETAILS](ll-18-e-set-tag-details.html)                     | 11     | 4         | Initial review recorded; decisions open |
+
+The 18 data sheets now have initial review notes; META input review remains deferred.
+
+[Live-data coverage](ll-live-data-coverage.html) measures this selection. Mapping and reporting decisions remain open.
+
+## Review approach
+
+Review [row presence](../09-database-import/index.html#sheet-row-presence) separately from mandatory fields for each sheet.
+
+For any row that must be exported, identify a source or an agreed reporting rule for every mandatory field.
+
+Then review optional source values, reference correspondences, calculations and missing information.
+
+Distinguish recorded observations from constants, assumptions and placeholders in the existing exporter.
+
+Record proposed choices without closing a decision until it is agreed.
+
+The prepared documents include every model field; they are not complete or approved field-to-source mappings.
+
+Use [export design](../export-design.html) for shared decisions and the agreed export scope.
+
+Use the [reference inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue correspondence findings.
+
+## Source conventions
+
+Target model: `ros.form.model/inst/models/4.2.0/ll-form.yaml`.
+
+Intermediate model: `ros.form.observe/inst/10.0/ll/form.yaml`.
+
+Philippe export: `ros_ll_iotc_v2.1`, including its R script and SQL queries.
+
+Source schema: ObServe 10.0; frozen IRD references: `20261112T184113Z`.
+
+Initial preparation used schema and code; the linked live-data check now measures source population.
+
+Delivery levels and the future R API remain separate decisions.

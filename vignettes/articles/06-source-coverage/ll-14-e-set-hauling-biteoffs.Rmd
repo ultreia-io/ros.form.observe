@@ -1,0 +1,155 @@
+---
+title: "LL 14 E-SET-HAULING-BITEOFFS mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 14 E-SET-HAULING-BITEOFFS mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Bite-off counts by set and branchline configuration.
+
+ROS LL **4.2.0**: **4 fields**, including **2 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-hauling-biteoffs) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field          | Required | Type   | ROS reference / fixed values |
+| ------------------ | -------- | ------ | ---------------------------- |
+| `observed_trip_id` | M        | string | —                            |
+| `set_id`           | M        | string | —                            |
+
+<details>
+<summary>Optional fields (2)</summary>
+
+| ROS field                       | Required | Type    | ROS reference / fixed values |
+| ------------------------------- | -------- | ------- | ---------------------------- |
+| `branchline_configuration_id`   | O        | string  | —                            |
+| `branchline_number_of_biteoffs` | O        | integer | —                            |
+
+</details>
+
+Parent: **E-SET-HAULING**, linked through `observed_trip_id`, `set_id`.
+
+## Source coverage
+
+Only trip and set identifiers are mandatory. Their sources and ROS identity rules are shared with E-SET.
+
+The configuration identifier and bite-off count are optional, but an ID-only row raises a model warning.
+
+The model requires at least one of those two details to avoid that warning.
+
+Individual `ll_observation.branchline` records contain `traceCutOff` and `hookLost` indicators.
+
+Both are visible in the detailed composition and catch editors. Their equivalence to a ROS bite-off is unconfirmed.
+
+Both indicators are non-null booleans defaulting to false. A stored false alone does not prove observation coverage.
+
+The source link to the set is branchline → basket → section → fishingSet.
+
+There is no direct link from the inspected branchline row to `branchlinesComposition`.
+
+Assigning the shared ROS configuration identifier therefore needs an agreed correspondence.
+
+The current catch extraction retains a branchline identifier, but does not extract either indicator.
+
+Composition and observation coverage would need to be available before deriving counts.
+
+This review establishes source candidates, not populated counts for the selected trips.
+
+## Philippe’s existing export
+
+The R section contains only `TO DO`; no bite-off extraction, calculation or sheet write was found in the script.
+
+His branchline SQL extracts global compositions for G-CONFIG-BRANCHLINES, not the individual cut-off indicators.
+
+There is therefore no existing bite-off counting rule to reuse from this export.
+
+## Counting and row inclusion
+
+A lost hook or cut trace must not automatically be counted as a bite-off without confirming the field meaning.
+
+Count eligible branchlines once; joining through catches could repeat a branchline or omit one without a catch.
+
+Actual observation coverage and configuration attribution remain to be established with Pascal.
+
+The database allows this sheet to remain empty. A missing row must not be interpreted as zero bite-offs.
+
+A reported row needs a parent E-SET-HAULING row, including that parent's required fields.
+
+## Questions for the sheet review
+
+1. Confirm which source indicator, if any, identifies a bite-off rather than another loss or cut.
+2. Check how these indicators are populated and how unknown or unobserved cases can be recognised.
+3. Link individual branchlines to the agreed ROS configuration identifiers.
+4. Define distinct counting, reporting of confirmed zero, and omission when observations are unavailable.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 734-735; ObServe 10.0 branchline schema.
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* ObServe 10.0 DDL: observation `branchline`, `basket` and `section`.
+* Observation UI: `FishingSetDetailCompositionUI.jaxx` and `FishingSetCatchUI.jaxx`.
+* Current extraction: `inst/10.0/ll/sql/ll_observation.catch.sql`.
+* Philippe's composition query: `sql-queries/observe_ll_branchline.sql`.
+* Form 4.2.0: optional detail fields, unique key, parent key and `at_least_one` warning.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retain the verified trip/set links and individual branchline identifiers for tracing possible bite-off observations.
+* Preserve traceCutOff and hookLost as their recorded source indicators, without yet relabelling them as bite-offs.
+
+### What stays unresolved
+
+* Confirm with Pascal which indicator denotes a bite-off and whether the relevant branchlines were actually observed.
+* Default false does not establish a confirmed zero; cut-off and hook loss do not by themselves identify the cause.
+* Count distinct eligible branchlines only after confirming semantics and coverage, not through duplicated catch joins.
+* Establish the configuration link separately; no direct link to the global composition was found.
+
+### Complete-row assessment
+
+The two required IDs are feasible, but an ID-only row triggers a warning and supplies no bite-off information.
+
+Do not invent a count or configuration to remove that warning. Omission still needs a reporting-policy decision.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* The selected sets have 209,430 individual branchline records, with no positive cut-off or hook-loss flags.
+* Every row has a hauling identifier; structural enumeration and false defaults do not prove observed zero bite-offs.
+* A count still requires Pascal's semantic and observation-coverage confirmation.

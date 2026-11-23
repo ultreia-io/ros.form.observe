@@ -13,9 +13,54 @@ Understand how ObServe data relates to ROS forms and the packages used by the ex
 
 ## Export scope
 
-The first export target is ObServe 10.0.6 to ROS longline 4.2.0.
+The first export target is ObServe 10.0 to ROS longline 4.2.0.
 
 Shared operations must also support purse-seine forms, with separate mappings for each fishing gear.
+
+## Export resources
+
+Resources are grouped by ObServe version, gear and, for mappings, ROS form version.
+
+```text
+inst/
+  10.0/
+    ll/
+      form.yaml
+      references.yaml
+      sql/
+      4.2.0/
+        mapping.yaml
+    ps/
+      form.yaml
+      references.yaml
+      sql/
+```
+
+Each gear's `references.yaml` defines its common and gear-specific catalogue lookups, shared by ROS form versions.
+
+LL includes `common` and `ll_*` tables; PS includes `common` and `ps_*` tables.
+
+Each gear's `form.yaml` describes extracted ObServe records; `sql/` contains one query per source-model sheet.
+
+Sheet names use `schema.table`, for example `ll_observation.fishingSet` or `ps_common.trip`.
+
+Each sheet has a SQL file with the same qualified name and a `.sql` extension.
+
+The PS model and queries cover all 40 tables owned by `ps_common.trip`.
+
+[PS extraction details](02-data-extraction/ps-extraction.html).
+
+The source model and queries are shared by all ROS form versions supported for that ObServe version and gear.
+
+Each ROS form version has its own `mapping.yaml` and companion correspondence files.
+
+Reference data remain outside the package.
+
+Set `OBSERVE_CODE_LISTS_URL` and `OBSERVE_REGISTRIES_URL` to external catalogue directories or HTTPS base URLs.
+
+Each source location supplies its `catalogue.yaml`, `catalogue.csv` and reference tables.
+
+Reference lookup declarations use the catalogues' `topiaid` spelling; extracted record fields retain `topiaId`.
 
 ## Export stages
 

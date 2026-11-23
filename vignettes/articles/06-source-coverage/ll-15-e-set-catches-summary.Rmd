@@ -1,0 +1,30 @@
+---
+title: "LL 15 E-SET-CATCHES summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 15 E-SET-CATCHES summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Eight fields: trip/set/catch IDs; species; fate category and reason; sampling method; fish count.
+
+## Available
+
+There are 8,703 catch records. IDs, species, broad fate and positive counts are recorded.
+
+The 1,350 grouped weights all come from self-reporting trips; 1,123 have specified processing and method.
+
+Most weights are visual estimates. They must not become individual fish weights.
+
+## To decide
+
+Validate species and fate correspondences, then establish the actual sampling method.
+
+Do not infer a discard reason from species alone, or treat retention as evidence of sale.
+
+An empty sheet is structurally possible only without specimen descendants; the reporting rule remains open.
+
+[Detailed review](ll-15-e-set-catches.html) · [Short review index](ll-sheet-summaries.html).

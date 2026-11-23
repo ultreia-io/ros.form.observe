@@ -1,0 +1,18 @@
+---
+title: "Getting started summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+ObServe is the data source; ROS is the reporting workbook.
+
+The first target is the longline form 4.2.0. Each selected trip produces one workbook.
+
+The workflow is: select trips, read their data, resolve correspondences, fill the form, then validate it.
+
+The reviews identify available data and open decisions. They do not establish a complete working exporter.
+
+[Detailed review](../ros.form.observe.html) · [Short review index](../06-source-coverage/ll-sheet-summaries.html).

@@ -1,0 +1,58 @@
+---
+title: "01 — Trip selection"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{01 — Trip selection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Trip selection — How do we choose the trips and supply their IDs? {#trip-selection-how-do-we-choose-the-trips-and-supply-their-ids}
+
+These levels describe how we select trips to export.
+
+**Level 1 — simple selection, usable immediately**
+
+An R function returns trip IDs using mandatory start and end dates and an optional observation programme filter.
+
+Include trips overlapping the period, with inclusive boundaries. Export each selected trip in full.
+
+The programme filter accepts zero, one or many technical IDs (`topiaId`), never programme `code` values.
+
+Zero programmes means no programme restriction. One or many select trips belonging to any supplied programme.
+
+Obtain and validate these IDs through the ObServe code-list catalogue's `ll_common.program` table.
+
+**Level 2 — final target**
+
+A Shiny application provides additional trip-selection filters, building on the level 1 rules.
+
+## Select trips before exporting
+
+First obtain the complete list of ObServe trip IDs to export. Then export each selected trip independently.
+
+Selection criteria belong to this first stage, not to the SQL queries that extract individual sheets.
+
+At level 1, an R function returns the selected ObServe trip IDs using these filters:
+
+* **Required start and end dates:** both boundaries are inclusive; the start must not exceed the end.
+* **Optional observation programmes:** zero, one or many `topiaId` values, matched against `trip.observationProgram`.
+
+Select trips that overlap the requested period:
+
+```text
+trip.startDate <= requested end date
+AND trip.endDate >= requested start date
+```
+
+Without a programme filter, include every trip matching the date range, regardless of its observation programme.
+
+Use `ll_common.program` in the ObServe code-list catalogue to obtain valid technical IDs; never select by `code`.
+
+Export each selected trip in full, including observations outside the requested period.
+
+The initial selection targets LL; PS should use the same selection interface when supported.
+
+At level 2, a Shiny application extends trip selection with additional filters.

@@ -1,0 +1,92 @@
+---
+title: "03 — References"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{03 — References}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+This topic covers obtaining and preparing both code-list and registry catalogues.
+
+## ObServe code-list catalogue — How do we obtain or build it? {#observe-code-list-catalogue-how-do-we-obtain-or-build-it}
+
+Each country may manage its own referential independently of the IRD.
+
+**Level 1 — catalogue extracted from the source database**
+
+Use SQL queries to extract the referential from the ObServe database used for the export.
+
+R code builds the catalogue using the existing `form.references` APIs.
+
+This level requires neither a public catalogue nor synchronization with the IRD.
+
+**Level 2 — public, versioned catalogue**
+
+Use a public, versioned ObServe catalogue.
+
+The source database must then be synchronized with the selected catalogue using ObServe's referential synchronization.
+
+This prerequisite applies to PostgreSQL and H2. The exporter does not perform synchronization itself.
+
+Technical IDs (`topiaId`) remain stable within the selected referential across databases and catalogue versions.
+
+Select an explicit catalogue version compatible with ObServe 10.0, record it, and reuse its snapshot throughout the export.
+
+**Rules shared by both levels**
+
+Unused entries are disabled through their `status` field, never removed from the catalogue.
+
+Disabled entries remain resolvable for historical observations; their status alone does not invalidate an export.
+
+Report any referenced ID missing from that catalogue as an inconsistency; do not silently substitute another entry.
+
+People and vessels belong to the separate registry catalogue and retain its access controls.
+
+## Reference catalogues
+
+Each gear has a catalogue configuration under `inst/10.0/<gear>/references.yaml`, shared by its ROS form versions.
+
+LL includes `common` and `ll_*` tables; PS includes `common` and `ps_*` tables.
+
+* `code_lists`: reference codes such as species, countries, harbours and activity types.
+* `registries`: people, vessels and other registry tables, including `common.person` and `common.vessel`.
+
+The lookup definitions come from the frozen `20261112T184113Z` catalogue snapshot.
+
+Set `OBSERVE_CODE_LISTS_URL` and `OBSERVE_REGISTRIES_URL` to external catalogue directories or HTTPS base URLs.
+
+Only definitions are packaged; catalogue data and persistent caches remain outside the package.
+
+[Download the ObServe 10.0 LL catalogue configuration](../../10.0/ll/references.yaml).
+
+[Download the ObServe 10.0 PS catalogue configuration](../../10.0/ps/references.yaml).
+
+This separates code correspondence from matching people and vessels to the corresponding ROS registry records.
+
+An ObServe person may be an observer, captain or data-entry operator; its role determines the target mapping.
+
+Extracted foreign-key values remain ObServe IDs. Catalogue lookups use the source column name `topiaid`.
+
+Use `ros.form.references` for target ROS reference values and lookup policies.
+
+Existing catalogue aliases and mapping-owned correspondences are distinct; both are covered by the shared design.
+
+Some mappings need additional reference tables reached through another reference, such as a harbour's country.
+
+Each sheet review must identify those dependencies so reference preparation can include them.
+
+## Shared mapping design
+
+Code lists and registries use the same generic lookup and mapping mechanisms.
+
+Read the [mapping design](mapping-design.html) for direct lookups, aliases, business rules and their shared context.
+
+Configured lookups may use exact matching or normalized-name matching; ambiguous results remain explicit.
+
+The design also records coverage of encountered values, delivery scopes, result handling and version traceability.
+
+Concrete mappings are specified in [04 — Code lists](../04-references-code-lists/index.html)
+and [05 — Registries](../05-references-registries/index.html).

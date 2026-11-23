@@ -1,0 +1,57 @@
+---
+title: "05 — References - Registries"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{05 — References - Registries}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Identity correspondences — How do we match people and vessels, and construct ROS trip IDs? {#identity-correspondences-how-do-we-match-people-and-vessels-and-construct-ros-trip-ids}
+
+Agree how to match people and vessels and construct the ROS trip identifier.
+
+Define the handling of missing or ambiguous matches.
+
+Use the [shared mapping design](../03-references/mapping-design.html) for the generic lookup mechanism.
+
+## Match ObServe registries to ROS registries
+
+Registry matching identifies the same person or vessel in two systems, rather than translating a code's meaning.
+
+First resolve the extracted ObServe ID in `common.person` or `common.vessel` to obtain the source record.
+
+Then identify the corresponding record in the ROS registry selected by the target field.
+
+| Source record                  | Target record        | Matching approach                                         |
+| ------------------------------ | -------------------- | --------------------------------------------------------- |
+| `common.person`, observer role | ROS observer         | Use an agreed identifier correspondence where available.   |
+| `common.vessel`                | ROS vessel           | Prefer its IOTC ID, checked against the target registry.    |
+
+For people, do not assume that `common.person.code` is an IOTC observer identifier.
+
+A person can have several ObServe roles. The field mapping determines which ROS registry and role are relevant.
+
+Other vessel identifiers may support matching only when their meaning and target lookup are explicitly agreed.
+
+Name matching can help when a reliable identifier is unavailable, using the configured ROS name lookup.
+
+A unique name match is a candidate identity match, not proof that two records identify the same entity.
+
+The sheet review must define when that fallback is acceptable and what additional information must agree.
+
+Require one accepted target record. Do not choose arbitrarily when several records match.
+
+Write the required ROS identifier from that record, preserving the ObServe ID in the mapping trace.
+
+Do not invent identifiers for missing matches, such as a placeholder observer number.
+
+Explicit identity correspondences belong to the mapping and retain the registry data’s access controls.
+
+Do not place private person or vessel mappings in public package files or in the public code-list catalogue.
+
+The storage format and lookup for any explicit ObServe-to-ROS identity correspondence remain to be defined.
+
+Reuse accepted identity matches across trips that refer to the same source record.

@@ -1,0 +1,120 @@
+---
+title: "Discussion with Emmanuel"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Discussion with Emmanuel}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Short agenda for decisions with Emmanuel. Keep discussion points here; supporting analysis stays in the reviews.
+
+## 1. Vessel reference data from RAV
+
+**Proposal:** match the vessel, then use RAV as the authoritative source for its reference data.
+
+**Question:** can these fields, starting with main fishing gear, become optional in ROS forms?
+
+**To decide:** should conflicts between the form and RAV block import? What if the vessel or RAV value is missing?
+
+## 2. ROS information unavailable in ObServe
+
+Some information requested by ROS forms is not available in ObServe.
+
+**Question:** how should exports handle unavailable information, especially when the ROS field is mandatory?
+
+Agree when omission, an accepted missing-data value or an external source is appropriate.
+
+The sheet-by-sheet review is ongoing. Build the list of confirmed gaps progressively, not exhaustively yet.
+
+## 3. Start with mandatory fields only
+
+**Proposal:** focus the first export on mandatory fields to deliver a usable, valid ROS form as soon as possible.
+
+Defer optional fields to a later stage. The first export must still pass the applicable ROS validation rules.
+
+## 4. Missing mandatory vessel speed in E-SET
+
+**Evidence:** vessel speed is missing for six of 700 sets across six of the 70 exported trips from 2020 to 2025.
+
+**Question:** if IRD cannot recover these values, how should a valid ROS form represent this mandatory missing value?
+
+Could zero explicitly mean "not collected", or should the field remain empty under an adapted validation rule?
+
+**To decide:** confirm the accepted convention and preserve missingness during import, without implying a measured zero.
+
+Zero is a proposal for discussion only; no replacement rule has been approved or implemented.
+
+## 5. Shooter speed: missing or not applicable
+
+**Evidence:** ObServe records shooter use separately; speed is optional and present for only 71 of our 700 exported sets.
+
+Another 53 sets record use without speed; 576 have a false use flag and no speed.
+
+**Gap:** E-SET has no per-set shooter-use field; G-GENERAL only describes equipment at trip level.
+
+**Proposal:** add a "shooter used" field to E-SET for each set.
+
+**Question:** can shooter speed become optional, including when the new "shooter used" field is yes?
+
+A recorded use must not require a measured speed. Leave missing speed empty; distinguish non-use from unknown speed.
+
+Confirm non-use before applying that rule: ObServe's use flag defaults to false. No zero-speed fallback is approved.
+
+## 6. More than three floatline lengths per set
+
+**Evidence:** ROS allows three lengths per set; 407 of our 700 exported sets contain more than three distinct lengths.
+
+**Question:** can the export retain only the three lengths with the highest recorded proportions?
+
+**Status:** proposed selection rule; apply only after CTOI confirmation. Tie handling remains to be specified.
+
+## 7. Missing target species in E-SET
+
+**Evidence:** ObServe records targets per trip; 27 of our 70 exported trips have none recorded.
+
+**Question:** could the first target species become optional, as the other three already are?
+
+Alternatively, clarify whether an accepted unavailable-species code exists. Do not infer targets from catches.
+
+**Status:** options for CTOI discussion; the current form still requires the first target species.
+
+## 8. Calculated minimum and maximum branchline lengths
+
+**Evidence:** Philippe calculates each set's minimum and maximum from ObServe's recorded composition lengths.
+
+With one recorded length, both values are identical. These are derived values, not separately recorded measurements.
+
+**Definition checked:** ROS requests the minimum and maximum total branchline lengths deployed in the set.
+
+See the [official ROS-LL guidance][ros-ll-guidance].
+
+[ros-ll-guidance]: https://data.iotc.org/reference/latest/forms/ros/Form-ROS-LL.html
+
+The calculation is appropriate if ObServe records those total lengths; IRD must confirm that source meaning.
+
+**Remaining question:** how should a valid form handle a set with no recorded branchline length?
+
+## 9. Unknown bait condition: ROS mapping gap
+
+**Evidence:** 13 of 1,290 exported bait compositions have an unknown condition; another five have no condition recorded.
+
+The ROS bait-condition catalogue includes “OT — Other”, but no “Unknown” entry.
+
+**Question:** does “Other” cover an unknown condition, or could an explicit “Unknown” entry be added?
+
+Provisional point for the second mapping review. No equivalence or replacement rule has been agreed.
+
+## 10. E-SET-MITIGATION-MEASURES: unavailable mandatory numeric data
+
+**Gap:** tori-line count, weighted-branchline percentage, hook-to-weight distance and average ballast weight.
+
+ObServe has partial source data; Philippe uses constants or calculations whose validity is not established.
+
+**Question:** can unavailable numeric values remain empty, or can these fields become optional?
+
+Please distinguish unknown values from non-applicable values when no weighting or device is used.
+
+Use existing missing-data codes where applicable; do not substitute zero or an assumed measurement for unknown data.
+
+IRD is being asked whether these quantities can be established from observations or added to ObServe.

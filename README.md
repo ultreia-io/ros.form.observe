@@ -1,5 +1,9 @@
 # ros.form.observe
 
+The draft source loader reads model-selected SQL files through H2/db.tools or the ObServe public SQL API.
+
+See `vignettes/source-loading.Rmd` for YAML configuration, session credentials and one-trip examples.
+
 [![Build](https://img.shields.io/github/actions/workflow/status/ultreia-io/ros.form.observe/Build.yaml?branch=develop&label=Build&logo=githubactions&logoColor=white)](https://github.com/ultreia-io/ros.form.observe/actions/workflows/Build.yaml?query=branch%3Adevelop)
 [![Website](https://img.shields.io/badge/website-documentation-blue?logo=readthedocs&logoColor=white)](https://ultreia-io.github.io/ros.form.observe/index.html)
 [![License](https://img.shields.io/badge/license-GPL--3-blue?logo=gnu&logoColor=white)](https://github.com/ultreia-io/ros.form.observe/blob/main/LICENSE)
@@ -58,6 +62,16 @@ pak::pak("ultreia-io/ros.form.observe@develop")
 
 Follow the [Getting started guide](https://ultreia-io.github.io/ros.form.observe/articles/ros.form.observe.html)
 to understand the export scope and the role of the related packages.
+
+## Load source data
+
+Use `observe_h2_backup_connection_provider()` to open connections from an ObServe `.sql.gz` backup.
+
+Use `read_observe_trip_tables()` with the SQL or API loader to select the packaged LL or PS model and queries.
+
+The [trip-loading guide][source-loading] covers backups, existing databases and the public API.
+
+[source-loading]: https://ultreia-io.github.io/ros.form.observe/articles/source-loading.html
 
 ## Further information
 

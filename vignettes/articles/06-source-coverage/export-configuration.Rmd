@@ -1,0 +1,230 @@
+---
+title: "LL exporter configuration draft"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL exporter configuration draft}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The draft covers all **19 sheets and 285 fields** in ROS LL 4.2.0, using the ObServe 10.0 LL source model.
+
+[Download export.yaml](../../10.0/ll/4.2.0/export.yaml).
+
+The file is a design proposal. No exporter reader, callback registry or rule implementation is supplied yet.
+
+`draft_version` identifies this proposed format; it does not refer to a published configuration schema.
+
+## Location and responsibility
+
+```text
+inst/10.0/ll/
+  form.yaml
+  references.yaml
+  sql/
+  4.2.0/
+    mapping.yaml
+    export.yaml
+```
+
+`form.yaml` describes source records and their parents. `references.yaml` describes ObServe catalogues.
+
+`mapping.yaml` declares catalogue correspondences. `export.yaml` declares target rows and field calculations.
+
+The target model is `models/4.2.0/ll-form.yaml` from `ros.form.model`.
+
+File paths are relative to `export.yaml`; the target model path is relative to its installed package.
+
+The caller supplies the ROS references configuration as `ros`. The source configuration is named `observe`.
+
+These names bind the two configurations used by `mapping.yaml`; catalogue data remains outside this package.
+
+No source table is renamed to its target. Target sheet and field names are the configuration entry points.
+
+## Reading a field declaration
+
+This entry copies a recorded value into its destination:
+
+```yaml
+sheets:
+  E-SET:
+    rows:
+      status: specified
+      rule: each_set
+      inputs:
+        records: {sheet: ll_observation.fishingSet, within: ll_common.trip}
+    fields:
+      number_total_hooks_set:
+        status: specified
+        rule: copy
+        inputs:
+          value: {sheet: ll_observation.fishingSet, field: totalHooksCount}
+```
+
+`rows` describes which source records produce target rows. `fields` describes values within each row.
+
+`inputs` names the values supplied to a rule. Each binding names its source sheet and field, or fields.
+
+`parameters` contains explicit rule options. `note` records a missing decision or a reporting limitation.
+
+| Status        | Meaning                                                              |
+| ------------- | -------------------------------------------------------------------- |
+| `specified`   | A concrete rule is proposed; data may still be missing or invalid.   |
+| `pending`     | The source, semantics, correspondence or reporting decision is open. |
+| `unavailable` | No usable source has been identified for this field.                 |
+| `omitted`     | An explicit scope decision leaves this field or sheet empty.         |
+
+These are design statuses, not runtime resolution results. `specified` does not mean implemented or approved.
+
+An unresolved row rule or shared identity affects its dependent fields, even when their rules are specified.
+
+Pending declarations must not activate provisional assumptions when a future engine reads the configuration.
+
+`inputs: {}` makes an absent source explicit. It is not a request to populate a default value.
+
+META uses named caller inputs. Its form identifier and revision come from the selected target model.
+
+## Source navigation
+
+Every source sheet name includes its schema, for example `ll_observation.fishingSet`.
+
+A binding without `within` or `via` refers to the current source row or its unique owning ancestor.
+
+Owning paths come from `parent_key` in the source model. Missing or broken links remain unresolved.
+
+For example, a set reaches its trip through `fishingSet.activity`, then `activity.trip`.
+
+`within` selects related records owned by the named current row or ancestor, including indirect descendants.
+
+It returns a collection, including an empty one. It must not select the first record or join unrelated collections.
+
+A row rule retains its source keys. Grouping must retain all contributing records for later field rules and diagnostics.
+
+The explicit `catch_branchline` relationship follows `catch.branchline` to `branchline.topiaId`.
+
+This optional link is not the catch's owning parent. A linked branchline must belong to the same source set.
+
+No link means no individual branchline input; it must not silently select a set composition.
+
+Model bindings use `model: target`; caller bindings use `input`. Neither claims an ObServe source sheet.
+
+## Rules and catalogue correspondences
+
+`rule_set` identifies one explicitly configured rule set and its version for this export scope.
+
+`rules` describes the named callbacks. Its text is documentation, never executable R.
+
+A future caller supplies an explicit registry of R functions under these names. YAML contains no R expressions.
+
+The proposed callback receives named inputs, generic context and parameters, and returns one field result.
+
+Context provides model relationships, source records, prepared catalogue lookups and shared exported identities.
+
+Row callbacks return source-backed row contexts. They must not multiply animals through independent collection joins.
+
+Result diagnostics distinguish missing input, no match, ambiguity and execution failure.
+
+Preserve source keys, rule-set version, rule name and catalogue versions with every result.
+
+The caller decides whether an unresolved result blocks a field, row or trip export.
+
+Reference results use the target field's declared catalogue lookup, including configured aliases and name matching.
+
+`catalogue_mapping` delegates to `form.references` using `parameters.target` and the separate `mapping.yaml`.
+
+Other callbacks may use those same lookups after calculations. An ambiguous lookup never chooses its first candidate.
+
+Only encountered references require resolution. Initial CSVs cover 28 pairs from the saved 2020–2025 trips.
+
+Additional catalogue candidates are separate in `correspondences-extended/`; `mapping.yaml` does not select them.
+
+Unmapped values, ambiguous target codes and private registry identities still require decisions.
+
+SSI interaction and leader material lack target-model reference bindings; their declared vocabulary still needs review.
+
+Type, required-field, range and parent-link validation stays in the target form model and validation pipeline.
+
+The exporter configuration does not duplicate minimum values, required flags or other target validation constraints.
+
+### A calculation: lights
+
+```yaml
+number_of_lights:
+  status: pending
+  rule: light_total
+  inputs:
+    lights_per_basket: {sheet: ll_observation.fishingSet, field: lightsticksPerBasketCount}
+    baskets: {sheet: ll_observation.fishingSet, field: totalBasketsCount}
+  note: "Confirm the count applies to every basket; retain missing inputs."
+```
+
+This declares the calculation in the export configuration. The engine dispatches the named rule.
+
+The rule remains pending because the meaning of the recorded count needs confirmation.
+
+### A related-record rule: set targets
+
+```yaml
+target_species_species_1:
+  status: pending
+  rule: trip_targets
+  inputs:
+    targets: {sheet: ll_common.trip_species, field: species, within: ll_common.trip}
+  parameters: {target: refs_biology.species, slot: 1}
+```
+
+Start from the current set, reach its trip, collect that trip's targets, then resolve their ROS species codes.
+
+IRD must confirm that trip targets apply to each set. Ordering and overflow beyond four slots remain open.
+
+### A combined reference: hooks
+
+`hook_type_size` reads both `hooksComposition.hookType` and `hookSize` for the current composition.
+
+It needs an agreed combined correspondence. Unknown sizes cannot become Philippe's fixed sizes.
+
+### An individual rule: SSI leader material
+
+`specimen_leader` first reads `tracelineType` from the catch's explicitly linked individual branchline.
+
+Its set-composition input is declared separately. `allow_set_fallback: false` keeps that assumption inactive.
+
+IRD must approve any fallback. Distinct materials are ambiguous; repeated equal materials alone are not.
+
+### A catalogue-only calculation: ports
+
+`harbour_port` uses the source harbour's `locode` to derive candidates in the ROS port catalogue.
+
+ROS ports have no `locode` field. Canonical country prefixes and competing port codes remain to be agreed.
+
+This stays an exporter callback. The catalogue mapping file contains no port conversion or global FRA-to-REU alias.
+
+## Proposed execution
+
+1. Load the selected source trip and its extracted tables, plus the declared models and references configurations.
+2. Prepare the encountered catalogue lookups and accepted registry identities.
+3. Allocate shared identities once; retain source-to-target identity associations for all dependent sheets.
+4. Visit target sheets in parent dependency order and construct rows using their declared row rules.
+5. Resolve each field's inputs and invoke its named callback with parameters and the current row context.
+6. Collect diagnostics and provenance, apply the caller's unresolved-result policy, then validate the target dataset.
+
+Evaluate contextual rules per record. A value-only cache cannot represent different parent trips or specimens.
+
+Shared measurement slots must stay aligned: type, value and tool all describe the same selected measurement.
+
+Reusing the same specimen identity prevents lengths, SSI and tags from creating different animals.
+
+## Decisions preserved in the draft
+
+- Captain reuse for both roles is agreed; identity matching and nationality interpretation still need resolution.
+- Vessel movement times use the agreed 00:00 and 23:59 conventions; timezone remains pending.
+- Observer movements have no independent source; vessel dates and ports are not substituted.
+- Optional V-ATTRIBUTES values remain empty; no-row versus trip-ID-only-row handling remains open.
+- G-CONFIG-BRANCHLINES reports trip and configuration identities only.
+- G-CONFIG-MITIGATION-DEVICES produces no data rows.
+- False defaults, missing measurements and absent associations do not prove zero, absence or exhaustive observation.
+- Specimen selection, identity, measurement ordering and unmeasured SSI parents remain unresolved.
+
+Purse-seine export rules are outside this LL draft. The source PS model alone does not establish a target mapping.
+
+Refine this file against the [sheet reviews](ll-sheet-reviews.html) before fixing the schema or implementing rules.

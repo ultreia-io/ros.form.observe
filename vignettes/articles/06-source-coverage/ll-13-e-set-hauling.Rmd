@@ -1,0 +1,206 @@
+---
+title: "LL 13 E-SET-HAULING mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 13 E-SET-HAULING mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Hauling timing and positions, offal management, observed quantities and sampling protocol.
+
+ROS LL **4.2.0**: **17 fields**, including **12 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-hauling) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes, if biteoff rows are absent.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field                                      | Required | Type      | ROS reference / fixed values               |
+| ---------------------------------------------- | -------- | --------- | ------------------------------------------ |
+| `observed_trip_id`                             | M        | string    | —                                          |
+| `set_id`                                       | M        | string    | —                                          |
+| `start_hauling_date_time`                      | M        | datetime  | —                                          |
+| `start_hauling_position_latitude`              | M        | latitude  | —                                          |
+| `start_hauling_position_longitude`             | M        | longitude | —                                          |
+| `end_hauling_date_time`                        | M        | datetime  | —                                          |
+| `end_hauling_position_latitude`                | M        | latitude  | —                                          |
+| `end_hauling_position_longitude`               | M        | longitude | —                                          |
+| `bird_scaring_device_at_hauler`                | M        | string    | `refs_data.logical_responses` / `code`     |
+| `number_branchline_haulings_observed`          | M        | integer   | —                                          |
+| `number_of_hooks_retrieved_during_observation` | M        | integer   | —                                          |
+| `sampling_protocol`                            | M        | string    | `refs_biology.sampling_protocols` / `code` |
+
+<details>
+<summary>Optional fields (5)</summary>
+
+| ROS field                                | Required | Type   | ROS reference / fixed values                   |
+| ---------------------------------------- | -------- | ------ | ---------------------------------------------- |
+| `offal_management`                       | O        | string | `refs_fishery.offal_management_types` / `code` |
+| `positions_of_offal_disposal_position_1` | O        | string | `refs_fishery.vessel_sections` / `code`        |
+| `positions_of_offal_disposal_position_2` | O        | string | `refs_fishery.vessel_sections` / `code`        |
+| `positions_of_offal_disposal_position_3` | O        | string | `refs_fishery.vessel_sections` / `code`        |
+| `positions_of_offal_disposal_position_4` | O        | string | `refs_fishery.vessel_sections` / `code`        |
+
+</details>
+
+Parent: **E-SET**, linked through `observed_trip_id`, `set_id`.
+
+## Source coverage
+
+Eight mandatory fields have direct source candidates already included in the current intermediate model:
+
+* Trip and set identifiers, with the shared ROS identity rules still to agree.
+* Hauling start and end timestamps, each with latitude and longitude, from `ll_observation.fishingSet`.
+
+The six hauling timing and position fields are non-null in the source schema.
+
+The remaining four mandatory fields need evidence beyond the legacy values:
+
+* Bird-scaring device response at the hauler.
+* Number of branchline haulings observed.
+* Number of hooks retrieved during observation.
+* Sampling protocol actually applied.
+
+The five optional offal fields are empty in Philippe's export: management type and four disposal positions.
+
+This review checks schema, catalogues, UI and code. Actual observation coverage has not been measured.
+
+## Philippe’s existing export
+
+* SQL copies the hauling timestamps and coordinates from the set.
+* Both observed quantities are assigned `totalHooksCount`, also used for the number of hooks set.
+* The bird-scaring response is fixed to `FALSE`; the sampling protocol is fixed to `ES`.
+* All offal fields are `NULL`.
+* R selects these 17 columns for retained sets without changing their values.
+
+A total number of hooks set does not establish the numbers retrieved or observed during hauling.
+
+`totalHooksCount` can be null in the source schema; its use does not guarantee either required quantity is present.
+
+The SQL comment marks bird scaring optional, but the authoritative form model makes it mandatory.
+
+`ES` means exhaustive sampling. The target list also distinguishes exhaustive sampling with observer presence (`EP`).
+
+Neither code is established by a constant or by the existence of a set record.
+
+The set query joins branchline compositions. Multiple compositions can repeat a trip/set row in this output.
+
+R does not deduplicate these hauling rows; ROS expects one row per trip/set key.
+
+SQL labels its timestamps UTC, but a cast to `timestamp` does not establish their time zone.
+
+The source columns have no time-zone component. Confirm the recording convention before export.
+
+## Further source candidates
+
+The set has a `monitored` flag, and branchline details include hauling identifiers and `hookLost`.
+
+Their collection meaning must be confirmed before deriving observed counts or choosing a sampling protocol.
+
+ObServe can generate the detailed line structure from section, basket and branchline counts or templates.
+
+Counting those generated records alone therefore does not prove that the observer saw each hauling.
+
+Set mitigation selections include code `02` (strategic offal discharge) and code `08` (tori lines).
+
+Philippe's query and the current intermediate extraction do not read this relation.
+
+These selections do not identify disposal positions or establish the presence of a device at the hauler.
+
+The offal category also needs interpretation against ROS management types `AH` (ad hoc) and `BD` (batch disposal).
+
+No dedicated offal-position or hauler-device field was found in the inspected set and branchline structures.
+
+That is a bounded finding; further source review remains open.
+
+For bird scaring, ROS distinguishes confirmed false from unavailable (`NAV`) and unknown (`UNK`).
+
+Selecting one requires evidence about collection; absence of a selected mitigation is not a confirmed negative.
+
+## Questions for the sheet review
+
+Resolve mandatory-field coverage first; review optional information afterwards.
+
+1. Confirm how observed branchlines and retrieved hooks can be distinguished from the total hooks set.
+2. Check the meaning and population of monitored, hauling identifiers and hook-loss details with Pascal.
+3. Establish the sampling protocol, including the ES/EP distinction, with source and reporting guidance.
+4. Find evidence for bird scaring at the hauler, or agree the appropriate missing-information response.
+5. Confirm the timestamp convention and ensure a single hauling row per trip/set.
+6. Review optional offal management and disposal locations after mandatory coverage is resolved.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 705-732; set query hauling section.
+
+* `sql-queries/observe_ll_set.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* Current extraction: `inst/10.0/ll/sql/ll_observation.fishingSet.sql`.
+* ObServe 10.0 DDL: observation `fishingSet`, `branchline` and `fishingSet_mitigationType`.
+* Observation UI: `FishingSetUI.jaxx`; composition generation: `composition/GenerateAll.java`.
+* IRD snapshot: `20261112T184113Z`; `ll_common.mitigationtype`.
+* ROS snapshot: `code_lists--b7c000cba93d`; sampling protocols, logical responses and offal management.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Retain the verified trip/set IDs and recorded hauling start/end timestamps and coordinates.
+* Preserve the actual timestamps; confirm their time-zone convention before presenting them as UTC.
+* Keep one hauling row per set, independent of the number of gear compositions.
+
+### What stays unresolved
+
+* Hooks set are not hooks retrieved, and neither count establishes how many branchline haulings were observed.
+* A generated branchline structure is not an observation log; loss flags need coverage and meaning checks.
+* The observation UI defines monitored as equipped with hook timers, not observed by a person.
+* Do not use that flag to infer observer coverage or the sampling protocol.
+* Bird-scaring use at hauling and the actual sampling protocol still need evidence; FALSE and ES are not defaults.
+* Leave offal management and disposal coordinates empty until records support those specific events.
+
+### Complete-row assessment
+
+Eight required fields have direct candidates. Four required observation/protocol fields still prevent complete coverage.
+
+Supporting records must establish those values or an agreed missing-data policy before claiming a complete row.
+
+The monitored meaning is evidenced by the ObServe observation UI label in services_en_GB.properties, line 869.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* All 461 sets have hauling start/end times and positions within coordinate ranges, with no reversed times.
+* One set has monitored=true, meaning hook timers; this does not measure observer coverage.
+* The 17 OB trips and 50 SR trips must remain distinguishable when defining observed totals and sampling.
+* Observed branchline/hook counts, bird-scaring response and sampling protocol still lack an agreed source rule.

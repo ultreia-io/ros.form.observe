@@ -1,0 +1,71 @@
+---
+title: "09 — Database import"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{09 — Database import}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Topic documents
+
+- [Database import — detailed](ll-database-import.html)
+- [Database import — short](ll-database-import-summary.html)
+
+## ROS database import — Where does each sheet go, and which records are required? {#sheet-row-presence}
+
+This topic covers importing a completed ROS workbook into the ROS database, after the export stages.
+
+See the [database review](ll-database-import.html) for the target tables, relationships and constraints.
+
+Start with META as the observation-dataset entry point, then map every sheet to tables, links and dependencies.
+
+Distinguish required fields within a reported row from any requirement to create that row or its association.
+
+Check the target database constraints and actual import rules alongside the 4.2.0 form model.
+
+For each sheet, determine whether no data rows, an identifier-only row, or populated records are required.
+
+Keep the worksheet's presence separate from its data-row presence and account for records shared by several sheets.
+
+ROS database 4.0.0 is authoritative; form 4.2.0 is independently versioned. Import behaviour remains to be checked.
+
+The [per-sheet answers](ll-database-import.html#empty-sheets) now state the structural row-presence conclusions.
+
+Keep import-application rules and reporting completeness separate from those database conclusions.
+
+#### Open question for Emmanuel (IOTC): mandatory fields and required worksheet data
+
+**Status: open; to discuss with Emmanuel (IOTC).**
+
+In the ROS LL 4.2.0 form, does "mandatory" constrain only fields within a reported data row?
+
+Or must some worksheets contain at least one data row, even when their information is unavailable?
+
+Please clarify, for each worksheet:
+
+* Whether it may contain zero data rows despite having fields marked mandatory.
+* Whether the answer differs for inapplicable equipment/events and information not collected or unknown.
+* If a row is required, how unavailable mandatory values must be represented.
+
+For example, may tori-line configuration remain empty when no device is used or no measurements were collected?
+
+Here, an empty worksheet remains in the workbook with its structure intact, but contains no data rows.
+
+The database review establishes structural possibilities; this question concerns IOTC reporting requirements.
+
+#### ROS and Reference Data alignment
+
+Reference Data is a separate project and database; its code lists have their own release cycle.
+
+Synchronization with ROS is incomplete. Required ROS database updates are a dependency of this export design.
+
+Retain ROS 4.0.0 as the baseline and identify the reference tables, values, columns and FKs that need adjustment.
+
+Record the chosen Reference Data version and the corresponding ROS updates before finalizing affected mappings.
+
+Distinguish target-database alignment from ObServe-to-ROS correspondences and ObServe source coverage.
+
+Track each affected field in the [database review](ll-database-import.html); database changes remain to be specified.

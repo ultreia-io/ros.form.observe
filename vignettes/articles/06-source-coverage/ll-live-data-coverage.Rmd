@@ -1,0 +1,184 @@
+---
+title: "LL live source-data coverage"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL live source-data coverage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Scope and evidence
+
+Live SELECT-only inspection of observe_main on observe.ultreia.io, performed on 12 November 2026.
+
+Server application: 10.0.8; persistence model: 10.0; PostgreSQL: 18.6.
+
+The prepared queries read actual observation rows, not just table definitions or reference catalogues.
+
+Queries used separate statement snapshots. No database records were changed and every API session was closed.
+
+The saved aggregate results and SQL provide the evidence; no passwords, tokens or security files are included.
+
+```text
+/home/tchemit/.cache/ros.form.observe/ird/analyses/20261112T211733Z
+```
+
+Use the [sheet reviews](ll-sheet-reviews.html) for field-level reasoning and the remaining reporting decisions.
+
+## Selection reproduced
+
+Philippe's trip query names five programmes. Most detail queries name only IRD, CAPRUN and TAAF.
+
+The analysis profiles all five explicit trip-query IDs; it does not execute the legacy export queries.
+
+Its R parameters select FRA vessels, the Indian Ocean, and trips starting or ending in 2025.
+
+All 67 matching trips also survive the trip query's required reference joins.
+
+All operations of those trips are retained; this is a source-coverage assessment, not a reproduced Excel export.
+
+| Programme                          | All matching trips | 2025 FRA / Indian trips |
+| ---------------------------------- | ------------------ | ----------------------- |
+| DCF Longline (IRD)                 | 1,006              | 67                      |
+| CAPPER                             | 11                 | 0                       |
+| DCF Longline (CAPRUN)              | 0                  | 0                       |
+| DCF Longline (TAAF)                | 2                  | 0                       |
+| DCF Longline (Mayotte marine park) | 22                 | 0                       |
+| Total                              | 1,041              | 67                      |
+
+The full five-programme scope contains 6,501 sets and 117,680 catch rows, including years outside 2025.
+
+The detailed findings below apply to the 67-trip 2025 selection unless explicitly stated otherwise.
+
+### Observation method matters
+
+| Recorded method        | Trips | Sets | Catch rows | Grouped weights | Length measurements |
+| ---------------------- | ----- | ---- | ---------- | --------------- | ------------------- |
+| OB: observer-monitored | 17    | 147  | 5,231      | 0               | 4,023               |
+| SR: self-reporting     | 50    | 314  | 3,472      | 1,350           | 0                   |
+| Total                  | 67    | 461  | 8,703      | 1,350           | 4,023               |
+
+All length measurements belong to observer-monitored trips. All grouped weights belong to self-reporting trips.
+
+The SR group includes 12 individual catch entries and 3,460 grouped entries; OB has only individual entries.
+
+Programme membership alone therefore does not establish the collection method or the ROS sampling protocol.
+
+Whether SR trips belong in this export is a selection/reporting decision; neither group was silently excluded.
+
+## Reusable information and limits
+
+| Source fact            | 2025 selection                    | Use or remaining condition                                    |
+| ---------------------- | --------------------------------- | ------------------------------------------------------------- |
+| Trip methods           | 17 OB; 50 SR                      | Decide inclusion separately from programme selection.         |
+| Grouped catch weights  | 1,350 records; 49 trips           | 1,123 have specified processing and method; all are SR.       |
+| Additional lengths     | 10 individuals; 7 trips           | SCL and SCW for the same turtle, not separate specimens.      |
+| Length tools           | 2,883 known; 1,140 unknown        | Use the recorded tool; do not force calliper.                 |
+| Tags                   | 1 individual                      | Identifier candidate; deployment/recovery still unknown.      |
+| Photo references       | 1,267 catches                     | References exist; file existence and format unchecked.        |
+| Hook sizes             | 293 known; 530 unknown; 2 missing | Actual known sizes are usable mapping inputs.                 |
+| Floatline lengths      | 1,992 rows; all 461 sets          | 333 sets exceed three distinct lengths; 18 contain zero.      |
+| Branchline composition | 1 row per set; 100% MON leader    | Global composition exists; section interpretation is open.    |
+| Individual weights     | 0 records                         | No individual-weight export for this selection.               |
+| Mitigation selections  | 0 records                         | No evidence from this association; absence of use not proved. |
+| Maturity               | 0 populated values                | No maturity export demonstrated for this selection.           |
+
+A populated source value is a mapping input. It is not, by itself, an approved ROS value or complete target row.
+
+### Weights
+
+The 1,350 positive grouped weights span 49 trips and 311 sets, with values from 2 to 2,724 kg.
+
+There are 1,347 records with both type and method references; 224 of those use Unknown processing.
+
+This leaves 1,123 records with a specified processing type and method, and three with a missing method.
+
+Recorded methods are visual assessment for 1,268 rows and scales for 79; the other three have no method.
+
+Preserve estimated versus weighed status and processing. Do not report these totals as individual fish weights.
+
+The wider five-programme scope has 741 individual weight measurements outside this 2025 selection.
+
+### Specimens and tags
+
+The 4,023 lengths belong to 4,013 individuals. All sizes are positive, from 29 to 325 cm, with no fractions here.
+
+Ten turtles have two distinct measures, SCL and SCW: six TTL and four TUG records, across seven trips.
+
+Those pairs can inform the two length fields while preserving one specimen identity; code mapping remains necessary.
+
+Tools are calliper for 2,876 measures, ruler for four, tape for two and visual assessment for one.
+
+Another 1,140 measures explicitly record Unknown; a constant calliper would misstate those observations.
+
+One measured ALB individual has a five-character, identifier-like tag value. Tag-event semantics remain unverified.
+
+Photo references exist on 1,267 catches, and sample references on 72. These are not verified files or sample metadata.
+
+### Gear
+
+All 295 hook-composition records on OB trips have a known size except two missing sizes.
+
+All 530 SR hook-composition records explicitly reference Unknown size; non-null counts would conceal this gap.
+
+At set level, 145 sets have all sizes known, two have partial size coverage and 314 have no known size.
+
+The 461 global branchline compositions each cover 100%, with MON leader material and lengths from 1.5 to 17.1 m.
+
+Leader length is populated in 147 compositions. Individual branchline dimensions and material are empty.
+
+The 1,992 floatline records cover every set, with two to eight records per set and proportions summing to 100%.
+
+There are 333 sets with more than three distinct lengths. The form's three length slots need a representation rule.
+
+Eighteen sets contain a zero length; its meaning needs review rather than conversion into a fabricated length.
+
+Shooter use is true on 21 sets. Twenty have speeds, all on SR trips; the one OB case lacks its speed.
+
+Clip-on timing has 122 populated values. Snap and swivel weights have 264 and 70 populated values respectively.
+
+Those component weights do not establish average sinker weight, weighted percentages or hook-to-sinker distances.
+
+The mitigation association has no rows throughout the five-programme scope, not just within the 2025 selection.
+
+The 209,430 individual branchline records in 2025 have no positive cut-off or hook-loss flags.
+
+Their false defaults do not establish observed zero bite-offs or complete observer coverage.
+
+### Trip references and operational fields
+
+All 67 trips have linked observers, captains, departure and landing ports, with port LOCODEs and coordinates.
+
+Vessel IOTC IDs are populated for 66 trips; crew count for 17. ROS registry matching remains separate.
+
+All 461 sets have setting and hauling endpoint times and positions within valid coordinate ranges.
+
+No reversed start/end timestamps were found. This does not establish their time zone or verify geographic accuracy.
+
+Catch counts are positive; individual-mode catches all have count one. Sampling protocol still needs evidence.
+
+## What this changes
+
+Several optional values omitted by Philippe are populated and can become export inputs after verified correspondence.
+
+The strongest candidates are grouped weights, paired lengths, recorded tools, photo references and the tag identifier.
+
+The two collection methods explain major coverage differences and should remain explicit in the next review.
+
+Individual weights, mitigation membership and maturity cannot be recovered from these sources for the 2025 selection.
+
+Unknown hook sizes, bait preparation, excess floatline lengths and missing observation context still need decisions.
+
+The review does not approve mappings, infer missing observations, implement an exporter or claim a valid full workbook.
+
+## Reproduction
+
+The evidence directory contains SQL, aggregate JSON results, provenance and SHA-256 checksums.
+
+The saved selection IDs and denominators allow the same checks to be repeated without running Philippe's exporter.
+
+Source units are confirmed by ObServe's observation UI labels: sizes in cm and weights in kg.
+
+CatchAcquisitionMode defines individual as ordinal 0 and grouped as ordinal 1.
+
+See source label keys for Catch.totalWeight, SizeMeasure.size and WeightMeasure.weight in services_en_GB.properties.

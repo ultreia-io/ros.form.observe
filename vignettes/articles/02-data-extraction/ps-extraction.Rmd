@@ -1,0 +1,167 @@
+---
+title: "ObServe PS extraction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ObServe PS extraction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Data extraction overview](index.html).
+
+## Scope
+
+The PS resources describe the complete ObServe 10.0 data tree rooted at `ps_common.trip`.
+
+The model contains 40 sheets: the trip, 35 owned entity tables and four membership tables.
+
+Observation, logbook, landing and local-market records remain separate throughout extraction.
+
+The source model and queries are shared by ROS target versions; they contain no ROS recoding or reporting calculations.
+
+[Download the PS source model](../../10.0/ps/form.yaml).
+
+[Download the PS catalogue definitions](../../10.0/ps/references.yaml).
+
+## Ownership and related records
+
+Each query binds `$1::text` to the same selected `ps_common.trip.topiaId`.
+
+Queries follow owning parents to the trip and select only columns from their own table.
+
+Independent collections are extracted separately, preserving every row without multiplication from unrelated joins.
+
+Ownership follows the source model: `wellActivity` belongs to a well and logbook samples belong to a trip.
+
+Other links remain source fields: related observed activities, sample activities, wells and optional survey links.
+
+The model format has one `parent_key`; it does not enforce these additional relationships or their trip consistency.
+
+Every sheet uses its qualified source table name, such as `ps_observation.activity` or `ps_logbook.activity`.
+
+| Sheet / source table                     | Parent sheet                    |
+| ---------------------------------------- | ------------------------------- |
+| `ps_common.trip`                         | —                               |
+| `ps_common.gearUseFeatures`              | `ps_common.trip`                |
+| `ps_common.gearUseFeaturesMeasurement`   | `ps_common.gearUseFeatures`     |
+| `ps_observation.route`                   | `ps_common.trip`                |
+| `ps_observation.activity`                | `ps_observation.route`          |
+| `ps_observation.fishingSet`              | `ps_observation.activity`       |
+| `ps_observation.schoolEstimate`          | `ps_observation.fishingSet`     |
+| `ps_observation.catch`                   | `ps_observation.fishingSet`     |
+| `ps_observation.sample`                  | `ps_observation.fishingSet`     |
+| `ps_observation.sampleMeasure`           | `ps_observation.sample`         |
+| `ps_observation.catchRelease`            | `ps_observation.fishingSet`     |
+| `ps_observation.floatingObject`          | `ps_observation.activity`       |
+| `ps_observation.objectSchoolEstimate`    | `ps_observation.floatingObject` |
+| `ps_observation.objectObservedSpecies`   | `ps_observation.floatingObject` |
+| `ps_observation.transmittingBuoy`        | `ps_observation.floatingObject` |
+| `ps_observation.floatingObjectPart`      | `ps_observation.floatingObject` |
+| `ps_observation.activity_observedSystem` | `ps_observation.activity`       |
+| `ps_logbook.route`                       | `ps_common.trip`                |
+| `ps_logbook.activity`                    | `ps_logbook.route`              |
+| `ps_logbook.catch`                       | `ps_logbook.activity`           |
+| `ps_logbook.floatingObject`              | `ps_logbook.activity`           |
+| `ps_logbook.transmittingBuoy`            | `ps_logbook.floatingObject`     |
+| `ps_logbook.floatingObjectPart`          | `ps_logbook.floatingObject`     |
+| `ps_logbook.activity_observedSystem`     | `ps_logbook.activity`           |
+| `ps_logbook.well`                        | `ps_common.trip`                |
+| `ps_logbook.wellActivity`                | `ps_logbook.well`               |
+| `ps_logbook.wellActivitySpecies`         | `ps_logbook.wellActivity`       |
+| `ps_logbook.sample`                      | `ps_common.trip`                |
+| `ps_logbook.sampleActivity`              | `ps_logbook.sample`             |
+| `ps_logbook.sampleSpecies`               | `ps_logbook.sample`             |
+| `ps_logbook.sampleSpeciesMeasure`        | `ps_logbook.sampleSpecies`      |
+| `ps_logbook.sample_person`               | `ps_logbook.sample`             |
+| `ps_landing.landing`                     | `ps_common.trip`                |
+| `ps_localmarket.batch`                   | `ps_common.trip`                |
+| `ps_localmarket.survey`                  | `ps_common.trip`                |
+| `ps_localmarket.surveyPart`              | `ps_localmarket.survey`         |
+| `ps_localmarket.sample`                  | `ps_common.trip`                |
+| `ps_localmarket.sampleSpecies`           | `ps_localmarket.sample`         |
+| `ps_localmarket.sampleSpeciesMeasure`    | `ps_localmarket.sampleSpecies`  |
+| `ps_localmarket.sample_well`             | `ps_localmarket.sample`         |
+
+## Fields and references
+
+Queries return fields in model order, with quoted aliases preserving ObServe names such as `topiaId`.
+
+CSV headers occupy row 1; data starts on row 2.
+
+The model preserves source types, nullability, primary keys and the unique activity link of an observed fishing set.
+
+Time-only values remain strings because the form schema has no time-only type; dates and timestamps stay distinct.
+
+Extraction adds no date, timezone, default value or biological interpretation.
+
+Audit/version fields, `homeId` and internal list indexes are excluded, following the LL extraction convention.
+
+Membership tables retain their composite keys and have no invented `topiaId`.
+
+The model declares 59 code lists and four registries, including dependencies of referenced catalogue records.
+
+The four registries are people, vessels, shipowners and vessel size categories.
+
+All 51 directly used catalogue lookups resolve through `ps/references.yaml`, using `topiaid`.
+
+Reference data remain external, configured through `OBSERVE_CODE_LISTS_URL` and `OBSERVE_REGISTRIES_URL`.
+
+See [reference preparation](../03-references/index.html) for the catalogue contract.
+
+## SQL downloads
+
+Queries live in `inst/10.0/ps/sql/`, with one `<schema>.<table>.sql` file per model sheet.
+
+Entity rows are ordered by `topiaId`; memberships are ordered by their complete composite key.
+
+* [ps_common.trip.sql](../../10.0/ps/sql/ps_common.trip.sql)
+* [ps_common.gearUseFeatures.sql](../../10.0/ps/sql/ps_common.gearUseFeatures.sql)
+* [ps_common.gearUseFeaturesMeasurement.sql](../../10.0/ps/sql/ps_common.gearUseFeaturesMeasurement.sql)
+* [ps_observation.route.sql](../../10.0/ps/sql/ps_observation.route.sql)
+* [ps_observation.activity.sql](../../10.0/ps/sql/ps_observation.activity.sql)
+* [ps_observation.fishingSet.sql](../../10.0/ps/sql/ps_observation.fishingSet.sql)
+* [ps_observation.schoolEstimate.sql](../../10.0/ps/sql/ps_observation.schoolEstimate.sql)
+* [ps_observation.catch.sql](../../10.0/ps/sql/ps_observation.catch.sql)
+* [ps_observation.sample.sql](../../10.0/ps/sql/ps_observation.sample.sql)
+* [ps_observation.sampleMeasure.sql](../../10.0/ps/sql/ps_observation.sampleMeasure.sql)
+* [ps_observation.catchRelease.sql](../../10.0/ps/sql/ps_observation.catchRelease.sql)
+* [ps_observation.floatingObject.sql](../../10.0/ps/sql/ps_observation.floatingObject.sql)
+* [ps_observation.objectSchoolEstimate.sql](../../10.0/ps/sql/ps_observation.objectSchoolEstimate.sql)
+* [ps_observation.objectObservedSpecies.sql](../../10.0/ps/sql/ps_observation.objectObservedSpecies.sql)
+* [ps_observation.transmittingBuoy.sql](../../10.0/ps/sql/ps_observation.transmittingBuoy.sql)
+* [ps_observation.floatingObjectPart.sql](../../10.0/ps/sql/ps_observation.floatingObjectPart.sql)
+* [ps_observation.activity_observedSystem.sql](../../10.0/ps/sql/ps_observation.activity_observedSystem.sql)
+* [ps_logbook.route.sql](../../10.0/ps/sql/ps_logbook.route.sql)
+* [ps_logbook.activity.sql](../../10.0/ps/sql/ps_logbook.activity.sql)
+* [ps_logbook.catch.sql](../../10.0/ps/sql/ps_logbook.catch.sql)
+* [ps_logbook.floatingObject.sql](../../10.0/ps/sql/ps_logbook.floatingObject.sql)
+* [ps_logbook.transmittingBuoy.sql](../../10.0/ps/sql/ps_logbook.transmittingBuoy.sql)
+* [ps_logbook.floatingObjectPart.sql](../../10.0/ps/sql/ps_logbook.floatingObjectPart.sql)
+* [ps_logbook.activity_observedSystem.sql](../../10.0/ps/sql/ps_logbook.activity_observedSystem.sql)
+* [ps_logbook.well.sql](../../10.0/ps/sql/ps_logbook.well.sql)
+* [ps_logbook.wellActivity.sql](../../10.0/ps/sql/ps_logbook.wellActivity.sql)
+* [ps_logbook.wellActivitySpecies.sql](../../10.0/ps/sql/ps_logbook.wellActivitySpecies.sql)
+* [ps_logbook.sample.sql](../../10.0/ps/sql/ps_logbook.sample.sql)
+* [ps_logbook.sampleActivity.sql](../../10.0/ps/sql/ps_logbook.sampleActivity.sql)
+* [ps_logbook.sampleSpecies.sql](../../10.0/ps/sql/ps_logbook.sampleSpecies.sql)
+* [ps_logbook.sampleSpeciesMeasure.sql](../../10.0/ps/sql/ps_logbook.sampleSpeciesMeasure.sql)
+* [ps_logbook.sample_person.sql](../../10.0/ps/sql/ps_logbook.sample_person.sql)
+* [ps_landing.landing.sql](../../10.0/ps/sql/ps_landing.landing.sql)
+* [ps_localmarket.batch.sql](../../10.0/ps/sql/ps_localmarket.batch.sql)
+* [ps_localmarket.survey.sql](../../10.0/ps/sql/ps_localmarket.survey.sql)
+* [ps_localmarket.surveyPart.sql](../../10.0/ps/sql/ps_localmarket.surveyPart.sql)
+* [ps_localmarket.sample.sql](../../10.0/ps/sql/ps_localmarket.sample.sql)
+* [ps_localmarket.sampleSpecies.sql](../../10.0/ps/sql/ps_localmarket.sampleSpecies.sql)
+* [ps_localmarket.sampleSpeciesMeasure.sql](../../10.0/ps/sql/ps_localmarket.sampleSpeciesMeasure.sql)
+* [ps_localmarket.sample_well.sql](../../10.0/ps/sql/ps_localmarket.sample_well.sql)
+
+## Source definitions
+
+Table names, columns, keys and foreign keys come from the ObServe 10.0 PostgreSQL schema.
+
+Ownership follows ObServe's parent navigation model, supplemented by the four membership tables.
+
+Source files in `observe-app`:
+
+* `core/persistence/migration/src/main/resources/db/migration/v10/10.0/empty-schema-PG.sql`
+* `model/persistence/src/main/resources/META-INF/navigation/Observe-parent-model.json`

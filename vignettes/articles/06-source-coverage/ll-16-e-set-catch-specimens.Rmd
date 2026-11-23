@@ -1,0 +1,245 @@
+---
+title: "LL 16 E-SET-CATCH-SPECIMENS mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 16 E-SET-CATCH-SPECIMENS mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Individual sampling, measurements, sex, maturity, collected samples and depredation.
+
+ROS LL **4.2.0**: **23 fields**, including **9 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-catch-specimens) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes, if SSI and tag sheets are empty.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field                 | Required | Type   | ROS reference / fixed values                                      |
+| ------------------------- | -------- | ------ | ----------------------------------------------------------------- |
+| `observed_trip_id`        | M        | string | —                                                                 |
+| `set_id`                  | M        | string | —                                                                 |
+| `catch_id`                | M        | string | —                                                                 |
+| `specimen_id`             | M        | string | —                                                                 |
+| `sampling_period`         | M        | string | `refs_biology.sampling_periods` / `code`                          |
+| `sampling_method`         | M        | string | `refs_biology.sampling_methods_for_sampling_collections` / `code` |
+| `length_1_type`           | M        | string | `refs_biology.measurements` / `code`                              |
+| `length_1_value_cm`       | M        | number | —                                                                 |
+| `length_1_measuring_tool` | M        | string | `refs_biology.measurement_tools` / `code`                         |
+
+<details>
+<summary>Optional fields (14)</summary>
+
+| ROS field                                | Required | Type   | ROS reference / fixed values                        |
+| ---------------------------------------- | -------- | ------ | --------------------------------------------------- |
+| `length_2_type`                          | O        | string | `refs_biology.measurements` / `code`                |
+| `length_2_value_cm`                      | O        | number | —                                                   |
+| `length_2_measuring_tool`                | O        | string | `refs_biology.measurement_tools` / `code`           |
+| `weight_processing_type`                 | O        | string | `refs_fishery.fish_processing_types` / `code`       |
+| `weight_value_kg`                        | O        | number | —                                                   |
+| `weight_estimation_method`               | O        | string | `refs_biology.weight_measurement_tools` / `code`    |
+| `sex`                                    | O        | string | `refs_biology.sex` / `code`                         |
+| `maturity_scale`                         | O        | string | —                                                   |
+| `maturity_stage`                         | O        | string | `refs_biology.maturity_stages` / `code`             |
+| `sample_collected_type`                  | O        | string | `refs_biology.biological_materials` / `code`        |
+| `sample_collected_preservation_method`   | O        | string | `refs_biology.sample_preservation_methods` / `code` |
+| `sample_collected_destination`           | O        | string | —                                                   |
+| `depredation_details_depredation_source` | O        | string | `refs_biology.depredation_sources` / `code`         |
+| `depredation_details_observed_predator`  | O        | string | `refs_biology.predator_species` / `code`            |
+
+</details>
+
+Parent: **E-SET-CATCHES**, linked through `observed_trip_id`, `set_id`, `catch_id`.
+
+## Source coverage
+
+The three parent identifiers come from trip, set and catch. Specimen identity requires a separate reporting rule.
+
+Three required length attributes have source candidates in `ll_observation.sizeMeasure`:
+
+* `sizeMeasureType` for measurement type.
+* `size` for the value, with units and precision to confirm for ROS centimetres.
+* `sizeMeasureMethod` for the measuring tool.
+
+All three are non-null in the source schema. Philippe ignores the recorded method and fixes the tool instead.
+
+The two remaining mandatory fields, sampling period and method, require collection-context evidence.
+
+The current four-sheet extraction does not include size or individual weight measurements.
+
+This review establishes source structures and code behaviour, not actual selected-trip measurement coverage.
+
+## Philippe’s existing export
+
+* SQL starts from catches, joins size and weight measurements, and joins branchline compositions at set level.
+* It keeps only rows with a size value, excluding weight-only or otherwise unmeasured records.
+* The provisional specimen ID is the size-measurement ID, not a distinct fish identifier.
+* R repeats each joined row `catch.count` times, then appends a global row number to the measurement ID.
+* Sampling period is fixed to `LH`; method is fixed to `RM`; length tool is fixed to `CA`.
+* SQL applies `FLOOR` to the length, discarding fractional precision without converting units.
+* R converts selected length types, sets a legacy straight-length flag, and leaves the second length empty.
+
+### Specimen identity and measurement multiplicity
+
+One fish can have several measurements. A measurement ID is therefore not, by itself, a specimen identity.
+
+For example, an individual catch with two lengths can produce two specimen rows instead of one with two lengths.
+
+Independent joins to weights and branchline compositions can multiply those rows further.
+
+Repeating the joined rows by catch count can amplify that multiplication; it does not establish individual measures.
+
+R checks for multiple lengths only after assigning a unique row suffix, so it no longer groups the original fish.
+
+The form requires a four-digit specimen sequence starting at 0001 within each trip/set/catch.
+
+The legacy measurement-ID-plus-row-number format does not satisfy that rule.
+
+An agreed identity rule must preserve the same specimen across lengths, weights, SSI details and tags.
+
+Grouped catches must not acquire invented individual measurements merely by repeating a shared value.
+
+### Sampling and length interpretation
+
+`LH` means line-hauling observation; `RM` means systematic random sampling of mixed species.
+
+Those constants are not established by the existence of a recorded length.
+
+For length, `CA` means calliper. ObServe also records ruler, tape, visual assessment and unknown methods.
+
+Use the recorded method as the correspondence source; the current constant discards that information.
+
+The generic ROS tool list also uses CA for weight calculation, so correspondence needs length context.
+
+Philippe handles 13 source length types; other types become missing values.
+
+Several recognised source types become `UN`, losing the available measurement meaning.
+
+The source catalogue includes curved measurements and historical disabled types; geometry needs explicit review.
+
+The ROS 4.2.0 sheet has no straight-length columns. Philippe selects 25 columns, including two such flags.
+
+Reusing his positional Excel write against this 23-field model would shift later fields into the wrong columns.
+
+Choose up to two reported lengths per specimen and respect the model's second-length field dependencies.
+
+Handling additional measurements, or specimens without a length, remains open with the reporting requirements.
+
+### Optional fields
+
+* Second length: currently empty despite the source allowing multiple measurements.
+* Weight: value, processing and method are empty, although `weightMeasure` is joined and stores these candidates.
+* Sex: R maps English Female/Male labels and turns every other state into U, losing undetermined/juvenile distinctions.
+* Maturity: source stage codes pass through unchanged; the scale stays empty and ROS uses different stage codes.
+* Collected samples: type, preservation and destination stay empty; source sample references alone do not define them.
+* Depredation: R selects the first matching predator category; the observed-predator field stays empty.
+
+The source predator relation can contain several species. Category priority and predator reporting need agreement.
+
+Weights need their own processing and method correspondence, plus unit verification.
+
+Maturity requires scale, species and sex context; numeric equality cannot establish a valid correspondence.
+
+Health recoding from this R section feeds the following SSI sheet and belongs to that review.
+
+## Questions for the sheet review
+
+1. Define stable specimen identity and the per-catch four-digit sequence, shared with SSI and tag records.
+2. Determine which source catches represent individuals and how multiple measurements belong to each fish.
+3. Establish actual sampling period and design; use recorded tools with agreed measurement correspondences.
+4. Confirm units and precision; decide how to choose two lengths and handle missing or additional measurements.
+5. Review optional weight, sex, maturity, collected-material and predator information independently.
+6. Align the 23-field form layout before reusing any legacy positional export.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 832-993; sample query; reference correspondence inventory.
+
+* `sql-queries/observe_ll_sample.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* ObServe 10.0 DDL: observation `catch`, `sizeMeasure`, `weightMeasure` and `catch_predator`.
+* Measurement UI: `SizeMeasureTableModel.java` and `WeightMeasureTableModel.java`.
+* Form 4.2.0: specimen ID pattern/sequence, required lengths and optional second-length dependencies.
+* Philippe's positional workbook write: R line 1138.
+* IRD snapshot: `20261112T184113Z`; size types/methods, sex and maturity status.
+* ROS snapshot: `code_lists--b7c000cba93d`; sampling periods/methods, tools, sex, maturity and depredation.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Identify an actual individual first, then attach its recorded lengths and weights to that same fish.
+* Retrieve length value, type and measuring tool from sizeMeasure; preserve precision and verify units.
+* Generate a stable four-digit sequence per catch only after individual identity and ordering are established.
+* Reuse that specimen identity for SSI and tags, regardless of the number of measurements.
+* Optional weights, sex and additional lengths are usable where source meaning and target correspondence agree.
+
+### What stays unresolved
+
+* A measurement is not a fish; do not repeat grouped counts or turn two lengths into two specimens.
+* Sampling period and method need collection evidence; neither LH nor RM follows from a recorded measurement.
+* Use the recorded measuring tool rather than constant CA; resolve unsupported types and more than two lengths.
+* Maturity requires the actual scale and applicable species/sex context; matching stage numbers is insufficient.
+* Sample references do not establish material, preservation or destination; predator choices must retain their evidence.
+* Ask Emmanuel how unmeasured animals can parent SSI or tag rows when the specimen sheet requires a length.
+
+### Complete-row assessment
+
+Recorded individual measurements are usable, but mandatory sampling context and specimen identity remain prerequisites.
+
+This does not yet establish a complete specimen row or justify excluding animals without measurements.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* The 4,023 length records describe 4,013 individuals on the 17 OB trips; no individual weights occur here.
+* Ten turtles across seven trips have paired SCL/SCW measures: six TTL and four TUG individuals.
+* Report those pairs against one specimen identity, subject to verified measurement-code correspondence.
+* Recorded tools are 2,876 callipers, four rulers, two tapes, one visual assessment and 1,140 Unknown values.
+* Lengths are positive, from 29 to 325 cm. No fractional precision occurs in this selection.
+* Sex has 340 populated references and sample references exist on 72 catches; maturity has none.
+* Sampling period/method and unmeasured-specimen reporting remain open despite actual measurements being available.
+
+## Export safeguard: more than two lengths
+
+The 2020–2025 exports contain 40 animals with two lengths and none with more than two.
+
+Before export, count length measurements per animal. Flag any animal with more than two and identify its source record.
+
+Keep one specimen identity. Report any measurements not transmitted; never silently discard them or duplicate the animal.
+
+A selection rule is still needed if this case occurs. This safeguard is documented, not implemented.
+
+IRD is asked whether its sampling protocol can produce more than two lengths per animal.

@@ -1,0 +1,153 @@
+---
+title: "02 — Data extraction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{02 — Data extraction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+[Architecture overview](../export-design.html).
+
+## Data extraction {#data-extraction}
+
+The R extraction script receives the selected ObServe trip IDs and extracts each trip in full.
+
+Two source access options are envisaged: a direct database connection or the public ObServe API.
+
+See [Load an ObServe trip](../../source-loading.html) for the two draft backends.
+
+It uses the shared `form.tools::read_form_tables()` API with H2/db.tools or the ObServe public SQL service.
+
+Both backends return one data frame per model sheet and trip. CSV publication remains a separate export operation.
+
+Preserve source identifiers and parent links so the later transformation can navigate the trip's records.
+
+Keep trip-selection criteria in point 01; all per-trip extraction operations use the selected trip identifier.
+
+The SQL queries and intermediate model below describe the database extraction path.
+
+Output conventions and failure handling are covered in point 08.
+
+The [PS extraction model](ps-extraction.html) covers the complete data tree rooted at `ps_common.trip`.
+
+## ObServe LL intermediate form model
+
+The model describes ObServe data using its field names, types, identifiers and relationships.
+
+It has no META sheet. ROS-specific metadata is supplied when preparing the ROS output.
+
+The LL model defines 18 source tables, including repeated measurements, gear compositions and associations.
+
+Each sheet is named after its qualified source table, including schema and table name.
+
+| Sheet / source table                       | Parent sheet                |
+| ------------------------------------------ | --------------------------- |
+| `ll_common.trip`                           | —                           |
+| `ll_observation.activity`                  | `ll_common.trip`            |
+| `ll_observation.fishingSet`                | `ll_observation.activity`   |
+| `ll_observation.catch`                     | `ll_observation.fishingSet` |
+| `ll_common.trip_species`                   | `ll_common.trip`            |
+| `ll_common.gearUseFeatures`                | `ll_common.trip`            |
+| `ll_common.gearUseFeaturesMeasurement`     | `ll_common.gearUseFeatures` |
+| `ll_observation.hooksComposition`          | `ll_observation.fishingSet` |
+| `ll_observation.baitsComposition`          | `ll_observation.fishingSet` |
+| `ll_observation.floatlinesComposition`     | `ll_observation.fishingSet` |
+| `ll_observation.branchlinesComposition`    | `ll_observation.fishingSet` |
+| `ll_observation.fishingSet_mitigationType` | `ll_observation.fishingSet` |
+| `ll_observation.section`                   | `ll_observation.fishingSet` |
+| `ll_observation.basket`                    | `ll_observation.section`    |
+| `ll_observation.branchline`                | `ll_observation.basket`     |
+| `ll_observation.sizeMeasure`               | `ll_observation.catch`      |
+| `ll_observation.weightMeasure`             | `ll_observation.catch`      |
+| `ll_observation.catch_predator`            | `ll_observation.catch`      |
+
+The model belongs conceptually to `observe.form.model`; its YAML lives in `ros.form.observe`.
+
+The source model and SQL queries are shared by ROS form versions under the same ObServe version and gear.
+
+[Download the ObServe 10.0 LL model](../../10.0/ll/form.yaml).
+
+Source NOT NULL flags define mandatory values within source rows; they do not require an empty table to have rows.
+
+Each added table retains its domain fields. Persistence audit columns and internal list indexes are excluded.
+
+Retain every measurement and composition row with its source key and parent; combine them only during transformation.
+
+The three membership tables retain composite keys. They have no invented `topiaId`.
+
+Optional catch links to section, basket and branchline stay as source fields, alongside its required set parent.
+
+The form schema has one `parent_key` per sheet; it does not enforce those additional catch links.
+
+Source fields retain their ObServe IDs; catalogue lookups use `topiaid`. Countries and species groups supply context.
+
+Equipment values remain text until interpreted through characteristic units, types and allowed list items.
+
+Trip equipment and characteristic measurements are additional source candidates; their ROS use remains unconfirmed.
+
+Their existence does not establish populated tori-line measurements or resolve branchline-section questions.
+
+Tags and photo references remain on catch rows. People, vessels and reference values remain in their catalogues.
+
+META uses user input. Optional V-ATTRIBUTES remains outside ObServe population, pending RAV consolidation.
+
+No established LL mapping requires instrument recordings or encounter sightings; these do not become catch records.
+
+Keep ObServe meanings intact. ROS identifiers, code conversions and reporting calculations belong to transformation.
+
+This source model does not resolve missing observations, sampling protocols or the agreed open reporting questions.
+
+## SQL extraction and CSV files
+
+Use one parameterized query per ObServe sheet. Bind the same selected trip ID to every query for that export.
+
+The 18 PostgreSQL queries live in `inst/10.0/ll/sql/`, named `<schema>.<table>.sql` after their source tables.
+
+Each sheet name is its database table name; append `.sql` to obtain the query filename.
+
+Each query binds `$1::text` to one `ll_common.trip.topiaId`, directly or through its owning parent records.
+
+Date, programme and observation-method filters belong to trip selection; these queries retain the whole selected trip.
+
+Join only owning ancestors. Do not combine independent measurements, compositions or reference records in extraction.
+
+Order entity rows by `topiaId` and association rows by their full composite key. Preserve source nulls and values.
+
+<details>
+<summary>SQL files for all 18 source tables</summary>
+
+* [ll_common.trip.sql](../../10.0/ll/sql/ll_common.trip.sql)
+* [ll_observation.activity.sql](../../10.0/ll/sql/ll_observation.activity.sql)
+* [ll_observation.fishingSet.sql](../../10.0/ll/sql/ll_observation.fishingSet.sql)
+* [ll_observation.catch.sql](../../10.0/ll/sql/ll_observation.catch.sql)
+* [ll_common.trip_species.sql](../../10.0/ll/sql/ll_common.trip_species.sql)
+* [ll_common.gearUseFeatures.sql](../../10.0/ll/sql/ll_common.gearUseFeatures.sql)
+* [ll_common.gearUseFeaturesMeasurement.sql](../../10.0/ll/sql/ll_common.gearUseFeaturesMeasurement.sql)
+* [ll_observation.hooksComposition.sql](../../10.0/ll/sql/ll_observation.hooksComposition.sql)
+* [ll_observation.baitsComposition.sql](../../10.0/ll/sql/ll_observation.baitsComposition.sql)
+* [ll_observation.floatlinesComposition.sql](../../10.0/ll/sql/ll_observation.floatlinesComposition.sql)
+* [ll_observation.branchlinesComposition.sql](../../10.0/ll/sql/ll_observation.branchlinesComposition.sql)
+* [ll_observation.fishingSet_mitigationType.sql](../../10.0/ll/sql/ll_observation.fishingSet_mitigationType.sql)
+* [ll_observation.section.sql](../../10.0/ll/sql/ll_observation.section.sql)
+* [ll_observation.basket.sql](../../10.0/ll/sql/ll_observation.basket.sql)
+* [ll_observation.branchline.sql](../../10.0/ll/sql/ll_observation.branchline.sql)
+* [ll_observation.sizeMeasure.sql](../../10.0/ll/sql/ll_observation.sizeMeasure.sql)
+* [ll_observation.weightMeasure.sql](../../10.0/ll/sql/ll_observation.weightMeasure.sql)
+* [ll_observation.catch_predator.sql](../../10.0/ll/sql/ll_observation.catch_predator.sql)
+
+</details>
+
+Queries must return exactly the model fields, in declaration order, with their declared names.
+
+The CSV header occupies row 1; data begins on row 2. The model declares `start_row: 2`.
+
+A reader that removes CSV headers must adapt the input before using worksheet-oriented diagnostics.
+
+The extraction contract preserves source identifiers, row meaning and parent relationships.
+
+Verify that contract during SQL development, including checks for duplicated rows and broken relationships.
+
+The normal export pipeline trusts the extraction contract; it has no intermediate diagnostic validation stage.
+
+CSV encoding, missing-value representation and date-time serialization remain to be specified.

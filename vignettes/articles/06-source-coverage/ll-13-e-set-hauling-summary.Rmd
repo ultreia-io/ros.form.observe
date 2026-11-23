@@ -1,0 +1,28 @@
+---
+title: "LL 13 E-SET-HAULING summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 13 E-SET-HAULING summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+12 fields: trip/set IDs; start/end times and positions; bird-scaring; two observed counts; sampling protocol.
+
+## Available
+
+All 461 sets have hauling times and positions. The source includes observer and self-reporting trips.
+
+Hooks set cannot be reused as the number retrieved or observed. The hook-timer flag does not show observer coverage.
+
+## To decide
+
+Establish observed hook/branchline counts, actual sampling protocol and bird-scaring information.
+
+Keep optional offal information empty without evidence. Do not reuse Philippe's fixed values.
+
+An empty sheet is structurally possible if no bite-off rows depend on it; the reporting rule remains open.
+
+[Detailed review](ll-13-e-set-hauling.html) · [Short review index](ll-sheet-summaries.html).

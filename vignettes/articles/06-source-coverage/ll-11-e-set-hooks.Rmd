@@ -1,0 +1,167 @@
+---
+title: "LL 11 E-SET-HOOKS mapping"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 11 E-SET-HOOKS mapping}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+## Scope
+
+Hook or terminal-device type, proportion and variations for each set.
+
+ROS LL **4.2.0**: **5 fields**, including **3 mandatory fields**.
+
+Initial review recorded. Source candidates and legacy behaviour below do not approve a mapping.
+
+Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
+
+## Database destination and import obligation
+
+[Database review](../09-database-import/ll-database-import.html#e-set-hooks) records this sheet's tables and dependencies.
+
+**Empty sheet, structurally: Yes.** See the linked database review for the conditions.
+
+## Mandatory fields first
+
+`ros.form.model/inst/models/4.2.0/ll-form.yaml` defines these names, types and requirements.
+
+**M** means `mandatory: true`; **O** means `mandatory` is omitted and defaults to false.
+
+First establish a source or an agreed reporting rule for every mandatory field.
+
+| ROS field                         | Required | Type   | ROS reference / fixed values                      |
+| --------------------------------- | -------- | ------ | ------------------------------------------------- |
+| `observed_trip_id`                | M        | string | —                                                 |
+| `set_id`                          | M        | string | —                                                 |
+| `hooks_and_terminal_devices_type` | M        | string | `refs_fishery.hook_and_terminal_devices` / `code` |
+
+<details>
+<summary>Optional fields (2)</summary>
+
+| ROS field                               | Required | Type   | ROS reference / fixed values |
+| --------------------------------------- | -------- | ------ | ---------------------------- |
+| `hooks_and_terminal_devices_percentage` | O        | number | —                            |
+| `hooks_and_terminal_devices_variations` | O        | string | —                            |
+
+</details>
+
+Parent: **E-SET**, linked through `observed_trip_id`, `set_id`.
+
+## Source coverage
+
+* Mandatory trip and set identifiers are available; their ROS identity rules remain shared with E-SET.
+* The mandatory ROS hook code combines a type family and a size. ObServe stores both in `hooksComposition`.
+* Optional percentage comes from `hooksComposition.proportion`; Philippe leaves variations empty.
+* `hookOffset` and type details are candidates for variations, with meaning and output format still to agree.
+
+The source table is `ll_observation.hooksComposition`, linked to its fishing set.
+
+Type and proportion are non-null in the schema; size and offset can be null.
+
+Its rows require coverage beyond the current four-sheet intermediate model.
+
+Individual `branchline` records also hold hook details, but do not establish the whole set's distribution.
+
+This review checks schema, UI, catalogues and legacy code. It does not measure actual trip-level population.
+
+## Philippe’s existing export
+
+* SQL selects hook type and proportion; it joins hook size without returning that value.
+* SQL returns `NULL` for variations and does not select offset.
+* A left join can retain a set without hook composition, leaving its hook fields empty.
+* R groups source types into families and assigns fixed sizes: `C14`, `J09`, `H40`, `S01`, `T36`.
+* The recorded size never influences these codes. These constants are not approved mapping rules.
+* Source type `13` becomes `TTL`; the frozen ROS catalogue contains `TLL`, not `TTL`.
+* Unmatched types, including source `99` (Unknown), become missing values.
+* R prints missing-code and `TTL` rows; these checks neither reject nor repair them.
+
+ROS keys each row by trip, set and terminal-device code.
+
+Several source types can collapse into one code. R does not aggregate the resulting rows or their percentages.
+
+Duplicate target keys are therefore possible; their occurrence has not been measured on the selected trips.
+
+## Catalogue correspondence
+
+The frozen catalogues contain 14 ObServe types, 22 ObServe sizes and 26 combined ROS codes.
+
+A circle hook recorded as 18/0 has candidate code `C18`; Philippe would assign `C14` regardless of size.
+
+Only combinations present in the target catalogue can be used. Missing size is not a licence to invent one.
+
+The target snapshot has no generic unknown hook code. Unsupported or unknown combinations need an agreed policy.
+
+`TLL` denotes a loop-based terminal device. Its equivalence to ObServe Trap-line needs semantic confirmation.
+
+ROS 4.0.0 uses `refs_fishery.hook_types`; alignment with the form's newer reference is a separate dependency.
+
+## Questions for the sheet review
+
+Resolve mandatory-field coverage first; review optional information afterwards.
+
+1. Inspect actual type/size combinations and missing sizes, then agree the combined ROS codes.
+2. Confirm Trap-line correspondence and the policy for unknown or unsupported combinations.
+3. Define aggregation when source rows share a target code, including how percentages are combined.
+4. Decide which source type details and offsets to preserve as optional variations.
+5. Apply the general empty-sheet policy when no usable hook composition is available.
+
+All decisions remain open. No level 1 or level 2 mapping is fixed by this review.
+
+## Evidence
+
+Philippe sources refer to `ros_ll_iotc_v2.1`; R line numbers refer to `r-script/ros_ll_iotc_v2.1.R`.
+
+R lines 611-650; hook query; reference correspondence inventory and frozen catalogue snapshots.
+
+* `sql-queries/observe_ll_hook.sql`
+
+Source field candidates use ObServe 10.0 and the current four-sheet intermediate model.
+
+* ObServe 10.0 DDL: `ll_observation.hooksComposition` and `ll_observation.branchline`.
+* Observation UI: `FishingSetHooksCompositionUI.jaxx` exposes type, size, offset and proportion.
+* IRD snapshot: `20261112T184113Z`; tables `ll_common.hooktype` and `ll_common.hooksize`.
+* ROS snapshot: `code_lists--b7c000cba93d`; table `refs_fishery.hook_and_terminal_devices`.
+
+See the [reference correspondence inventory](../04-references-code-lists/ll-reference-correspondences.html) for catalogue issues.
+
+## Working analysis: exportable data without assumptions
+
+This is a proposed scope based on recorded facts and justified conversions. Existing decisions above still apply.
+
+The live-data check below measures this selection. Missing required values and reporting rules remain unresolved.
+
+### What can be populated
+
+* Read actual type, size and proportion from each set's hook composition, retaining source identity.
+* Produce a combined ROS code only for a verified type/size combination present in the target catalogue.
+* A recorded circle hook of size 18/0 has candidate C18; no recorded size should be replaced with a fixed size.
+* Preserve recorded proportions; optional variations can use offset or type detail once their meaning is agreed.
+
+### What stays unresolved
+
+* A missing size or unsupported combination cannot be repaired with C14, J09 or another convenient default.
+* Confirm Trap-line equivalence to TLL; the legacy TTL value is not a valid target code.
+* Merge shares only when source rows describe disjoint parts of the same set; do not normalise to 100 automatically.
+* Resolve duplicate target keys after recoding without discarding source distinctions.
+
+### Complete-row assessment
+
+Rows with verified type/size codes can supply all three mandatory fields, subject to valid parent IDs.
+
+Unknown and unsupported combinations remain unresolved; their occurrence in actual trips still needs measurement.
+
+## Live-data check: 2025 selection
+
+[Measured scope and evidence](ll-live-data-coverage.html): 67 trips, 461 sets and 8,703 catch rows.
+
+The scope includes 17 observer-monitored trips and 50 self-reporting trips. These are different collection methods.
+
+* Of 825 composition rows, 293 have known sizes, 530 explicitly use Unknown and two have no size.
+* OB trips supply the 293 known sizes and two missing sizes; every SR composition uses Unknown.
+* At set level, 145 have all sizes known, two have some known sizes and 314 have none.
+* Known combinations include circle 13/0, 14/0 and 16/0, and J hooks 9/0 and 11/0.
+* Type/size correspondence remains necessary; fixed-size recoding would discard or invent observed detail.
+* Composition proportions total 100% per set. Offset is empty in all 825 records.

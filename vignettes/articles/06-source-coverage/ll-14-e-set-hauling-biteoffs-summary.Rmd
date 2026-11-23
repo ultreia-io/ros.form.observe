@@ -1,0 +1,28 @@
+---
+title: "LL 14 E-SET-HAULING-BITEOFFS summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 14 E-SET-HAULING-BITEOFFS summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+Only trip and set IDs. The configuration ID and bite-off count are optional.
+
+## Available
+
+There are 209,430 branchline records, but no positive cut-off or hook-loss flags in the selected trips.
+
+Those false defaults do not prove that observers recorded zero bite-offs.
+
+## To decide
+
+Ask Pascal which recorded event means a bite-off and whether the relevant branchlines were actually observed.
+
+Do not calculate a count or assign a configuration until that is clear.
+
+An ID-only row produces a warning. An empty sheet is structurally possible; the reporting rule remains open.
+
+[Detailed review](ll-14-e-set-hauling-biteoffs.html) · [Short review index](ll-sheet-summaries.html).

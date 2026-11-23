@@ -1,0 +1,169 @@
+---
+title: "Load an ObServe trip"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Load an ObServe trip}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The source form model drives extraction: each sheet selects the SQL file with the same qualified table name.
+
+`read_observe_trip_tables()` selects the packaged model and SQL, then calls `form.tools::read_form_tables()`.
+
+It returns one data frame per sheet, with exactly the model's field names and order.
+
+Choose an H2 SQL backup, an existing database connection or the ObServe public SQL API.
+
+All use the existing ObServe 10.0 queries and pass the selected trip ID to every sheet query.
+
+## Select the source version, gear and trip
+
+```{r source-model, eval=FALSE}
+# Select the packaged ObServe schema version.
+observe_version <- "10.0"
+# Select longline source tables, or use "ps" for purse seine.
+gear <- "ll"
+# Supply a trip ID selected by the calling application.
+trip_id <- "REPLACE_WITH_TRIP_TOPIA_ID"
+```
+
+The reader uses `<observe_version>/<gear>/form.yaml` and its sibling `sql/` directory from the package.
+
+Trip selection, reference retrieval and ROS transformations are separate from this operation.
+
+## H2 SQL backup
+
+H2 runs in Java. `RJDBC` supplies its DBI connection, and `db.tools` executes the table queries through that connection.
+
+`observe_h2_backup_connection_provider()` loads the supplied H2 jar and delegates restoration to `db.tools`.
+
+The first call restores it; later calls reopen the same database without rerunning the backup.
+
+```{r h2-backup-load, eval=FALSE}
+# Select the H2 jar compatible with the backup and a temporary restore directory.
+connection_provider <- ros.form.observe::observe_h2_backup_connection_provider(
+  "/path/to/observe.sql.gz", directory = NA, h2_jar = Sys.getenv("H2_JAR"))
+# Open the restored database and close this connection when the extraction finishes.
+source_tables <- db.tools::with_db_connection(connection_provider, function(connection) {
+  # Adapt the restored H2 database to the shared table-loader API.
+  table_loader <- form.tools::sql_table_loader(connection)
+  # Select the packaged source model and bind the trip ID to its queries.
+  ros.form.observe::read_observe_trip_tables(trip_id, table_loader,
+    gear = gear, observe_version = observe_version)
+})
+# Remove the temporary database after all work with the provider has finished.
+unlink(attr(connection_provider, "directory"), recursive = TRUE)
+```
+
+Set `directory` to a new path, such as `/data/observe-restored`, to retain the restored database.
+
+The parent must exist. An existing destination is rejected; the original backup is never modified.
+
+Reuse the same provider for more trips; each `with_db_connection()` call opens and closes an independent connection.
+
+Supplied connections default to read-only. The database remains available after each connection closes.
+
+`NA` uses a session-temporary directory; normal R-session cleanup removes it unless you remove it earlier.
+
+ObServe's backup writer omits database passwords and settings. The provider defaults to database user `sa` and no password.
+
+These are H2 connection credentials, separate from ObServe application accounts.
+
+Supply the driver matching the backup; this loader does not migrate old H2 or ObServe schemas.
+
+## Existing H2 database
+
+Create an application-owned `observe-h2.yaml`, following the `db.tools` configuration convention:
+
+```yaml
+url: jdbc:h2:file:/path/to/restored/observe;IFEXISTS=TRUE;ACCESS_MODE_DATA=r
+user: REPLACE_WITH_DATABASE_USER
+password: !env OBSERVE_DB_PASSWORD
+```
+
+The URL opens an existing database in read-only mode. Keep the backup's own database settings and H2 version.
+
+Supply the password for this R session through a secure prompt or an existing keyring entry.
+
+```{r h2-load, eval=FALSE}
+# Read a previously registered database secret into the current R process.
+Sys.setenv(OBSERVE_DB_PASSWORD = keyring::key_get("observe-database"))
+# Load the H2 JDBC driver selected by the caller.
+driver <- RJDBC::JDBC("org.h2.Driver", Sys.getenv("H2_JAR"), identifier.quote = '"')
+# Create the connection through the application's YAML configuration.
+connection_provider <- function() db.tools::db_connect_from_yaml(driver, "observe-h2.yaml")
+# Scope the database connection to this extraction.
+source_tables <- db.tools::with_db_connection(connection_provider, function(connection) {
+  # Use a transaction with suitable isolation if a shared database can change during extraction.
+  DBI::dbWithTransaction(connection, {
+    # Adapt the supplied connection to the shared table-loader API.
+    table_loader <- form.tools::sql_table_loader(connection)
+    # Bind the trip ID to each model-selected query through db.tools and JDBC.
+    ros.form.observe::read_observe_trip_tables(trip_id, table_loader,
+      gear = gear, observe_version = observe_version)
+  })
+})
+# Remove the process copy of the password after the database work.
+Sys.unsetenv("OBSERVE_DB_PASSWORD")
+```
+
+The SQL loader also accepts other DBI connections. The consumer supplies the driver and database-specific SQL.
+
+It never disconnects a shared connection; `with_db_connection()` owns and closes the connection it creates.
+
+## ObServe public SQL service
+
+Copy the packaged API configuration, then set its URL, login and database name.
+
+```{r api-config, eval=FALSE}
+# Copy the configuration template without overwriting an existing local file.
+file.copy(system.file("config", "observe-api.example.yaml", package = "ros.form.observe"),
+  "observe-api.yaml", overwrite = FALSE)
+# Enter the password securely for this R session, following the schema-atlas convention.
+ros.form.observe::observe_set_password("observe-api.yaml")
+```
+
+The YAML declares `password: !env OBSERVE_API_PASSWORD`; it contains no literal password.
+
+An existing keyring can supply the password instead of the prompt:
+
+```{r api-keyring, eval=FALSE}
+# Read an existing keyring entry into the session variable declared by the YAML.
+ros.form.observe::observe_set_password("observe-api.yaml",
+  prompt = function(label) keyring::key_get("observe-api"))
+```
+
+The password stays in the current R process until cleared or R exits. No persistent keyring entry is created.
+
+```{r api-load, eval=FALSE}
+# Create an API connection provider from the local YAML configuration.
+connection_provider <- function() ros.form.observe::observe_connect_from_yaml("observe-api.yaml")
+# Open one API session and close it after success or failure.
+source_tables <- ros.form.observe::with_observe_connection(connection_provider, function(connection) {
+  # Select the ObServe SQL-service implementation of the shared table-loader contract.
+  table_loader <- ros.form.observe::observe_sql_table_loader(connection)
+  # Execute the same model-selected SQL files for the same trip ID.
+  ros.form.observe::read_observe_trip_tables(trip_id, table_loader,
+    gear = gear, observe_version = observe_version)
+})
+# Remove the process copy of the API password when finished.
+Sys.unsetenv(ros.form.observe::observe_password_variable("observe-api.yaml"))
+```
+
+The session object retains its token, not its password. Its print method omits credentials.
+
+## Draft contract and limits
+
+* Results stay in memory as named data frames; no CSV directory is published by these functions.
+* All SQL files are checked before the first table request, and every result must match the modeled columns.
+* Missing values, empty text and zero remain distinct. Reference IDs are not translated.
+* Keys, relationships and business rules are not validated during loading.
+* Query or transport errors stop the read; no partial dataset is returned.
+* H2 uses JDBC binding. The API supports one restricted technical ID at `$1::text`, since it has no binding protocol.
+* API requests have separate snapshots. A common snapshot across tables is not guaranteed.
+* API row or byte limits raise errors. Pagination and streaming are not implemented in this draft.
+* HTTP dates and timestamps remain text; direct drivers retain their native R types.
+* Empty or wholly null HTTP columns have no SQL type metadata and remain logical NA vectors.
+
+The consuming exporter must settle type normalization and durable file publication before relying on this draft.

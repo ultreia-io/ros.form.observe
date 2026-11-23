@@ -1,0 +1,26 @@
+---
+title: "LL 00 META summary"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{LL 00 META summary}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Required
+
+11 mandatory fields identify the form, reporting authority, contacts, reporting year and submission.
+
+## Available
+
+The user supplies shared metadata for the per-trip workbooks. The chosen model fixes the form ID and revision.
+
+META provides the dataset entry point in ROS. Metadata is needed when creating a new dataset.
+
+## To decide
+
+Detailed review is deferred. Confirm reporting year/entity, contact matching, and finalisation/submission dates.
+
+Do not substitute the export execution date for those dates without agreement.
+
+[Detailed review](ll-00-meta.html) · [Short review index](ll-sheet-summaries.html).
