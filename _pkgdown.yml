@@ -159,13 +159,23 @@ articles:
       - ros.form.observe
       - terminology
 reference:
-  - title: Source table loading
-    contents: [read_observe_trip_tables, observe_sql_table_loader]
+  - title: Trip extraction
+    contents:
+      - observe_sql_extract_trip_csv
+      - observe_public_api_extract_trip_csv
+      - OBSERVE_GEAR_LL
+      - OBSERVE_GEAR_PS
+      - OBSERVE_VERSION_10_0
   - title: H2 backup connections
-    contents: [observe_h2_backup_connection_provider]
-  - title: API sessions
-    contents: [observe_password_variable, observe_set_password, observe_connect_from_yaml,
-      observe_disconnect, with_observe_connection, observe_api_connection-class]
+    contents: [create_observe_h2_backup_connection_provider]
+  - title: Public API sessions
+    contents:
+      - observe_public_api_get_password_variable
+      - observe_public_api_set_password
+      - observe_public_api_connect_from_yaml
+      - observe_public_api_disconnect
+      - observe_public_api_with_connection
+      - observe_public_api_connection-class
   - title: Package
     contents: [ros.form.observe-package]
 

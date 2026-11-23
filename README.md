@@ -1,6 +1,6 @@
 # ros.form.observe
 
-The draft source loader reads model-selected SQL files through H2/db.tools or the ObServe public SQL API.
+Trip extraction saves one CSV per source table through a database connection or the ObServe public API.
 
 See `vignettes/source-loading.Rmd` for YAML configuration, session credentials and one-trip examples.
 
@@ -65,9 +65,11 @@ to understand the export scope and the role of the related packages.
 
 ## Load source data
 
-Use `observe_h2_backup_connection_provider()` to open connections from an ObServe `.sql.gz` backup.
+Use `create_observe_h2_backup_connection_provider()` to open connections from an ObServe `.sql.gz` backup.
 
-Use `read_observe_trip_tables()` with the SQL or API loader to select the packaged LL or PS model and queries.
+Use `observe_sql_extract_trip_csv()` with a DBI connection.
+
+Use `observe_public_api_extract_trip_csv()` with an ObServe public API session.
 
 The [trip-loading guide][source-loading] covers backups, existing databases and the public API.
 

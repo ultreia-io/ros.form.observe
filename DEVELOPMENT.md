@@ -6,22 +6,25 @@
 
 The files organize functions in one package namespace. You do not source each file separately.
 
-| File                         | Responsibility                       |
-| ---------------------------- | ------------------------------------ |
-| `ros.form.observe-package.R` | Provide package-level documentation. |
-| `observe-connection.R`       | Configure and manage API sessions.   |
-| `observe-h2.R`               | Adapt H2 SQL backups for extraction. |
-| `observe-tables.R`           | Prepare SQL and decode source rows.  |
+| File                         | Responsibility                        |
+| ---------------------------- | ------------------------------------- |
+| `ros.form.observe-package.R` | Provide package-level documentation.  |
+| `observe-public-api.R`       | Manage public API sessions and SQL.   |
+| `observe-h2.R`               | Adapt H2 SQL backups for extraction.  |
+| `observe-csv-extraction.R`   | Extract ObServe source tables to CSV. |
+| `observe-constants.R`       | Define source gears and versions.    |
 
 Public operations appear before internal helpers in each R file.
 
 Every named function has roxygen documentation, including internal helpers and the connection print method.
 
-Model-driven SQL loading belongs to `form.tools`; H2 restoration belongs to `db.tools`.
+Model-driven DBI queries use `form.tools`. H2 restoration uses `db.tools`.
 
 ObServe API requests stay in this package.
 
-`read_observe_trip_tables()` selects the packaged version and gear; its table loader selects the transport.
+Each extraction wrapper supplies its CSV writer to `extract_observe_trip_csv()`.
+
+The shared extractor selects the source model and calls the writer once per table.
 
 H2 integration tests restore synthetic backups and check that LL and PS queries keep trips and related records separate.
 

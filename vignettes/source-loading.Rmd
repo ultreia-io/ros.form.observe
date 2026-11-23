@@ -9,9 +9,7 @@ vignette: >
 
 The source form model drives extraction: each sheet selects the SQL file with the same qualified table name.
 
-`read_observe_trip_tables()` selects the packaged model and SQL, then calls `form.tools::read_form_tables()`.
-
-It returns one data frame per sheet, with exactly the model's field names and order.
+Both extraction functions create a trip directory and write one CSV per source table.
 
 Choose an H2 SQL backup, an existing database connection or the ObServe public SQL API.
 
@@ -21,14 +19,16 @@ All use the existing ObServe 10.0 queries and pass the selected trip ID to every
 
 ```{r source-model, eval=FALSE}
 # Select the packaged ObServe schema version.
-observe_version <- "10.0"
-# Select longline source tables, or use "ps" for purse seine.
-gear <- "ll"
+observe_version <- ros.form.observe::OBSERVE_VERSION_10_0
+# Select longline source tables, or use OBSERVE_GEAR_PS for purse seine.
+gear <- ros.form.observe::OBSERVE_GEAR_LL
 # Supply a trip ID selected by the calling application.
 trip_id <- "REPLACE_WITH_TRIP_TOPIA_ID"
+# Choose a new directory under an existing parent.
+trip_directory <- file.path("/path/to/extracted", "trip-1")
 ```
 
-The reader uses `<observe_version>/<gear>/form.yaml` and its sibling `sql/` directory from the package.
+Each extraction selects one gear. The reader uses `<observe_version>/<gear>/form.yaml` and its sibling `sql/` directory.
 
 Trip selection, reference retrieval and ROS transformations are separate from this operation.
 
@@ -36,20 +36,18 @@ Trip selection, reference retrieval and ROS transformations are separate from th
 
 H2 runs in Java. `RJDBC` supplies its DBI connection, and `db.tools` executes the table queries through that connection.
 
-`observe_h2_backup_connection_provider()` loads the supplied H2 jar and delegates restoration to `db.tools`.
+`create_observe_h2_backup_connection_provider()` loads the supplied H2 jar and delegates restoration to `db.tools`.
 
 The first call restores it; later calls reopen the same database without rerunning the backup.
 
 ```{r h2-backup-load, eval=FALSE}
 # Select the H2 jar compatible with the backup and a temporary restore directory.
-connection_provider <- ros.form.observe::observe_h2_backup_connection_provider(
+connection_provider <- ros.form.observe::create_observe_h2_backup_connection_provider(
   "/path/to/observe.sql.gz", directory = NA, h2_jar = Sys.getenv("H2_JAR"))
 # Open the restored database and close this connection when the extraction finishes.
-source_tables <- db.tools::with_db_connection(connection_provider, function(connection) {
-  # Adapt the restored H2 database to the shared table-loader API.
-  table_loader <- form.tools::sql_table_loader(connection)
-  # Select the packaged source model and bind the trip ID to its queries.
-  ros.form.observe::read_observe_trip_tables(trip_id, table_loader,
+source_csv_files <- db.tools::with_db_connection(connection_provider, function(connection) {
+  # Save one CSV per table from the restored database.
+  ros.form.observe::observe_sql_extract_trip_csv(trip_id, connection, trip_directory,
     gear = gear, observe_version = observe_version)
 })
 # Remove the temporary database after all work with the provider has finished.
@@ -72,9 +70,47 @@ These are H2 connection credentials, separate from ObServe application accounts.
 
 Supply the driver matching the backup; this loader does not migrate old H2 or ObServe schemas.
 
-## Existing H2 database
+## Direct database connection
 
-Create an application-owned `observe-h2.yaml`, following the `db.tools` configuration convention:
+Pass an open PostgreSQL or H2 DBI connection to `observe_sql_extract_trip_csv()`.
+
+### PostgreSQL
+
+Save your connection settings as `observe-postgresql.yaml`:
+
+```yaml
+host: localhost
+port: 5432
+dbname: observe
+user: observe_reader
+password: !env OBSERVE_DB_PASSWORD
+```
+
+Set `OBSERVE_DB_PASSWORD` in the R session before opening the connection.
+
+```{r postgresql-load, eval=FALSE}
+# Open PostgreSQL with the application-owned YAML configuration.
+open_observe_postgresql <- function() {
+  db.tools::db_connect_from_yaml(RPostgres::Postgres(), "observe-postgresql.yaml")
+}
+
+# Close the PostgreSQL connection when the extraction finishes.
+source_csv_paths <- db.tools::with_db_connection(open_observe_postgresql, function(observe_connection) {
+  # Use a single transaction for the trip's source tables.
+  DBI::dbWithTransaction(observe_connection, {
+    # Read all tables from the same database snapshot.
+    DBI::dbExecute(observe_connection,
+      "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+    # Save one CSV per source table for the selected trip.
+    ros.form.observe::observe_sql_extract_trip_csv(trip_id, observe_connection, trip_directory,
+      gear = gear, observe_version = observe_version)
+  })
+})
+```
+
+### H2
+
+To open H2 from YAML, use `db.tools::db_connect_from_yaml()` with a configuration like this:
 
 ```yaml
 url: jdbc:h2:file:/path/to/restored/observe;IFEXISTS=TRUE;ACCESS_MODE_DATA=r
@@ -94,13 +130,11 @@ driver <- RJDBC::JDBC("org.h2.Driver", Sys.getenv("H2_JAR"), identifier.quote = 
 # Create the connection through the application's YAML configuration.
 connection_provider <- function() db.tools::db_connect_from_yaml(driver, "observe-h2.yaml")
 # Scope the database connection to this extraction.
-source_tables <- db.tools::with_db_connection(connection_provider, function(connection) {
+source_csv_files <- db.tools::with_db_connection(connection_provider, function(connection) {
   # Use a transaction with suitable isolation if a shared database can change during extraction.
   DBI::dbWithTransaction(connection, {
-    # Adapt the supplied connection to the shared table-loader API.
-    table_loader <- form.tools::sql_table_loader(connection)
-    # Bind the trip ID to each model-selected query through db.tools and JDBC.
-    ros.form.observe::read_observe_trip_tables(trip_id, table_loader,
+    # Save one CSV per table through the existing database connection.
+    ros.form.observe::observe_sql_extract_trip_csv(trip_id, connection, trip_directory,
       gear = gear, observe_version = observe_version)
   })
 })
@@ -108,9 +142,7 @@ source_tables <- db.tools::with_db_connection(connection_provider, function(conn
 Sys.unsetenv("OBSERVE_DB_PASSWORD")
 ```
 
-The SQL loader also accepts other DBI connections. The consumer supplies the driver and database-specific SQL.
-
-It never disconnects a shared connection; `with_db_connection()` owns and closes the connection it creates.
+`with_db_connection()` closes the connection it opens. A shared connection stays under the caller's control.
 
 ## ObServe public SQL service
 
@@ -121,7 +153,7 @@ Copy the packaged API configuration, then set its URL, login and database name.
 file.copy(system.file("config", "observe-api.example.yaml", package = "ros.form.observe"),
   "observe-api.yaml", overwrite = FALSE)
 # Enter the password securely for this R session, following the schema-atlas convention.
-ros.form.observe::observe_set_password("observe-api.yaml")
+ros.form.observe::observe_public_api_set_password("observe-api.yaml")
 ```
 
 The YAML declares `password: !env OBSERVE_API_PASSWORD`; it contains no literal password.
@@ -130,7 +162,7 @@ An existing keyring can supply the password instead of the prompt:
 
 ```{r api-keyring, eval=FALSE}
 # Read an existing keyring entry into the session variable declared by the YAML.
-ros.form.observe::observe_set_password("observe-api.yaml",
+ros.form.observe::observe_public_api_set_password("observe-api.yaml",
   prompt = function(label) keyring::key_get("observe-api"))
 ```
 
@@ -138,32 +170,54 @@ The password stays in the current R process until cleared or R exits. No persist
 
 ```{r api-load, eval=FALSE}
 # Create an API connection provider from the local YAML configuration.
-connection_provider <- function() ros.form.observe::observe_connect_from_yaml("observe-api.yaml")
+connection_provider <- function() ros.form.observe::observe_public_api_connect_from_yaml("observe-api.yaml")
 # Open one API session and close it after success or failure.
-source_tables <- ros.form.observe::with_observe_connection(connection_provider, function(connection) {
-  # Select the ObServe SQL-service implementation of the shared table-loader contract.
-  table_loader <- ros.form.observe::observe_sql_table_loader(connection)
-  # Execute the same model-selected SQL files for the same trip ID.
-  ros.form.observe::read_observe_trip_tables(trip_id, table_loader,
+source_csv_files <- ros.form.observe::observe_public_api_with_connection(connection_provider, function(connection) {
+  # Save the API's CSV response for each source table as received.
+  ros.form.observe::observe_public_api_extract_trip_csv(trip_id, connection, trip_directory,
     gear = gear, observe_version = observe_version)
 })
 # Remove the process copy of the API password when finished.
-Sys.unsetenv(ros.form.observe::observe_password_variable("observe-api.yaml"))
+Sys.unsetenv(ros.form.observe::observe_public_api_get_password_variable("observe-api.yaml"))
 ```
 
 The session object retains its token, not its password. Its print method omits credentials.
 
-## Draft contract and limits
+## Load the extracted trip tables
 
-* Results stay in memory as named data frames; no CSV directory is published by these functions.
-* All SQL files are checked before the first table request, and every result must match the modeled columns.
-* Missing values, empty text and zero remain distinct. Reference IDs are not translated.
-* Keys, relationships and business rules are not validated during loading.
-* Query or transport errors stop the read; no partial dataset is returned.
-* H2 uses JDBC binding. The API supports one restricted technical ID at `$1::text`, since it has no binding protocol.
-* API requests have separate snapshots. A common snapshot across tables is not guaranteed.
-* API row or byte limits raise errors. Pagination and streaming are not implemented in this draft.
-* HTTP dates and timestamps remain text; direct drivers retain their native R types.
-* Empty or wholly null HTTP columns have no SQL type metadata and remain logical NA vectors.
+Use the directory from either extraction example. The CSV reader uses the form model to check headers and convert fields.
 
-The consuming exporter must settle type normalization and durable file publication before relying on this draft.
+```{r load-trip-csv, eval=FALSE}
+# Load the packaged ObServe 10.0 longline form model.
+observe_form_model <- form.model::read_form_model(
+  file.path(
+    ros.form.observe::OBSERVE_VERSION_10_0,
+    ros.form.observe::OBSERVE_GEAR_LL,
+    "form.yaml"
+  ),
+  package = "ros.form.observe"
+)
+
+# Load the CSVs as typed tables for the ROS transformation.
+observe_trip_tables <- form.tools::read_form_csv_tables(
+  form_model = observe_form_model,
+  directory = trip_directory
+)
+
+# Inspect the extracted trip record.
+observe_trip_tables[["ll_common.trip"]]
+```
+
+## Source CSV contract
+
+Both paths create one `<qualified-table>.csv` per model sheet, with a header even when there are no rows.
+
+The API path saves the default `sql/csv` response byte for byte. The direct database path uses the same format:
+
+* UTF-8 text, commas between fields and CRLF between records.
+* Quoted headers and values, with embedded quotes doubled.
+* A bare empty field for SQL NULL and `""` for empty text.
+
+All queries are prepared before execution. A failed extraction removes its new directory.
+
+The API uses separate snapshots for the table requests. Its row or byte limits cause the extraction to fail.

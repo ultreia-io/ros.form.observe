@@ -11,7 +11,9 @@ vignette: >
 
 ## Files and failures — What CSV conventions and output names do we use, and what happens when a trip export fails? {#files-and-failures-what-csv-conventions-and-output-names-do-we-use-and-what-happens-when-a-trip-export-fails}
 
-Agree CSV encoding, missing values, date-time serialization, header handling and output names.
+Source extraction uses the default `sql/csv` format. It writes one `<qualified-table>.csv` per table.
+
+See the [trip-loading guide](../../source-loading.html) for the encoding, headers and NULL representation.
 
 Decide what to retain and whether to continue with other trips when one export fails.
 

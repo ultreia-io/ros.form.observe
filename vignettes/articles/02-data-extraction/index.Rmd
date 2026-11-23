@@ -15,11 +15,11 @@ The R extraction script receives the selected ObServe trip IDs and extracts each
 
 Two source access options are envisaged: a direct database connection or the public ObServe API.
 
-See [Load an ObServe trip](../../source-loading.html) for the two draft backends.
+See [Load an ObServe trip](../../source-loading.html) for both extraction paths.
 
-It uses the shared `form.tools::read_form_tables()` API with H2/db.tools or the ObServe public SQL service.
+`observe_sql_extract_trip_csv()` writes one CSV per source table from a database connection.
 
-Both backends return one data frame per model sheet and trip. CSV publication remains a separate export operation.
+`observe_public_api_extract_trip_csv()` writes the same files from the public API.
 
 Preserve source identifiers and parent links so the later transformation can navigate the trip's records.
 
@@ -150,4 +150,4 @@ Verify that contract during SQL development, including checks for duplicated row
 
 The normal export pipeline trusts the extraction contract; it has no intermediate diagnostic validation stage.
 
-CSV encoding, missing-value representation and date-time serialization remain to be specified.
+Both paths use the default `sql/csv` format described in the [trip-loading guide](../../source-loading.html).
