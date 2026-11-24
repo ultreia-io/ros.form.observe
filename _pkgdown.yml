@@ -14,6 +14,8 @@ navbar:
     articles:
       text: Articles
       menu:
+        - text: Live example — Prepare the export
+          href: articles/live-example/01_prepare_export.html
         - text: Architecture topics — 01 to 09
           href: articles/export-design.html
         - text: Short reviews - start here
@@ -55,6 +57,12 @@ navbar:
         - text: Code of conduct
           href: CODE_OF_CONDUCT.html
 articles:
+  - title: Live example
+    navbar: ~
+    contents:
+      - articles/live-example/01_prepare_export
+      - articles/live-example/02_extracting_trips_public_api
+      - articles/live-example/02_extracting_trips_postgresql
   - title: Architecture overview
     navbar: ~
     contents:
@@ -159,13 +167,18 @@ articles:
       - ros.form.observe
       - terminology
 reference:
+  - title: Export inputs
+    contents: [export_settings, export_paths, prepare_export_inputs, prepare_observe_catalogue, prepare_ros_catalogue]
+  - title: Export context
+    contents: [load_export_context, prepare_export_references]
+  - title: Trip selection
+    contents: [observe_public_api_select_trip_ids, observe_sql_select_trip_ids]
   - title: Trip extraction
     contents:
       - observe_sql_extract_trip_csv
       - observe_public_api_extract_trip_csv
-      - OBSERVE_GEAR_LL
-      - OBSERVE_GEAR_PS
       - OBSERVE_VERSION_10_0
+      - OBSERVE_VERSIONS
   - title: H2 backup connections
     contents: [create_observe_h2_backup_connection_provider]
   - title: Public API sessions

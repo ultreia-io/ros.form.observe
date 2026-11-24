@@ -1,0 +1,179 @@
+---
+title: "01 — Prepare the export"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{01 — Prepare the export}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This walkthrough prepares an ObServe 10.0 longline export to ROS LL 4.2.0, with one Excel form per trip.
+
+## Install R packages
+
+Open R in the directory you want to use for the export. Install `pak` from CRAN if needed.
+
+```{r install-pak, eval=FALSE}
+# Install the package installer.
+install.packages("pak", repos = "https://cloud.r-project.org")
+```
+
+```{r install-export-packages, eval=FALSE}
+# Install the exporter from develop.
+pak::pkg_install("ultreia-io/ros.form.observe@develop")
+```
+
+## Load the packages
+
+```{r load-export-packages, eval=FALSE}
+# Load the reference catalogue tools.
+library(form.references)
+# Load the form table tools.
+library(form.tools)
+# Load the ROS form models.
+library(ros.form.model)
+# Load the ROS catalogue configuration package.
+library(ros.form.references)
+# Load the ObServe exporter.
+library(ros.form.observe)
+```
+
+## Export inputs
+
+Exports with the same settings reuse `inputs/` and the catalogue snapshots.
+
+| Input                | Location              | What it defines                                                  |
+|----------------------|-----------------------|------------------------------------------------------------------|
+| ObServe form model   | `observe-form.yaml`   | Defines the ObServe tables, their fields and relationships.      |
+| ROS form model       | `ros-form.yaml`       | Defines the ROS workbook sheets, their fields and relationships. |
+| ROS form template    | `ros-form-empty.xlsx` | Blank ROS workbook to fill for each trip.                        |
+| ObServe catalogues   | `observe-catalogue/`  | ObServe code lists and registries used by the export.            |
+| ROS catalogues       | `ros-catalogue/`      | ROS code lists and registries used by the export.                |
+| Reference mapping    | `mapping.yaml`        | How ObServe codes map to ROS codes.                              |
+| Export configuration | `export.yaml`         | Which rows and values to produce for each ROS sheet.             |
+
+## Prepare the input files
+
+Prepare the input files in the ROS target directory.
+
+```{r prepare-export-inputs, eval=FALSE}
+# Create settings for the ObServe version, gear and ROS target.
+export_settings <- ros.form.observe::export_settings(
+  observe_version = ros.form.observe::OBSERVE_VERSION_10_0,
+  ros_form_version = ros.form.model::ROS_FORM_VERSION_4_2_0,
+  gear = ros.form.model::ROS_FORM_LL,
+  output_directory = "output"
+)
+# Prepare or reuse the input files for these settings.
+ros.form.observe::prepare_export_inputs(export_settings)
+```
+
+## Load the export context
+
+Each snapshot contains the tables needed by its form model and the selected mapping.
+
+Configure the catalogue URLs in `observe-references.yaml` and `ros-references.yaml` under `inputs/`.
+Set any environment variables those YAML files reference for the URLs or credentials.
+Use an ObServe catalogue version that matches the source database.
+
+```{r prepare-export-catalogues, eval=FALSE}
+# Load both form models, the mapping definition and the export configuration.
+export_context <- ros.form.observe::load_export_context(export_settings)
+# Prepare the catalogue snapshots, lookups and mapping for reuse across trips.
+export_context <- ros.form.observe::prepare_export_references(export_context)
+```
+
+Reuse `export_context` for each trip in this R session.
+
+## ObServe connection
+
+Choose one connection method to select trips and extract their tables.
+
+### Public API
+
+Save your ObServe API settings in `observe-api.yaml` and set `OBSERVE_API_PASSWORD`.
+
+```yaml
+url: https://observe.example.org/api/public
+login: REPLACE_WITH_OBSERVE_API_LOGIN
+database: observe
+password: !env OBSERVE_API_PASSWORD
+```
+
+```{r open-api-connection, eval=FALSE}
+# Open a public API session using the YAML settings.
+open_observe_api <- function() {
+  ros.form.observe::observe_public_api_connect_from_yaml("observe-api.yaml")
+}
+```
+
+### PostgreSQL
+
+Install and load `RPostgres` for this connection.
+
+```{r load-postgresql, eval=FALSE}
+# Install the PostgreSQL driver if needed.
+if (!requireNamespace("RPostgres", quietly = TRUE)) pak::pkg_install("RPostgres")
+# Load the PostgreSQL driver.
+library(RPostgres)
+```
+
+Save your PostgreSQL settings in `observe-postgresql.yaml` and set `OBSERVE_DB_PASSWORD`.
+
+```yaml
+host: db.example.org
+port: 5432
+dbname: observe
+user: REPLACE_WITH_OBSERVE_DB_LOGIN
+password: !env OBSERVE_DB_PASSWORD
+```
+
+```{r open-postgresql-connection, eval=FALSE}
+# Open a PostgreSQL connection using the YAML settings.
+open_observe_postgresql <- function() {
+  db.tools::db_connect_from_yaml(RPostgres::Postgres(), "observe-postgresql.yaml")
+}
+```
+
+## Output directory
+
+Both extraction methods share the catalogue snapshots. Each dated run keeps its own trip selection and source tables.
+
+```text
+output/
+└── observe-10.0/
+    └── ll/
+        ├── observe-catalogue/
+        └── ros-4.2.0/
+            ├── inputs/
+            │   ├── observe-form.yaml
+            │   ├── observe-references.yaml
+            │   ├── observe-sql/
+            │   ├── ros-form.yaml
+            │   ├── ros-references.yaml
+            │   ├── ros-form-empty.xlsx
+            │   ├── export.yaml
+            │   ├── mapping.yaml
+            │   └── correspondences/
+            ├── ros-catalogue/
+            └── 2026-11-24/
+                ├── public-api/
+                │   ├── 01-trip-selection/selected-trip-ids.csv
+                │   └── 02-source-tables/
+                │       ├── <topiaId>/
+                │       └── <topiaId>.Rds
+                └── postgresql/
+                    ├── 01-trip-selection/selected-trip-ids.csv
+                    └── 02-source-tables/
+                        ├── <topiaId>/
+                        └── <topiaId>.Rds
+```
+
+Use the export run date (`YYYY-MM-DD`) for the dated folder. Each extraction guide sets the trip dates separately.
+
+## Run the walkthrough
+
+1. Select and extract trips through the [public API](02_extracting_trips_public_api.html)
+   or [PostgreSQL](02_extracting_trips_postgresql.html).
+2. Use the saved catalogues and trip data to fill a ROS form. See the
+   [export configuration](../06-source-coverage/export-configuration.html) for the declared rules.

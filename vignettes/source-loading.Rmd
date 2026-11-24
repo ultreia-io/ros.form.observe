@@ -20,12 +20,12 @@ All use the existing ObServe 10.0 queries and pass the selected trip ID to every
 ```{r source-model, eval=FALSE}
 # Select the packaged ObServe schema version.
 observe_version <- ros.form.observe::OBSERVE_VERSION_10_0
-# Select longline source tables, or use OBSERVE_GEAR_PS for purse seine.
-gear <- ros.form.observe::OBSERVE_GEAR_LL
+# Select longline source tables.
+gear <- ros.form.model::ROS_FORM_LL
 # Supply a trip ID selected by the calling application.
 trip_id <- "REPLACE_WITH_TRIP_TOPIA_ID"
-# Choose a new directory under an existing parent.
-trip_directory <- file.path("/path/to/extracted", "trip-1")
+# Choose an existing directory in which to store extracted trips.
+trip_root_directory <- "/path/to/extracted"
 ```
 
 Each extraction selects one gear. The reader uses `<observe_version>/<gear>/form.yaml` and its sibling `sql/` directory.
@@ -45,9 +45,9 @@ The first call restores it; later calls reopen the same database without rerunni
 connection_provider <- ros.form.observe::create_observe_h2_backup_connection_provider(
   "/path/to/observe.sql.gz", directory = NA, h2_jar = Sys.getenv("H2_JAR"))
 # Open the restored database and close this connection when the extraction finishes.
-source_csv_files <- db.tools::with_db_connection(connection_provider, function(connection) {
+trip_directory <- db.tools::with_db_connection(connection_provider, function(connection) {
   # Save one CSV per table from the restored database.
-  ros.form.observe::observe_sql_extract_trip_csv(trip_id, connection, trip_directory,
+  ros.form.observe::observe_sql_extract_trip_csv(trip_id, connection, trip_root_directory,
     gear = gear, observe_version = observe_version)
 })
 # Remove the temporary database after all work with the provider has finished.
@@ -95,14 +95,14 @@ open_observe_postgresql <- function() {
 }
 
 # Close the PostgreSQL connection when the extraction finishes.
-source_csv_paths <- db.tools::with_db_connection(open_observe_postgresql, function(observe_connection) {
+trip_directory <- db.tools::with_db_connection(open_observe_postgresql, function(observe_connection) {
   # Use a single transaction for the trip's source tables.
   DBI::dbWithTransaction(observe_connection, {
     # Read all tables from the same database snapshot.
     DBI::dbExecute(observe_connection,
       "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
     # Save one CSV per source table for the selected trip.
-    ros.form.observe::observe_sql_extract_trip_csv(trip_id, observe_connection, trip_directory,
+    ros.form.observe::observe_sql_extract_trip_csv(trip_id, observe_connection, trip_root_directory,
       gear = gear, observe_version = observe_version)
   })
 })
@@ -130,11 +130,11 @@ driver <- RJDBC::JDBC("org.h2.Driver", Sys.getenv("H2_JAR"), identifier.quote = 
 # Create the connection through the application's YAML configuration.
 connection_provider <- function() db.tools::db_connect_from_yaml(driver, "observe-h2.yaml")
 # Scope the database connection to this extraction.
-source_csv_files <- db.tools::with_db_connection(connection_provider, function(connection) {
+trip_directory <- db.tools::with_db_connection(connection_provider, function(connection) {
   # Use a transaction with suitable isolation if a shared database can change during extraction.
   DBI::dbWithTransaction(connection, {
     # Save one CSV per table through the existing database connection.
-    ros.form.observe::observe_sql_extract_trip_csv(trip_id, connection, trip_directory,
+    ros.form.observe::observe_sql_extract_trip_csv(trip_id, connection, trip_root_directory,
       gear = gear, observe_version = observe_version)
   })
 })
@@ -172,9 +172,9 @@ The password stays in the current R process until cleared or R exits. No persist
 # Create an API connection provider from the local YAML configuration.
 connection_provider <- function() ros.form.observe::observe_public_api_connect_from_yaml("observe-api.yaml")
 # Open one API session and close it after success or failure.
-source_csv_files <- ros.form.observe::observe_public_api_with_connection(connection_provider, function(connection) {
+trip_directory <- ros.form.observe::observe_public_api_with_connection(connection_provider, function(connection) {
   # Save the API's CSV response for each source table as received.
-  ros.form.observe::observe_public_api_extract_trip_csv(trip_id, connection, trip_directory,
+  ros.form.observe::observe_public_api_extract_trip_csv(trip_id, connection, trip_root_directory,
     gear = gear, observe_version = observe_version)
 })
 # Remove the process copy of the API password when finished.
@@ -192,7 +192,7 @@ Use the directory from either extraction example. The CSV reader uses the form m
 observe_form_model <- form.model::read_form_model(
   file.path(
     ros.form.observe::OBSERVE_VERSION_10_0,
-    ros.form.observe::OBSERVE_GEAR_LL,
+    ros.form.model::ROS_FORM_LL,
     "form.yaml"
   ),
   package = "ros.form.observe"
@@ -210,7 +210,8 @@ observe_trip_tables[["ll_common.trip"]]
 
 ## Source CSV contract
 
-Both paths create one `<qualified-table>.csv` per model sheet, with a header even when there are no rows.
+Both extractors create and return the trip's directory under the supplied root.
+They write one `<qualified-table>.csv` per model sheet, with a header even when there are no rows.
 
 The API path saves the default `sql/csv` response byte for byte. The direct database path uses the same format:
 

@@ -11,9 +11,7 @@ The draft covers all **19 sheets and 285 fields** in ROS LL 4.2.0, using the ObS
 
 [Download export.yaml](../../10.0/ll/4.2.0/export.yaml).
 
-The file is a design proposal. No exporter reader, callback registry or rule implementation is supplied yet.
-
-`draft_version` identifies this proposed format; it does not refer to a published configuration schema.
+The configuration uses `form.tools` export schema `1.0.0`. The ROS callback implementations are a separate step.
 
 ## Location and responsibility
 
@@ -33,9 +31,9 @@ inst/10.0/ll/
 
 The target model is `models/4.2.0/ll-form.yaml` from `ros.form.model`.
 
-File paths are relative to `export.yaml`; the target model path is relative to its installed package.
+The export context supplies the source and target form models from the prepared inputs.
 
-The caller supplies the ROS references configuration as `ros`. The source configuration is named `observe`.
+The context supplies the reference configurations as `observe` and `ros`.
 
 These names bind the two configurations used by `mapping.yaml`; catalogue data remains outside this package.
 
@@ -88,7 +86,7 @@ META uses named caller inputs. Its form identifier and revision come from the se
 
 Every source sheet name includes its schema, for example `ll_observation.fishingSet`.
 
-A binding without `within` or `via` refers to the current source row or its unique owning ancestor.
+A binding without `within` refers to the current source row or its unique owning ancestor.
 
 Owning paths come from `parent_key` in the source model. Missing or broken links remain unresolved.
 
@@ -100,7 +98,9 @@ It returns a collection, including an empty one. It must not select the first re
 
 A row rule retains its source keys. Grouping must retain all contributing records for later field rules and diagnostics.
 
-The explicit `catch_branchline` relationship follows `catch.branchline` to `branchline.topiaId`.
+The SSI rules receive `catch.branchline` as `branchline_id`. Their `branchline_fields` parameter lists the fields to read.
+
+The callback follows `catch.branchline` to `branchline.topiaId`.
 
 This optional link is not the catch's owning parent. A linked branchline must belong to the same source set.
 
@@ -110,11 +110,7 @@ Model bindings use `model: target`; caller bindings use `input`. Neither claims 
 
 ## Rules and catalogue correspondences
 
-`rule_set` identifies one explicitly configured rule set and its version for this export scope.
-
-`rules` describes the named callbacks. Its text is documentation, never executable R.
-
-A future caller supplies an explicit registry of R functions under these names. YAML contains no R expressions.
+Each `rule` names a callback supplied by the caller. The callback notes below record the intended behavior.
 
 The proposed callback receives named inputs, generic context and parameters, and returns one field result.
 
@@ -124,7 +120,7 @@ Row callbacks return source-backed row contexts. They must not multiply animals 
 
 Result diagnostics distinguish missing input, no match, ambiguity and execution failure.
 
-Preserve source keys, rule-set version, rule name and catalogue versions with every result.
+Preserve source keys, rule names and catalogue versions with every result.
 
 The caller decides whether an unresolved result blocks a field, row or trip export.
 
@@ -199,6 +195,100 @@ ROS ports have no `locode` field. Canonical country prefixes and competing port 
 
 This stays an exporter callback. The catalogue mapping file contains no port conversion or global FRA-to-REU alias.
 
+<details>
+<summary>Shared identity and callback notes</summary>
+
+```yaml
+identities:
+  trip:
+    status: pending
+    rule: trip_identity
+    inputs:
+      trip: {sheet: ll_common.trip, fields: [topiaId, startDate, observer, vessel]}
+    note: "Agree ROS identifier components and accepted registry identities; never emit the raw trip ID as a ROS trip ID."
+  set:
+    status: specified
+    rule: copy
+    inputs:
+      value: {sheet: ll_observation.fishingSet, field: topiaId}
+  catch:
+    status: specified
+    rule: copy
+    inputs:
+      value: {sheet: ll_observation.catch, field: topiaId}
+  configuration:
+    status: specified
+    rule: copy
+    inputs:
+      value: {sheet: ll_observation.branchlinesComposition, field: topiaId}
+  specimen:
+    status: pending
+    rule: specimen_identity
+    inputs:
+      animal: {sheet: ll_observation.catch, fields: [topiaId, count]}
+    note: "The source catch may represent several animals; individual identity and unmeasured-parent handling must be agreed."
+rules:
+  copy: "Copy the recorded scalar without substituting missing values or changing precision."
+  input: "Read an explicit caller input; no implicit date, country, gear or reporting-year default."
+  model_value: "Read the single allowed value of this field from the selected target model."
+  unresolved: "Return an unresolved diagnostic with the candidate inputs; do not manufacture a value."
+  omit: "Leave the field empty under an explicit scope decision; this does not mean zero or absence."
+  identity: "Reuse the shared identity indexed by its source key; never allocate identifiers per target sheet."
+  trip_identity: "Construct the ROS trip ID from accepted observer/vessel identities and trip date; format components remain open."
+  specimen_identity: "Allocate a stable four-digit sequence per trip/set/catch, shared by measurements, SSI and tags."
+  catalogue_mapping: "Resolve the input with mapping.yaml for the declared target table; preserve unresolved and ambiguous results."
+  observer_identity: "Resolve common.person by topiaid, then an explicitly accepted ROS observer correspondence; return a property of that same record."
+  vessel_identity: "Resolve common.vessel by topiaid and match its iotcid to ros_meta.vessel.iotc_vessel_identifier; require one accepted record."
+  captain_identity: "Resolve the captain in common.person, then an accepted ros_meta.contact identity; return the declared property."
+  vessel_flag: "Read common.vessel.flagcountry and map the country; flag versus chartering-state choice needs agreement."
+  captain_country: "Read common.person.country and map it; confirm its nationality meaning before reporting it for either role."
+  harbour_country: "Read common.harbour.country and map it; resolve the France/Reunion reporting question without a global alias."
+  harbour_port: "Read common.harbour.locode; derive candidates using its country prefix and port suffix; require one canonical ROS port."
+  harbour_coordinate: "Read the requested common.harbour coordinate only after agreeing that it represents the vessel endpoint."
+  date_at_time: "Combine the recorded vessel date with the declared reporting time and explicit timezone; retain convention provenance."
+  timestamp: "Interpret the source timestamp using an agreed timezone convention, preserving the recorded instant."
+  conducted_sets: "Count distinct FishingSet topiaIds whose parent activity resolves to vesselActivity code FO within this trip."
+  activity_days: "Derive durations by agreed vessel-activity categories and day boundaries; missing or uncovered intervals remain unresolved."
+  trip_equipment: "Determine trip equipment availability from recorded use and gear information; false defaults and non-use do not establish absence."
+  shooter_speed: "Convert a confirmed knots value to m/s using 1852/3600; missing speed or an unused shooter does not imply zero."
+  floatline_length: "Select up to three distinct lengths by composition proportion; ranking, aggregation and ties need confirmation."
+  leader_material: "Map distinct composition materials; require one unambiguous material, never the first row."
+  leader_percentage: "Return the proportion for the same resolved leader material; aggregation of repeated material rows needs agreement."
+  branchline_extreme: "Take the requested bound of complete branchline lengths; empty or incomplete input stays unresolved, never Inf or zero."
+  trip_targets: "Map the parent trip's recorded target species into ordered set slots after approval; no inference from catches or fixed species."
+  light_total: "Multiply recorded lights per basket by basket count only when the count applies to every basket."
+  mitigation_slots: "Map recorded measures into ordered slots; membership supplies no device count and missing slots have no default code."
+  configuration_link: "Reuse the corresponding G-CONFIG-BRANCHLINES identity; several configurations need an explicit selection/allocation rule."
+  hook_type_size: "Resolve the actual hook type and size together; unsupported or unknown combinations remain unresolved."
+  bait_condition: "Resolve the recorded bait state without inferring whole/chopped or live/dead information."
+  bait_species: "Resolve the source bait type to an established natural-bait species; artificial bait is not a species code."
+  bait_type: "Resolve an individual branchline's recorded bait type to the target bait-type catalogue."
+  fate_reason: "Resolve the recorded fate reason only when supported; species or retention alone does not establish a discard reason or sale."
+  length_component: "Select a shared ordered measurement slot and return its type, value or tool; preserve precision and report excess measurements."
+  weight_component: "Select one individual weight and its processing/method together; never distribute a grouped catch weight over animals."
+  maturity: "Convert stage using an established scale and species/sex context; equal stage numbers do not prove biological equivalence."
+  predator_class: "Classify all recorded predators through their taxonomic groups; combination and priority policy must be explicit."
+  predator_species: "Map all recorded predator species; several candidates need a reporting policy, never first-match selection."
+  health_condition: "Map the recorded capture or release condition independently; do not infer one observation from the other."
+  gear_interaction: "Translate the recorded hook position through an agreed interaction correspondence, preserving missing input."
+  specimen_leader: "Prefer the linked branchline material; a set-composition fallback requires approval and one distinct mapped material."
+  photo_reference: "Preserve recorded photo references using an agreed encoding and multiplicity policy."
+  tag_identifier: "Use a verified recorded tag identifier; it does not establish release, recovery, tag type or finder details."
+  one_trip: "Produce one row for the selected source trip; META uses one cell block for the same export."
+  each_set: "Produce one row per selected trip's source FishingSet, preserving its source key."
+  configurations: "Produce one row per distinct trip and branchlinesComposition topiaId; retain the source configuration key."
+  light_rows: "Determine light-row presence from recorded light use; zero, missing and mixed categories require an explicit policy."
+  composition_rows: "Start from composition records; agree grouping and proportion aggregation when multiple sources share a target key."
+  catch_rows: "Produce one row per source catch with its source identity, preserving grouped counts and weights."
+  specimen_rows: "Identify actual individuals and collect their measurements; never expand grouped counts into invented measured animals."
+  ssi_rows: "Select eligible exported specimens using accepted ROS species status, including a policy for unmeasured animals and seabirds."
+  tag_rows: "Select verified tag-bearing exported specimens; retain the same parent specimen identity."
+  no_rows: "Do not produce data rows for the sheet under the explicit scope decision."
+  pending_rows: "Do not choose row presence until the named reporting decision is resolved."
+```
+
+</details>
+
 ## Proposed execution
 
 1. Load the selected source trip and its extracted tables, plus the declared models and references configurations.
@@ -227,4 +317,4 @@ Reusing the same specimen identity prevents lengths, SSI and tags from creating 
 
 Purse-seine export rules are outside this LL draft. The source PS model alone does not establish a target mapping.
 
-Refine this file against the [sheet reviews](ll-sheet-reviews.html) before fixing the schema or implementing rules.
+Use the [sheet reviews](ll-sheet-reviews.html) when implementing the rules.

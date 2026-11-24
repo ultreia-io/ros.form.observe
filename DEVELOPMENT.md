@@ -6,13 +6,17 @@
 
 The files organize functions in one package namespace. You do not source each file separately.
 
-| File                         | Responsibility                        |
-| ---------------------------- | ------------------------------------- |
-| `ros.form.observe-package.R` | Provide package-level documentation.  |
-| `observe-public-api.R`       | Manage public API sessions and SQL.   |
-| `observe-h2.R`               | Adapt H2 SQL backups for extraction.  |
-| `observe-csv-extraction.R`   | Extract ObServe source tables to CSV. |
-| `observe-constants.R`       | Define source gears and versions.    |
+| File                         | Responsibility                               |
+|------------------------------|----------------------------------------------|
+| `ros.form.observe-package.R` | Provide package-level documentation.         |
+| `observe-public-api.R`       | Manage public API sessions and SQL.          |
+| `observe-h2.R`               | Adapt H2 SQL backups for extraction.         |
+| `observe-trip-selection.R`   | Select longline trip IDs.                    |
+| `observe-csv-extraction.R`   | Extract ObServe source tables to CSV.        |
+| `export-settings.R`          | Define run settings and prepare input files. |
+| `export-catalogues.R`        | Save the reference tables an export needs.   |
+| `export-context.R`           | Load the inputs shared by trips.              |
+| `observe-constants.R`        | Define ObServe versions.                     |
 
 Public operations appear before internal helpers in each R file.
 

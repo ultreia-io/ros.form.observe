@@ -1,0 +1,15 @@
+@media (min-width: 992px) {
+  .template-article {
+    max-width: min(96%, 1500px);
+  }
+
+  .template-article > .row > main {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .template-article > .row > aside {
+    flex: 0 0 14rem;
+    width: 14rem;
+  }
+}

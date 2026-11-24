@@ -63,6 +63,14 @@ pak::pak("ultreia-io/ros.form.observe@develop")
 Follow the [Getting started guide](https://ultreia-io.github.io/ros.form.observe/articles/ros.form.observe.html)
 to understand the export scope and the role of the related packages.
 
+## Live example
+
+Follow [Prepare the export][live-example] to set up the inputs, catalogues and ObServe connection.
+
+Then select, extract and load trips through the [public API][ll-trip-public-api] or [PostgreSQL][ll-trip-postgresql].
+
+[live-example]: https://ultreia-io.github.io/ros.form.observe/articles/live-example/01_prepare_export.html
+
 ## Load source data
 
 Use `create_observe_h2_backup_connection_provider()` to open connections from an ObServe `.sql.gz` backup.
@@ -73,6 +81,8 @@ Use `observe_public_api_extract_trip_csv()` with an ObServe public API session.
 
 The [trip-loading guide][source-loading] covers backups, existing databases and the public API.
 
+[ll-trip-public-api]: https://ultreia-io.github.io/ros.form.observe/articles/live-example/02_extracting_trips_public_api.html
+[ll-trip-postgresql]: https://ultreia-io.github.io/ros.form.observe/articles/live-example/02_extracting_trips_postgresql.html
 [source-loading]: https://ultreia-io.github.io/ros.form.observe/articles/source-loading.html
 
 ## Further information
