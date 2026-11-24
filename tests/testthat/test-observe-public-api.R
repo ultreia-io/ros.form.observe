@@ -25,11 +25,11 @@ test_that("public API extraction saves each CSV response byte for byte", {
     else api_response("{}")
   })
   connection <- observe_public_api_connect_from_yaml(config)
-  trip_directory <- file.path(directory, "trip")
-  paths <- observe_public_api_extract_trip_csv("trip#001", connection, trip_directory)
-  expect_identical(names(paths), names(definitions))
-  expect_identical(basename(paths), paste0(names(definitions), ".csv") |> unname())
-  expect_setequal(list.files(trip_directory), basename(paths))
+  trip_directory <- file.path(directory, "trip#001")
+  extracted_directory <- observe_public_api_extract_trip_csv("trip#001", connection, directory)
+  expect_identical(extracted_directory, normalizePath(trip_directory, winslash = "/"))
+  paths <- file.path(extracted_directory, paste0(names(definitions), ".csv"))
+  expect_setequal(list.files(extracted_directory), basename(paths))
   for (path in paths)
     expect_identical(readBin(path, "raw", n = file.size(path)), charToRaw(enc2utf8(csv_response)))
   expect_match(rawToChar(requests[[2]]$body$data), "= 'trip#001'::text", fixed = TRUE)
@@ -38,7 +38,7 @@ test_that("public API extraction saves each CSV response byte for byte", {
   observe_public_api_disconnect(connection)
   expect_true(connection$closed)
   expect_null(connection$token)
-  expect_error(observe_public_api_extract_trip_csv("trip#001", connection, file.path(directory, "closed")), "closed")
+  expect_error(observe_public_api_extract_trip_csv("trip#002", connection, directory), "closed")
   expect_length(requests, length(definitions) + 2L)
 })
 
@@ -54,8 +54,9 @@ test_that("public API CSV extraction retains headers when queries return no rows
   httr2::local_mocked_responses(unname(responses))
   connection <- observe_public_api_connect_from_yaml(config)
   on.exit(observe_public_api_disconnect(connection))
-  paths <- observe_public_api_extract_trip_csv("trip#missing", connection, file.path(directory, "empty"))
-  expect_identical(names(paths), names(definitions))
+  extracted_directory <- observe_public_api_extract_trip_csv("trip#missing", connection, directory)
+  paths <- stats::setNames(file.path(extracted_directory, paste0(names(definitions), ".csv")), names(definitions))
+  expect_setequal(list.files(extracted_directory), basename(paths))
   for (sheet in names(paths))
     expect_identical(readBin(paths[[sheet]], "raw", n = file.size(paths[[sheet]])),
       charToRaw(headers[[sheet]]))
@@ -74,7 +75,7 @@ test_that("public API query preparation rejects unsupported values before sendin
   connection <- observe_public_api_connect_from_yaml(config)
   on.exit(observe_public_api_disconnect(connection))
   sql <- "SELECT topiaId FROM ll_common.trip WHERE topiaId = $1::text"
-  expect_error(observe_public_api_extract_trip_csv("invalid identifier", connection, file.path(directory, "invalid")),
+  expect_error(observe_public_api_extract_trip_csv("invalid identifier", connection, directory),
     "Invalid ObServe technical ID")
   expect_error(observe_public_api_prepare_query(sql, list(NA_character_)), "Invalid ObServe technical ID")
   expect_error(observe_public_api_prepare_query(sql, list(trip = "id")), "unnamed trip")
@@ -102,14 +103,14 @@ test_that("failed public API extraction removes partial CSVs and closes the owne
     api_response("{}")
   })
   connection <- NULL
-  trip_directory <- file.path(directory, "failed")
+  trip_directory <- file.path(directory, "trip#001")
   expect_error(observe_public_api_with_connection(function() {
     connection <<- observe_public_api_connect_from_yaml(config)
     connection
-  }, function(connection) observe_public_api_extract_trip_csv("trip#001", connection, trip_directory)),
+  }, function(connection) observe_public_api_extract_trip_csv("trip#001", connection, directory)),
     "returned HTTP 500")
   expect_identical(csv_calls, 2L)
-  expect_false(file.exists(trip_directory))
+  expect_true(dir.exists(directory) && !file.exists(trip_directory))
   expect_true(connection$closed)
   expect_match(tail(endpoints, 1L), "init/close$")
 })

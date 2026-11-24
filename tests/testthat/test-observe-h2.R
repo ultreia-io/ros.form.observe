@@ -40,24 +40,27 @@ test_that("H2 backups produce a separate CSV dataset for each LL and PS trip", {
   skip_if(!nzchar(jar) || !file.exists(jar), "Set H2_JAR to the ObServe H2 driver jar")
   driver <- RJDBC::JDBC("org.h2.Driver", jar, identifier.quote = '"')
   directory <- withr::local_tempdir()
-  for (gear in c(OBSERVE_GEAR_LL, OBSERVE_GEAR_PS)) {
+  for (gear in c(ros.form.model::ROS_FORM_LL, ros.form.model::ROS_FORM_PS)) {
     backup <- file.path(directory, paste0(gear, ".sql.gz"))
     definitions <- observe_test_backup(driver, backup, gear)
     destination <- if (gear == "ll") NA_character_ else file.path(directory, "persistent-ps")
     provider <- create_observe_h2_backup_connection_provider(backup, directory = destination, h2_jar = jar)
     restored_directory <- attr(provider, "directory")
+    trips_directory <- file.path(directory, paste0(gear, "-trips"))
+    dir.create(trips_directory)
     observed_connection <- NULL
     tryCatch({
       for (number in 1:2) {
-        paths <- db.tools::with_db_connection(provider, function(connection) {
+        trip_id <- paste0("trip#", number)
+        extracted_directory <- db.tools::with_db_connection(provider, function(connection) {
           observed_connection <<- connection
-          observe_sql_extract_trip_csv(paste0("trip#", number), connection,
-            file.path(directory, paste(gear, number, sep = "-")), gear = gear,
+          observe_sql_extract_trip_csv(trip_id, connection, trips_directory, gear = gear,
             observe_version = OBSERVE_VERSION_10_0)
         })
-        expect_identical(names(paths), names(definitions))
+        expect_identical(extracted_directory, normalizePath(file.path(trips_directory, trip_id), winslash = "/"))
+        paths <- stats::setNames(file.path(extracted_directory, paste0(names(definitions), ".csv")), names(definitions))
         tables <- lapply(paths, utils::read.csv, check.names = FALSE, colClasses = "character")
-        expect_identical(tables[[paste0(gear, "_common.trip")]]$topiaId, paste0("trip#", number))
+        expect_identical(tables[[paste0(gear, "_common.trip")]]$topiaId, trip_id)
         expect_identical(tables[[paste0(gear, "_observation.activity")]]$topiaId, paste0("activity#", number))
         expect_identical(tables[[paste0(gear, "_observation.fishingSet")]]$topiaId, paste0("set#", number))
         expect_false(DBI::dbIsValid(observed_connection))
@@ -78,12 +81,12 @@ test_that("H2 backups produce a separate CSV dataset for each LL and PS trip", {
         if (number == 1L) unlink(backup)
       }
       empty <- db.tools::with_db_connection(provider, function(connection) {
-        observe_sql_extract_trip_csv("trip#missing", connection, file.path(directory, paste0(gear, "-empty")),
-          gear = gear)
+        observe_sql_extract_trip_csv("trip#missing", connection, trips_directory, gear = gear)
       })
       for (sheet in names(definitions)) {
         header <- paste0('"', paste(names(definitions[[sheet]]$fields), collapse = '","'), '"\r\n')
-        expect_identical(readBin(empty[[sheet]], "raw", n = file.size(empty[[sheet]])), charToRaw(header))
+        csv_path <- file.path(empty, paste0(sheet, ".csv"))
+        expect_identical(readBin(csv_path, "raw", n = file.size(csv_path)), charToRaw(header))
       }
     }, finally = unlink(restored_directory, recursive = TRUE))
   }
@@ -92,7 +95,7 @@ test_that("H2 backups produce a separate CSV dataset for each LL and PS trip", {
 test_that("unsupported source selections fail before invoking the backend", {
   directory <- file.path(withr::local_tempdir(), "trip")
   for (extract_csv in list(observe_sql_extract_trip_csv, observe_public_api_extract_trip_csv)) {
-    expect_error(extract_csv("trip#1", NULL, directory, gear = c(OBSERVE_GEAR_LL, OBSERVE_GEAR_PS)),
+    expect_error(extract_csv("trip#1", NULL, directory, gear = c(ros.form.model::ROS_FORM_LL, ros.form.model::ROS_FORM_PS)),
       "gear must be a non-empty string")
     expect_error(extract_csv("trip#1", NULL, directory, gear = "trawl"), "gear must be 'll' or 'ps'")
     expect_error(extract_csv("trip#1", NULL, directory, gear = "l"), "gear must be 'll' or 'ps'")
