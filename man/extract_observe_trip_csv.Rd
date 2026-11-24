@@ -10,13 +10,14 @@ extract_observe_trip_csv(
   gear,
   observe_version,
   extract_table,
-  prepare_query = identity
+  prepare_query = identity,
+  export_context = NULL
 )
 }
 \arguments{
 \item{trip_id}{Requested source trip identifier.}
 
-\item{directory}{New output directory.}
+\item{directory}{Existing root directory for trip outputs.}
 
 \item{gear}{One supported source gear.}
 
@@ -25,9 +26,11 @@ extract_observe_trip_csv(
 \item{extract_table}{Callback accepting SQL, CSV path and model field names.}
 
 \item{prepare_query}{Callback preparing each query before extraction starts.}
+
+\item{export_context}{Optional context supplying the loaded model and SQL directory.}
 }
 \value{
-Absolute CSV paths named by source table.
+The absolute path to the created trip directory.
 }
 \description{
 Run the model's table extraction through an explicit CSV writer

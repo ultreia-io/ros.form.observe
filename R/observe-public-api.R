@@ -211,6 +211,17 @@ observe_public_api_decode_json <- function(response) {
     error = function(error) stop("Invalid ObServe API JSON response", call. = FALSE))
 }
 
+#' Check an ObServe trip ID before using it in SQL or a directory name
+#' @param trip_id Candidate ObServe trip `topiaId`.
+#' @return The validated trip ID invisibly.
+#' @keywords internal
+observe_public_api_check_trip_id <- function(trip_id) {
+  if (!is.character(trip_id) || length(trip_id) != 1L || is.na(trip_id) ||
+      !grepl("^[A-Za-z0-9_.:#-]+$", trip_id) || trip_id %in% c(".", ".."))
+    stop("Invalid ObServe technical ID", call. = FALSE)
+  invisible(trip_id)
+}
+
 #' Prepare a restricted trip query for the ObServe SQL service
 #' @param sql Consumer-supplied SELECT statement, optionally containing one
 #'   `$1::text` placeholder. Full-line SQL comments are removed.
@@ -236,9 +247,7 @@ observe_public_api_prepare_query <- function(sql, params) {
   if (!is.list(params) || length(params) != 1L || !is.null(names(params)))
     stop("ObServe SQL requires one unnamed trip parameter", call. = FALSE)
   value <- params[[1L]]
-  if (!is.character(value) || length(value) != 1L || is.na(value) ||
-      !grepl("^[A-Za-z0-9_.:#-]+$", value))
-    stop("Invalid ObServe technical ID for SQL service interpolation", call. = FALSE)
+  observe_public_api_check_trip_id(value)
   unquoted <- gsub('"([^\"]|\"\")*"', '""', statement)
   matches <- gregexpr("$1::text", unquoted, fixed = TRUE)[[1L]]
   if (identical(matches[[1L]], -1L) || length(matches) != 1L ||

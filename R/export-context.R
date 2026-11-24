@@ -1,0 +1,58 @@
+# Public operations ---------------------------------------------------------
+
+#' Load the inputs shared by trips in an export
+#' @param export_settings Export settings from [export_settings()].
+#' @return An S3 `export_context` containing the settings, paths, both form
+#'   models, the mapping definition and the parsed export configuration.
+#' @details Run [prepare_export_inputs()] first. Use [prepare_export_references()]
+#'   to add the catalogue data, lookup indexes and prepared mapping.
+#' @export
+load_export_context <- function(export_settings) {
+  paths <- export_paths(export_settings)
+  structure(list(
+    settings = export_settings,
+    paths = paths,
+    observe_form_model = form.model::read_form_model(paths$observe_form_path),
+    ros_form_model = form.model::read_form_model(paths$ros_form_path),
+    mapping_definition = form.references::read_mapping_configuration(paths$mapping_path),
+    export_configuration = form.tools::read_form_export(paths$export_configuration_path)
+  ), class = "export_context")
+}
+
+#' Prepare the references shared by trips in an export
+#' @param export_context Context from [load_export_context()].
+#' @return The context with the reference configurations, tables, indexes and
+#'   prepared mapping added.
+#' @details Uses saved catalogue snapshots when available. Otherwise it retrieves
+#'   the required tables and saves them before preparing lookups. Form and mapping
+#'   lookups use the same tables in memory. A prepared context can be reused.
+#' @export
+prepare_export_references <- function(export_context) {
+  if (!inherits(export_context, "export_context")) {
+    stop("Load the context with load_export_context().", call. = FALSE)
+  }
+  if (!is.null(export_context$mapping_references)) return(export_context)
+  paths <- export_context$paths
+  mapping <- export_context$mapping_definition
+  observe_catalogue <- prepare_export_catalogue(export_context$observe_form_model,
+    paths$observe_references_path,
+    paths$observe_catalogue_directory, observe_mapping_tables(mapping))
+  ros_catalogue <- prepare_export_catalogue(export_context$ros_form_model,
+    paths$ros_references_path,
+    paths$ros_catalogue_directory, ros_mapping_tables(mapping))
+
+  configurations <- list(observe = observe_catalogue$configuration, ros = ros_catalogue$configuration)
+  tables <- list(observe = observe_catalogue$tables, ros = ros_catalogue$tables)
+  export_context$reference_configurations <- configurations
+  export_context$reference_tables <- tables
+  export_context$observe_references <- form.references::prepare_model_references(
+    export_context$observe_form_model, configurations$observe, catalogues = tables$observe
+  )$references
+  export_context$ros_references <- form.references::prepare_model_references(
+    export_context$ros_form_model, configurations$ros, catalogues = tables$ros
+  )$references
+  export_context$mapping_references <- form.references::prepare_mapping_references(
+    mapping, configurations, catalogues = tables
+  )
+  export_context
+}

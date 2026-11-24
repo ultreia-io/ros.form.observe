@@ -8,8 +8,9 @@ observe_public_api_extract_trip_csv(
   trip_id,
   connection,
   directory,
-  gear = OBSERVE_GEAR_LL,
-  observe_version = OBSERVE_VERSION_10_0
+  gear = ros.form.model::ROS_FORM_LL,
+  observe_version = OBSERVE_VERSION_10_0,
+  export_context = NULL
 )
 }
 \arguments{
@@ -17,14 +18,18 @@ observe_public_api_extract_trip_csv(
 
 \item{connection}{An open session from \code{\link[=observe_public_api_connect_from_yaml]{observe_public_api_connect_from_yaml()}}.}
 
-\item{directory}{New trip directory. Its parent must already exist.}
+\item{directory}{Existing root directory for the trips. A new subdirectory
+named after \code{trip_id} is created inside it.}
 
-\item{gear}{One source gear, \link{OBSERVE_GEAR_LL} or \link{OBSERVE_GEAR_PS}.}
+\item{gear}{One source gear, \link[ros.form.model:ROS_FORM_LL]{ros.form.model::ROS_FORM_LL} or \link[ros.form.model:ROS_FORM_PS]{ros.form.model::ROS_FORM_PS}.}
 
 \item{observe_version}{Packaged ObServe source-model version. Defaults to \link{OBSERVE_VERSION_10_0}.}
+
+\item{export_context}{Optional context from \code{\link[=load_export_context]{load_export_context()}}. Its
+ObServe form model and prepared SQL determine the extraction when supplied.}
 }
 \value{
-Absolute CSV paths named by qualified source table, in model order.
+The absolute path to the created trip directory.
 Empty results have a header and no data rows.
 }
 \description{
