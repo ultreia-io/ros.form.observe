@@ -35,9 +35,9 @@ runs:
           https://repo.maven.apache.org/maven2/com/h2database/h2/2.5.252/h2-2.5.252.jar
         h2_checksum=90b11dc413da82070ef15fc943282c1408e6ffd34fa68998335fea8603b5ff20
         if command -v sha256sum >/dev/null 2>&1; then
-          printf '%s  h2-2.5.252.jar\n' "$h2_checksum" | sha256sum --check
+          printf '%s  h2-2.5.252.jar\n' "$h2_checksum" | sha256sum -c
         else
-          printf '%s  h2-2.5.252.jar\n' "$h2_checksum" | shasum -a 256 --check
+          printf '%s  h2-2.5.252.jar\n' "$h2_checksum" | shasum -a 256 -c
         fi
         h2_jar="$h2_directory/h2-2.5.252.jar"
         if [ "$RUNNER_OS" = Windows ]; then
