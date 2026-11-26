@@ -15,13 +15,13 @@ sheets:
       observed_trip_id:
         rule: identity_to_cache
         inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
+          value: {field: topiaId}
         note: O-INFO.1
       observer_identification_iotc_id: {status: omitted, note: O-INFO.2}
       observer_identification_full_name:
         rule: person_full_name
         inputs:
-          value: {sheet: ll_common.trip, field: observer}
+          value: {field: observer}
         note: O-INFO.3
       observer_trip_details_embarkation_in_port_country: {status: unavailable, note: O-INFO.4}
       observer_trip_details_embarkation_in_port_port: {status: unavailable, note: O-INFO.4}
@@ -59,29 +59,29 @@ sheets:
       identification_name:
         rule: vessel_identity
         inputs:
-          value: {sheet: ll_common.trip, field: vessel}
+          value: {field: vessel}
         parameters: {property: label1}
         note: V-INFO.1
       identification_flag_or_chartering_state:
         inputs:
-          value: {sheet: ll_common.trip, field: vessel}
+          value: {field: vessel}
         note: V-INFO.2
       identification_iotc_number:
         rule: vessel_identity
         inputs:
-          value: {sheet: ll_common.trip, field: vessel}
+          value: {field: vessel}
         parameters: {property: iotcid}
         note: V-INFO.1
       identification_imo_number:
         rule: vessel_identity
         inputs:
-          value: {sheet: ll_common.trip, field: vessel}
+          value: {field: vessel}
         parameters: {property: imoid}
         note: V-INFO.1
       identification_ircs:
         rule: vessel_identity
         inputs:
-          value: {sheet: ll_common.trip, field: vessel}
+          value: {field: vessel}
         parameters: {property: radiocallsignid}
         note: V-INFO.1
       registration_country: {status: omitted, note: V-INFO.3}
@@ -96,18 +96,18 @@ sheets:
       personnel_fishing_master_full_name:
         rule: person_full_name
         inputs:
-          value: {sheet: ll_common.trip, field: captain}
+          value: {field: captain}
         note: V-INFO.6
       personnel_fishing_master_nationality:
         inputs:
-          value: {sheet: ll_common.trip, field: captain}
+          value: {field: captain}
         note: V-INFO.7
       personnel_skipper_captain_full_name: {status: omitted, note: V-INFO.6}
       personnel_skipper_captain_nationality: {status: omitted, note: V-INFO.7}
       personnel_crew_number:
         rule: copy
         inputs:
-          value: {sheet: ll_common.trip, field: noOfCrewMembers}
+          value: {field: noOfCrewMembers}
   V-TRIP:
     rows:
       rule: one_row
@@ -120,70 +120,70 @@ sheets:
         status: pending
         rule: harbour_country
         inputs:
-          value: {sheet: ll_common.trip, field: departureHarbour}
+          value: {field: departureHarbour}
         parameters: {target: refs_admin.countries}
         note: "Resolve the reporting-country meaning; no global FRA to REU substitution."
       vessel_departure_port_port:
         status: pending
         rule: harbour_port
         inputs:
-          value: {sheet: ll_common.trip, field: departureHarbour}
+          value: {field: departureHarbour}
         parameters: {target: refs_admin.ports}
         note: "ROS ports have no locode column. Confirm canonical codes where REULPT and FRARELPT coexist."
       vessel_departure_port_latitude:
         status: pending
         rule: harbour_coordinate
         inputs:
-          value: {sheet: ll_common.trip, field: departureHarbour}
+          value: {field: departureHarbour}
         parameters: {property: latitude}
         note: "Confirm harbour coordinates represent this endpoint; they do not provide an at-sea position."
       vessel_departure_port_longitude:
         status: pending
         rule: harbour_coordinate
         inputs:
-          value: {sheet: ll_common.trip, field: departureHarbour}
+          value: {field: departureHarbour}
         parameters: {property: longitude}
         note: "Confirm harbour coordinates represent this endpoint; they do not provide an at-sea position."
       vessel_departure_date_time:
         status: pending
         rule: date_at_time
         inputs:
-          value: {sheet: ll_common.trip, field: startDate}
+          value: {field: startDate}
         parameters: {time: "00:00", timezone: null}
         note: "Reporting time is agreed, timezone is unresolved; this is not an observed movement time."
       vessel_return_port_country:
         status: pending
         rule: harbour_country
         inputs:
-          value: {sheet: ll_common.trip, field: landingHarbour}
+          value: {field: landingHarbour}
         parameters: {target: refs_admin.countries}
         note: "Resolve the reporting-country meaning; no global FRA to REU substitution."
       vessel_return_port_port:
         status: pending
         rule: harbour_port
         inputs:
-          value: {sheet: ll_common.trip, field: landingHarbour}
+          value: {field: landingHarbour}
         parameters: {target: refs_admin.ports}
         note: "ROS ports have no locode column. Confirm canonical codes where REULPT and FRARELPT coexist."
       vessel_return_port_latitude:
         status: pending
         rule: harbour_coordinate
         inputs:
-          value: {sheet: ll_common.trip, field: landingHarbour}
+          value: {field: landingHarbour}
         parameters: {property: latitude}
         note: "Confirm harbour coordinates represent this endpoint; they do not provide an at-sea position."
       vessel_return_port_longitude:
         status: pending
         rule: harbour_coordinate
         inputs:
-          value: {sheet: ll_common.trip, field: landingHarbour}
+          value: {field: landingHarbour}
         parameters: {property: longitude}
         note: "Confirm harbour coordinates represent this endpoint; they do not provide an at-sea position."
       vessel_return_date_time:
         status: pending
         rule: date_at_time
         inputs:
-          value: {sheet: ll_common.trip, field: endDate}
+          value: {field: endDate}
         parameters: {time: "23:59", timezone: null}
         note: "Reporting time is agreed, timezone is unresolved; this is not an observed movement time."
   V-ATTRIBUTES:
@@ -437,7 +437,7 @@ sheets:
       branchline_configurations_configuration_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.branchlinesComposition, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: configuration}
       branchline_configurations_section_id:
         status: omitted
@@ -582,54 +582,54 @@ sheets:
       set_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: set}
       start_setting_date_time:
         status: pending
         rule: timestamp
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingStartTimeStamp}
+          value: {field: settingStartTimeStamp}
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       start_setting_position_latitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingStartLatitude}
+          value: {field: settingStartLatitude}
       start_setting_position_longitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingStartLongitude}
+          value: {field: settingStartLongitude}
       end_setting_date_time:
         status: pending
         rule: timestamp
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingEndTimeStamp}
+          value: {field: settingEndTimeStamp}
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       end_setting_position_latitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingEndLatitude}
+          value: {field: settingEndLatitude}
       end_setting_position_longitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingEndLongitude}
+          value: {field: settingEndLongitude}
       vessel_speed_kn:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: settingVesselSpeed}
+          value: {field: settingVesselSpeed}
       line_setter_speed_ms:
         status: pending
         rule: shooter_speed
         inputs:
-          speed: {sheet: ll_observation.fishingSet, field: shooterSpeed}
-          used: {sheet: ll_observation.fishingSet, field: shooterUsed}
+          speed: {field: shooterSpeed}
+          used: {field: shooterUsed}
         note: "Confirm stored knots and reporting when the shooter is unused; no artificial zero."
       mainline_material:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: lineType}
+          value: {field: lineType}
         parameters: {target: refs_fishery.line_material_types}
         note: "Review the initial material correspondences; Polyvinyl has no agreed equivalent."
       mainline_length_value: {status: unavailable}
@@ -638,18 +638,18 @@ sheets:
         status: pending
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: timeBetweenHooks}
+          value: {field: timeBetweenHooks}
         note: "Source is labelled seconds; confirm equivalence to branchline clip-on time."
       clip_on_time_buoys: {status: unavailable}
       number_total_hooks_set:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: totalHooksCount}
+          value: {field: totalHooksCount}
       number_total_floats_set:
         status: pending
         rule: unresolved
         inputs:
-          baskets: {sheet: ll_observation.fishingSet, field: totalBasketsCount}
+          baskets: {field: totalBasketsCount}
         note: "No agreed line-layout rule; do not automatically subtract one from baskets."
       number_radio_dhan_buoys_set: {status: unavailable}
       floatline_length_1_m:
@@ -677,7 +677,7 @@ sheets:
         status: pending
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: branchlinesPerBasketCount}
+          value: {field: branchlinesPerBasketCount}
         note: "Confirm basket/float and hook/branchline equivalence."
       distance_between_branchlines_m: {status: unavailable}
       shark_lines_set: {status: unavailable}
@@ -751,28 +751,28 @@ sheets:
       set_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: set}
       type:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: lightsticksType}
+          value: {field: lightsticksType}
         parameters: {target: refs_fishery.light_types}
         note: "Review the initial type correspondences; mixed categories do not supply counts for each component."
       colour:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: lightsticksColor}
+          value: {field: lightsticksColor}
         parameters: {target: refs_fishery.light_colours}
         note: "Review the initial colour correspondences; mixed categories do not supply counts for each component."
       number_of_lights:
         status: pending
         rule: light_total
         inputs:
-          lights_per_basket: {sheet: ll_observation.fishingSet, field: lightsticksPerBasketCount}
-          baskets: {sheet: ll_observation.fishingSet, field: totalBasketsCount}
+          lights_per_basket: {field: lightsticksPerBasketCount}
+          baskets: {field: totalBasketsCount}
         note: "Confirm the count applies to every basket; retain missing inputs."
   E-SET-MITIGATION-MEASURES:
     rows:
@@ -787,7 +787,7 @@ sheets:
       set_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: set}
       number_tori_lines_deployed:
         status: pending
@@ -800,20 +800,20 @@ sheets:
         status: pending
         rule: unresolved
         inputs:
-          weighting: {sheet: ll_observation.fishingSet, fields: [weightedSnap, weightedSwivel]}
+          weighting: {fields: [weightedSnap, weightedSwivel]}
           measures: {sheet: ll_observation.fishingSet_mitigationType, field: mitigationType, within: ll_observation.fishingSet}
         note: "Define actual branchline weighting; default-false component flags do not establish absence."
       average_sinker_weight_g:
         status: pending
         rule: unresolved
         inputs:
-          components: {sheet: ll_observation.fishingSet, fields: [snapWeight, swivelWeight]}
+          components: {fields: [snapWeight, swivelWeight]}
         note: "Component weights are kg, but their sum is not an established average sinker weight."
       percent_branchline_weighted:
         status: pending
         rule: unresolved
         inputs:
-          weighting: {sheet: ll_observation.fishingSet, fields: [weightedSnap, weightedSwivel]}
+          weighting: {fields: [weightedSnap, weightedSwivel]}
         note: "No measured weighting proportion; equipment presence must not become 100 percent."
       hook_sinker_distance_cm: {status: unavailable}
       hook_pods:
@@ -832,7 +832,7 @@ sheets:
         status: pending
         rule: unresolved
         inputs:
-          hooks: {sheet: ll_observation.fishingSet, field: totalHooksCount}
+          hooks: {field: totalHooksCount}
           configurations: {sheet: ll_observation.branchlinesComposition, fields: [topiaId, proportion], within: ll_observation.fishingSet}
         note: "Confirm hooks/branchlines equivalence and allocation across configurations."
       other_mitigation_measures_used_measure_1:
@@ -882,20 +882,20 @@ sheets:
         status: pending
         rule: hook_type_size
         inputs:
-          hook: {sheet: ll_observation.hooksComposition, fields: [hookType, hookSize]}
+          hook: {fields: [hookType, hookSize]}
         parameters: {target: refs_fishery.hook_and_terminal_devices}
         note: "Use actual sizes; no fixed or invented replacement for Unknown."
       hooks_and_terminal_devices_percentage:
         status: pending
         rule: copy
         inputs:
-          value: {sheet: ll_observation.hooksComposition, field: proportion}
+          value: {field: proportion}
         note: "Copy only for one source composition; aggregation is needed if target codes collapse source categories."
       hooks_and_terminal_devices_variations:
         status: pending
         rule: copy
         inputs:
-          value: {sheet: ll_observation.hooksComposition, field: hookOffset}
+          value: {field: hookOffset}
         note: "Confirm offset meaning and the ROS variation representation."
   E-SET-BAITS:
     rows:
@@ -916,21 +916,21 @@ sheets:
         status: pending
         rule: bait_condition
         inputs:
-          value: {sheet: ll_observation.baitsComposition, field: baitSettingStatus}
+          value: {field: baitSettingStatus}
         parameters: {target: refs_biology.bait_conditions}
         note: "Defrosted does not establish whole/chopped; fresh does not establish dead."
       bait_species:
         status: pending
         rule: bait_species
         inputs:
-          value: {sheet: ll_observation.baitsComposition, field: baitType}
+          value: {field: baitType}
         parameters: {target: refs_biology.bait_species}
         note: "Explicit bait correspondence is still required; artificial bait cannot populate a species code."
       bait_percentage:
         status: pending
         rule: copy
         inputs:
-          value: {sheet: ll_observation.baitsComposition, field: proportion}
+          value: {field: proportion}
         note: "Confirm target-key grouping and proportion aggregation."
       bait_dye_colour: {status: unavailable}
   E-SET-HAULING:
@@ -944,38 +944,38 @@ sheets:
       set_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: set}
       start_hauling_date_time:
         status: pending
         rule: timestamp
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: haulingStartTimeStamp}
+          value: {field: haulingStartTimeStamp}
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       start_hauling_position_latitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: haulingStartLatitude}
+          value: {field: haulingStartLatitude}
       start_hauling_position_longitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: haulingStartLongitude}
+          value: {field: haulingStartLongitude}
       end_hauling_date_time:
         status: pending
         rule: timestamp
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: haulingEndTimeStamp}
+          value: {field: haulingEndTimeStamp}
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       end_hauling_position_latitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: haulingEndLatitude}
+          value: {field: haulingEndLatitude}
       end_hauling_position_longitude:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: haulingEndLongitude}
+          value: {field: haulingEndLongitude}
       offal_management: {status: unavailable}
       positions_of_offal_disposal_position_1: {status: unavailable}
       positions_of_offal_disposal_position_2: {status: unavailable}
@@ -991,14 +991,14 @@ sheets:
         status: pending
         rule: unresolved
         inputs:
-          deployed: {sheet: ll_observation.fishingSet, field: totalHooksCount}
+          deployed: {field: totalHooksCount}
           branchlines: {sheet: ll_observation.branchline, field: topiaId, within: ll_observation.fishingSet}
         note: "Neither deployed hooks nor enumerated branchlines prove observation coverage or retrieved counts."
       number_of_hooks_retrieved_during_observation:
         status: pending
         rule: unresolved
         inputs:
-          deployed: {sheet: ll_observation.fishingSet, field: totalHooksCount}
+          deployed: {field: totalHooksCount}
           branchlines: {sheet: ll_observation.branchline, field: topiaId, within: ll_observation.fishingSet}
         note: "Neither deployed hooks nor enumerated branchlines prove observation coverage or retrieved counts."
       sampling_protocol: {status: unavailable}
@@ -1021,14 +1021,14 @@ sheets:
         status: pending
         rule: configuration_link
         inputs:
-          branchlines: {sheet: ll_observation.branchline, field: topiaId, within: ll_observation.fishingSet}
+          branchlines: {field: topiaId, within: ll_observation.fishingSet}
           configurations: {sheet: ll_observation.branchlinesComposition, field: topiaId, within: ll_observation.fishingSet}
         note: "No accepted individual-to-configuration association; keep the shared configuration identity."
       branchline_number_of_biteoffs:
         status: pending
         rule: unresolved
         inputs:
-          branchlines: {sheet: ll_observation.branchline, fields: [topiaId, traceCutOff, hookLost], within: ll_observation.fishingSet}
+          branchlines: {fields: [topiaId, traceCutOff, hookLost], within: ll_observation.fishingSet}
         note: "Confirm event semantics and actual observation; false defaults do not establish a zero count."
   E-SET-CATCHES:
     rows:
@@ -1046,55 +1046,55 @@ sheets:
       catch_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: catch}
       species:
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.catch, field: species}
+          value: {field: species}
         parameters: {target: refs_biology.species}
       fate_type:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.catch, field: catchFate}
+          value: {field: catchFate}
         parameters: {target: refs_biology.fate_types}
         note: "Review retained/discarded correspondences; escaped catches remain unresolved."
       fate_code:
         status: pending
         rule: fate_reason
         inputs:
-          fate: {sheet: ll_observation.catch, field: catchFate}
+          fate: {field: catchFate}
         parameters: {target: refs_biology.fates}
         note: "Broad fate does not establish a discard reason or sale; detailed reason source is unresolved."
       sampling_method:
         status: pending
         rule: unresolved
         inputs:
-          acquisition: {sheet: ll_observation.catch, field: acquisitionMode}
+          acquisition: {field: acquisitionMode}
           method: {sheet: ll_common.trip, field: observationMethod}
         note: "Acquisition mode and observation programme do not establish exhaustive or sampled catch estimation."
       number_of_fish:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.catch, field: count}
+          value: {field: count}
       weight_processing_type:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.catch, field: weightMeasureType}
+          value: {field: weightMeasureType}
         parameters: {target: refs_biology.weight_measurements}
         note: "Use the E-SET-CATCHES target binding; review the initial whole/gutted/headed-and-gutted correspondences."
       weight_value_kg:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.catch, field: totalWeight}
+          value: {field: totalWeight}
         note: "This is the grouped catch total; do not distribute it into specimen weights."
       weight_estimation_method:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.catch, field: weightMeasureMethod}
+          value: {field: weightMeasureMethod}
         parameters: {target: refs_biology.weight_measurement_tools}
         note: "Review the recorded Unknown method correspondence; never use it for missing input."
   E-SET-CATCH-SPECIMENS:
@@ -1115,26 +1115,26 @@ sheets:
       catch_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: catch}
       specimen_id:
         status: pending
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: specimen}
       sampling_period:
         status: pending
         rule: unresolved
         inputs:
-          acquisition: {sheet: ll_observation.catch, field: acquisitionMode}
+          acquisition: {field: acquisitionMode}
           method: {sheet: ll_common.trip, field: observationMethod}
         note: "Recording a measurement does not establish line-hauling observation; no LH default."
       sampling_method:
         status: pending
         rule: unresolved
         inputs:
-          acquisition: {sheet: ll_observation.catch, field: acquisitionMode}
+          acquisition: {field: acquisitionMode}
           method: {sheet: ll_common.trip, field: observationMethod}
         note: "No established sampling design; no RM default."
       length_1_type:
@@ -1204,40 +1204,40 @@ sheets:
         status: pending
         rule: catalogue_mapping
         inputs:
-          value: {sheet: ll_observation.catch, field: sex}
+          value: {field: sex}
         parameters: {target: refs_biology.sex}
         note: "Review the initial sex correspondences; Not available remains unresolved."
       maturity_scale:
         status: pending
         rule: maturity
         inputs:
-          animal: {sheet: ll_observation.catch, fields: [maturityStatus, species, sex]}
+          animal: {fields: [maturityStatus, species, sex]}
         parameters: {component: maturity_scale}
         note: "Establish source scale and biological equivalences; numeric equality is insufficient."
       maturity_stage:
         status: pending
         rule: maturity
         inputs:
-          animal: {sheet: ll_observation.catch, fields: [maturityStatus, species, sex]}
+          animal: {fields: [maturityStatus, species, sex]}
         parameters: {component: maturity_stage}
         note: "Establish source scale and biological equivalences; numeric equality is insufficient."
       sample_collected_type:
         status: pending
         rule: unresolved
         inputs:
-          samples: {sheet: ll_observation.catch, field: sampleReferences}
+          samples: {field: sampleReferences}
         note: "Free-text sample references do not establish material, preservation or destination; no parser is agreed."
       sample_collected_preservation_method:
         status: pending
         rule: unresolved
         inputs:
-          samples: {sheet: ll_observation.catch, field: sampleReferences}
+          samples: {field: sampleReferences}
         note: "Free-text sample references do not establish material, preservation or destination; no parser is agreed."
       sample_collected_destination:
         status: pending
         rule: unresolved
         inputs:
-          samples: {sheet: ll_observation.catch, field: sampleReferences}
+          samples: {field: sampleReferences}
         note: "Free-text sample references do not establish material, preservation or destination; no parser is agreed."
       depredation_details_depredation_source:
         status: pending
@@ -1271,60 +1271,60 @@ sheets:
       catch_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: catch}
       specimen_id:
         status: pending
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: specimen}
       condition_at_capture:
         status: pending
         rule: health_condition
         inputs:
-          value: {sheet: ll_observation.catch, field: catchHealthStatus}
+          value: {field: catchHealthStatus}
         parameters: {target: refs_biology.individual_conditions}
         note: "Correspondence is pending; preserve each observed state independently and do not infer release."
       condition_at_release:
         status: pending
         rule: health_condition
         inputs:
-          value: {sheet: ll_observation.catch, field: discardHealthStatus}
+          value: {field: discardHealthStatus}
         parameters: {target: refs_biology.individual_conditions}
         note: "Correspondence is pending; preserve each observed state independently and do not infer release."
       gear_interaction:
         status: pending
         rule: gear_interaction
         inputs:
-          value: {sheet: ll_observation.catch, field: hookPosition}
+          value: {field: hookPosition}
         note: "Target model currently has no reference binding; agree vocabulary and correspondence before use."
       hook_type:
         status: pending
         rule: hook_type_size
         inputs:
-          branchline_id: {sheet: ll_observation.catch, field: branchline}
+          branchline_id: {field: branchline}
         parameters: {target: refs_fishery.hook_and_terminal_devices, branchline_fields: [hookType, hookSize]}
         note: "Use the linked individual's hook; never assume the first set composition."
       bait_condition:
         status: pending
         rule: bait_condition
         inputs:
-          branchline_id: {sheet: ll_observation.catch, field: branchline}
+          branchline_id: {field: branchline}
         parameters: {target: refs_biology.bait_conditions, branchline_fields: [baitSettingStatus, baitHaulingStatus]}
         note: "Agree the relevant observation time and condition correspondence."
       bait_type:
         status: pending
         rule: bait_type
         inputs:
-          branchline_id: {sheet: ll_observation.catch, field: branchline}
+          branchline_id: {field: branchline}
         parameters: {target: refs_biology.bait_types, branchline_fields: [baitType]}
         note: "Explicit individual-bait correspondence is pending."
       leader_material:
         status: pending
         rule: specimen_leader
         inputs:
-          branchline_id: {sheet: ll_observation.catch, field: branchline}
+          branchline_id: {field: branchline}
           compositions: {sheet: ll_observation.branchlinesComposition, field: tracelineType, within: ll_observation.fishingSet}
         parameters: {target: refs_fishery.line_material_types, branchline_fields: [tracelineType], allow_set_fallback: false}
         note: "IRD must approve set-to-individual fallback. Distinct materials are ambiguous; repeated equal materials alone are not ambiguity."
@@ -1338,7 +1338,7 @@ sheets:
         status: pending
         rule: photo_reference
         inputs:
-          value: {sheet: ll_observation.catch, field: photoReferences}
+          value: {field: photoReferences}
         note: "Agree the photo-reference format and handling of several references."
       depredation_details_depredation_source:
         status: pending
@@ -1372,37 +1372,37 @@ sheets:
       catch_id:
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: catch}
       specimen_id:
         status: pending
         rule: identity
         inputs:
-          value: {sheet: ll_observation.catch, field: topiaId}
+          value: {field: topiaId}
         parameters: {key: specimen}
       release:
         status: pending
         rule: unresolved
         inputs:
-          tag: {sheet: ll_observation.catch, field: tagNumber}
+          tag: {field: tagNumber}
         note: "A tag number alone does not establish this event or tag type."
       recovery:
         status: pending
         rule: unresolved
         inputs:
-          tag: {sheet: ll_observation.catch, field: tagNumber}
+          tag: {field: tagNumber}
         note: "A tag number alone does not establish this event or tag type."
       type:
         status: pending
         rule: unresolved
         inputs:
-          tag: {sheet: ll_observation.catch, field: tagNumber}
+          tag: {field: tagNumber}
         note: "A tag number alone does not establish this event or tag type."
       tag_id_1:
         status: pending
         rule: tag_identifier
         inputs:
-          value: {sheet: ll_observation.catch, field: tagNumber}
+          value: {field: tagNumber}
         note: "Confirm this is a tag identifier; it does not establish tag type, deployment or recovery."
       tag_id_2: {status: unavailable}
       finder_name: {status: unavailable}
