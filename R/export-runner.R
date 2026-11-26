@@ -71,6 +71,20 @@ extract_export_sources <- function(export_context) {
   paths$sources_directory
 }
 
+#' Transform one extracted ObServe trip into ROS tables
+#' @param export_plan Plan from [form.tools::prepare_form_export()] built with
+#'   the form models, configuration and rules in `export_context`.
+#' @param observe_trip_tables Named list of extracted ObServe tables for the trip.
+#' @param export_context Prepared batch context from [prepare_export()].
+#' @return The ROS tables and diagnostics after [finalize_ros_trip()].
+#' @export
+export_ros_trip <- function(export_plan, observe_trip_tables, export_context) {
+  form.tools::run_form_export(export_plan, observe_trip_tables,
+    inputs = list(meta = export_context$meta),
+    resources = export_context,
+    finalize = finalize_ros_trip)
+}
+
 # Internal helpers ----------------------------------------------------------
 
 #' Check the names of an export runner mapping

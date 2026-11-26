@@ -7,7 +7,7 @@
 finalize_ros_trip(export_result, export_context)
 }
 \arguments{
-\item{export_result}{First-pass result from \code{\link[form.tools:run_form_export]{form.tools::run_form_export()}}.}
+\item{export_result}{Assembled result passed by \code{\link[form.tools:run_form_export]{form.tools::run_form_export()}}.}
 
 \item{export_context}{Prepared context from \code{\link[=prepare_export]{prepare_export()}}.}
 }
@@ -17,4 +17,7 @@ unresolved diagnostic. The trip ID remains provisional.
 }
 \description{
 Finalize the ROS fields for one trip
+}
+\details{
+\code{\link[=export_ros_trip]{export_ros_trip()}} supplies this function to the export engine.
 }

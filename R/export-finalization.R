@@ -1,10 +1,11 @@
 # Public operations ---------------------------------------------------------
 
 #' Finalize the ROS fields for one trip
-#' @param export_result First-pass result from [form.tools::run_form_export()].
+#' @param export_result Assembled result passed by [form.tools::run_form_export()].
 #' @param export_context Prepared context from [prepare_export()].
 #' @return The export result with the IOTC observer ID filled in or an
 #'   unresolved diagnostic. The trip ID remains provisional.
+#' @details [export_ros_trip()] supplies this function to the export engine.
 #' @export
 finalize_ros_trip <- function(export_result, export_context) {
   sheet <- "O-INFO"
