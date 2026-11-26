@@ -54,12 +54,13 @@ sheets:
       number_total_hooks_set:
         rule: copy
         inputs:
-          value: {sheet: ll_observation.fishingSet, field: totalHooksCount}
+          value: {field: totalHooksCount}
 ```
 
 `rows` describes which source records produce target rows. `fields` describes values within each row.
 
-`inputs` names the values supplied to a rule. Each binding names its source sheet and field, or fields.
+`inputs` names the values supplied to a rule. A field input uses the sheet at
+`rows.inputs.records.sheet` by default. Set `sheet` when the input reads another source sheet.
 
 `parameters` contains explicit rule options. `note` records a missing decision or a reporting limitation.
 
