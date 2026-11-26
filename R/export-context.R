@@ -3,26 +3,41 @@
 #' Load the inputs shared by trips in an export
 #' @param export_settings Export settings from [export_settings()].
 #' @return An S3 `export_context` containing the settings, paths, both form
-#'   models, the mapping definition and the parsed export configuration.
+#'   models, the mapping definition, the export configuration and the shared
+#'   and gear-specific rules.
 #' @details Run [prepare_export_inputs()] first. Use [prepare_export_references()]
 #'   to add the catalogue data, lookup indexes and prepared mapping.
 #' @export
 load_export_context <- function(export_settings) {
   paths <- export_paths(export_settings)
+  inputs <- paths$workspace
+  export_rules <- list(
+    one_row = select_one_row,
+    input = read_export_input,
+    identity = resolve_source_identity,
+    identity_to_cache = cache_export_identity,
+    identity_from_cache = read_cached_identity
+  )
+  if (identical(export_settings$gear, ros.form.model::ROS_FORM_LL))
+    export_rules <- c(export_rules, get_ll_export_rules())
+
   structure(list(
     settings = export_settings,
     paths = paths,
-    observe_form_model = form.model::read_form_model(paths$observe_form_path),
-    ros_form_model = form.model::read_form_model(paths$ros_form_path),
-    mapping_definition = form.references::read_mapping_configuration(paths$mapping_path),
-    export_configuration = form.tools::read_form_export(paths$export_configuration_path)
+    observe_form_model = form.model::read_form_model(inputs$observe_form_path),
+    ros_form_model = form.model::read_form_model(inputs$ros_form_path),
+    mapping_definition = form.references::read_mapping_configuration(inputs$mapping_path),
+    export_configuration = form.tools::read_form_export(inputs$export_configuration_path),
+    export_rules = export_rules
   ), class = "export_context")
 }
 
 #' Prepare the references shared by trips in an export
 #' @param export_context Context from [load_export_context()].
 #' @return The context with the reference configurations, tables, indexes and
-#'   prepared mapping added.
+#'   prepared mapping added, along with the reference resources for the selected
+#'   gear. Pass this context as `resources` to export rules that use the prepared
+#'   catalogues or correspondences.
 #' @details Uses saved catalogue snapshots when available. Otherwise it retrieves
 #'   the required tables and saves them before preparing lookups. Form and mapping
 #'   lookups use the same tables in memory. A prepared context can be reused.
@@ -32,14 +47,17 @@ prepare_export_references <- function(export_context) {
     stop("Load the context with load_export_context().", call. = FALSE)
   }
   if (!is.null(export_context$mapping_references)) return(export_context)
-  paths <- export_context$paths
+  paths <- export_context$paths$workspace
   mapping <- export_context$mapping_definition
   observe_catalogue <- prepare_export_catalogue(export_context$observe_form_model,
-    paths$observe_references_path,
-    paths$observe_catalogue_directory, observe_mapping_tables(mapping))
+    system.file(export_context$settings$observe_version, export_context$settings$gear,
+      "references.yaml", package = "ros.form.observe", mustWork = TRUE),
+    paths$observe_catalogue_directory, observe_mapping_tables(mapping),
+    sources_path = paths$observe_references_path)
   ros_catalogue <- prepare_export_catalogue(export_context$ros_form_model,
-    paths$ros_references_path,
-    paths$ros_catalogue_directory, ros_mapping_tables(mapping))
+    system.file("references.yaml", package = "ros.form.references", mustWork = TRUE),
+    paths$ros_catalogue_directory, ros_mapping_tables(mapping),
+    sources_path = paths$ros_references_path, optional_sources = TRUE)
 
   configurations <- list(observe = observe_catalogue$configuration, ros = ros_catalogue$configuration)
   tables <- list(observe = observe_catalogue$tables, ros = ros_catalogue$tables)
@@ -54,5 +72,7 @@ prepare_export_references <- function(export_context) {
   export_context$mapping_references <- form.references::prepare_mapping_references(
     mapping, configurations, catalogues = tables
   )
+  if (identical(export_context$settings$gear, ros.form.model::ROS_FORM_LL))
+    export_context <- prepare_ll_export_references(export_context)
   export_context
 }

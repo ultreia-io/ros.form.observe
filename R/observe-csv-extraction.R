@@ -103,7 +103,7 @@ extract_observe_trip_csv <- function(trip_id,
     if (!inherits(export_context, "export_context"))
       stop("Load the context with load_export_context().", call. = FALSE)
     source_model <- export_context$observe_form_model
-    queries_directory <- export_context$paths$observe_sql_directory
+    queries_directory <- export_context$paths$workspace$observe_sql_directory
   }
   sheets <- form.model::form_sheets(source_model)
 

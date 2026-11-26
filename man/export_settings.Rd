@@ -4,7 +4,7 @@
 \alias{export_settings}
 \title{Create the settings for an ObServe export run}
 \usage{
-export_settings(observe_version, ros_form_version, gear, output_directory)
+export_settings(observe_version, ros_form_version, gear, batch_directory)
 }
 \arguments{
 \item{observe_version}{One of \link{OBSERVE_VERSIONS}.}
@@ -13,7 +13,7 @@ export_settings(observe_version, ros_form_version, gear, output_directory)
 
 \item{gear}{One of \link[ros.form.model:ROS_FORMS]{ros.form.model::ROS_FORMS}.}
 
-\item{output_directory}{Root directory for export files and dated runs.}
+\item{batch_directory}{Batch directory containing export-runner.yaml.}
 }
 \value{
 An \code{export_settings} object for use across the export steps.

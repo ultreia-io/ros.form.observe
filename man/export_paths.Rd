@@ -10,7 +10,7 @@ export_paths(export_settings)
 \item{export_settings}{Export settings from \code{\link[=export_settings]{export_settings()}}.}
 }
 \value{
-A named list of output directories and prepared input paths.
+Named \code{workspace} and \code{batch} lists of paths.
 }
 \description{
 Locate the files and directories shared by exports using these settings

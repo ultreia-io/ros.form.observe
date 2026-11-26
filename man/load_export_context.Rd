@@ -11,7 +11,8 @@ load_export_context(export_settings)
 }
 \value{
 An S3 \code{export_context} containing the settings, paths, both form
-models, the mapping definition and the parsed export configuration.
+models, the mapping definition, the export configuration and the shared
+and gear-specific rules.
 }
 \description{
 Load the inputs shared by trips in an export

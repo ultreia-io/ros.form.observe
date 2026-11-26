@@ -4,7 +4,14 @@
 \alias{prepare_export_catalogue}
 \title{Save the reference tables selected by a form model and mapping}
 \usage{
-prepare_export_catalogue(model, lookup_path, directory, mapping_tables)
+prepare_export_catalogue(
+  model,
+  lookup_path,
+  directory,
+  mapping_tables,
+  sources_path,
+  optional_sources = FALSE
+)
 }
 \arguments{
 \item{model}{Loaded form model.}
@@ -14,6 +21,10 @@ prepare_export_catalogue(model, lookup_path, directory, mapping_tables)
 \item{directory}{Destination for the local catalogue snapshot.}
 
 \item{mapping_tables}{Additional table IDs grouped by catalogue.}
+
+\item{sources_path}{Workspace YAML containing source overrides.}
+
+\item{optional_sources}{Whether packaged sources suffice when the YAML is absent.}
 }
 \value{
 The snapshot path, its configuration and the verified tables in memory.

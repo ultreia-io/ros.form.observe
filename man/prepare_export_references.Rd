@@ -11,7 +11,9 @@ prepare_export_references(export_context)
 }
 \value{
 The context with the reference configurations, tables, indexes and
-prepared mapping added.
+prepared mapping added, along with the reference resources for the selected
+gear. Pass this context as \code{resources} to export rules that use the prepared
+catalogues or correspondences.
 }
 \description{
 Prepare the references shared by trips in an export

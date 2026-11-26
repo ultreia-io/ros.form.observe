@@ -9,14 +9,16 @@
 #'   Reuses an existing snapshot after checking that it has the required tables.
 #' @export
 prepare_observe_catalogue <- function(export_settings) {
-  paths <- export_paths(export_settings)
+  paths <- export_paths(export_settings)$workspace
   mapping <- form.references::read_mapping_configuration(paths$mapping_path)
   model <- form.model::read_form_model(paths$observe_form_path)
   prepare_export_catalogue(
     model,
-    paths$observe_references_path,
+    system.file(export_settings$observe_version, export_settings$gear, "references.yaml",
+      package = "ros.form.observe", mustWork = TRUE),
     paths$observe_catalogue_directory,
-    observe_mapping_tables(mapping)
+    observe_mapping_tables(mapping),
+    sources_path = paths$observe_references_path
   )$directory
 }
 
@@ -28,14 +30,15 @@ prepare_observe_catalogue <- function(export_settings) {
 #'   Reuses an existing snapshot after verifying its required tables.
 #' @export
 prepare_ros_catalogue <- function(export_settings) {
-  paths <- export_paths(export_settings)
+  paths <- export_paths(export_settings)$workspace
   mapping <- form.references::read_mapping_configuration(paths$mapping_path)
   model <- form.model::read_form_model(paths$ros_form_path)
   prepare_export_catalogue(
     model,
-    paths$ros_references_path,
+    system.file("references.yaml", package = "ros.form.references", mustWork = TRUE),
     paths$ros_catalogue_directory,
-    ros_mapping_tables(mapping)
+    ros_mapping_tables(mapping),
+    sources_path = paths$ros_references_path, optional_sources = TRUE
   )$directory
 }
 
@@ -67,12 +70,21 @@ ros_mapping_tables <- function(mapping) {
 #' @param lookup_path Prepared YAML containing the catalogue sources and lookup settings.
 #' @param directory Destination for the local catalogue snapshot.
 #' @param mapping_tables Additional table IDs grouped by catalogue.
+#' @param sources_path Workspace YAML containing source overrides.
+#' @param optional_sources Whether packaged sources suffice when the YAML is absent.
 #' @return The snapshot path, its configuration and the verified tables in memory.
 #' @keywords internal
-prepare_export_catalogue <- function(model, lookup_path, directory, mapping_tables) {
+prepare_export_catalogue <- function(model, lookup_path, directory, mapping_tables,
+                                     sources_path, optional_sources = FALSE) {
   reuse_snapshot <- dir.exists(directory)
-  if (reuse_snapshot) lookup_path <- file.path(directory, "references.yaml")
-  configuration <- form.references::read_reference_configuration(lookup_path)
+  if (reuse_snapshot) {
+    lookup_path <- file.path(directory, "references.yaml")
+    sources_path <- NULL
+  } else if (!file.exists(sources_path)) {
+    if (!optional_sources) stop("Missing catalogue source settings: ", sources_path, call. = FALSE)
+    sources_path <- NULL
+  }
+  configuration <- form.references::read_reference_configuration(lookup_path, sources_path = sources_path)
   resolved <- form.references::resolve_reference_lookups(model, configuration)
   lookups <- attr(resolved, "reference_lookups", exact = TRUE)
   model_tables <- vapply(lookups, `[[`, character(1), "table")
@@ -108,6 +120,7 @@ prepare_export_catalogue <- function(model, lookup_path, directory, mapping_tabl
 #' @return Verified tables with their saved inventory and publication metadata.
 #' @keywords internal
 save_export_catalogues <- function(directory, configuration, catalogues) {
+  dir.create(dirname(directory), recursive = TRUE, mode = "0700", showWarnings = FALSE)
   staging_directory <- tempfile("catalogue-", tmpdir = dirname(directory))
   if (!dir.create(staging_directory, mode = "0700")) {
     stop("Cannot stage catalogue: ", directory, call. = FALSE)

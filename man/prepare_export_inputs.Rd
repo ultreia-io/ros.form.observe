@@ -10,16 +10,13 @@ prepare_export_inputs(export_settings)
 \item{export_settings}{Run settings from \code{\link[=export_settings]{export_settings()}}.}
 }
 \value{
-The absolute path to the prepared input directory.
+The absolute path to the inputs for the selected version pair.
 }
 \description{
 Prepare the input files for an ObServe export
 }
 \details{
-ObServe resources and the workbook template come from this package.
-The ROS form model and lookup settings come from the installed
-\code{ros.form.model} and \code{ros.form.references} packages, respectively.
-Files are copied into \verb{inputs/} under the ROS target directory on the first call.
-Later calls reuse the existing input directory.
-The form models, reference settings and export rules are copied alongside each other.
+Shares the ObServe form model and SQL across ROS targets, and the ROS
+form model and template across ObServe versions. The mapping, correspondences
+and export configuration belong to the selected pair.
 }
