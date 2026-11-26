@@ -38,41 +38,11 @@ sheets:
           sets: {sheet: ll_observation.fishingSet, fields: [topiaId, activity], within: ll_common.trip}
         note: O-INFO.5
       observed_trip_summary_number_fishing_sets_observed: {note: O-INFO.6}
-      observed_trip_summary_number_of_days_searching:
-        status: pending
-        rule: activity_days
-        inputs:
-          activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
-        parameters: {category: searching}
-        note: O-INFO.7
-      observed_trip_summary_number_of_days_actively_fishing:
-        status: pending
-        rule: activity_days
-        inputs:
-          activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
-        parameters: {category: actively_fishing}
-        note: O-INFO.7
-      observed_trip_summary_number_of_days_in_fishing_area:
-        status: pending
-        rule: activity_days
-        inputs:
-          activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
-        parameters: {category: in_fishing_area}
-        note: O-INFO.7
-      observed_trip_summary_number_of_days_transiting:
-        status: pending
-        rule: activity_days
-        inputs:
-          activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
-        parameters: {category: transiting}
-        note: O-INFO.7
-      observed_trip_summary_number_of_days_lost:
-        status: pending
-        rule: activity_days
-        inputs:
-          activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
-        parameters: {category: lost}
-        note: O-INFO.7
+      observed_trip_summary_number_of_days_searching: {status: pending, note: O-INFO.7}
+      observed_trip_summary_number_of_days_actively_fishing: {status: pending, note: O-INFO.7}
+      observed_trip_summary_number_of_days_in_fishing_area: {status: pending, note: O-INFO.7}
+      observed_trip_summary_number_of_days_transiting: {status: pending, note: O-INFO.7}
+      observed_trip_summary_number_of_days_lost: {status: pending, note: O-INFO.7}
       observed_trip_summary_reasons_for_days_lost_reason_1: {status: unavailable, note: O-INFO.8}
       observed_trip_summary_reasons_for_days_lost_reason_2: {status: unavailable, note: O-INFO.8}
       observed_trip_summary_reasons_for_days_lost_reason_3: {status: unavailable, note: O-INFO.8}
