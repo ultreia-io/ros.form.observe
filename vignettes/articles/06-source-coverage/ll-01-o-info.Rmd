@@ -98,7 +98,7 @@ Mandatory status comes from `ros.form.model` 4.2.0. Resolve mandatory-field cove
 | `observed_trip_id`                                      | trip.topiaId; ROS identifier components to establish       | Decision: source ID does not satisfy the ROS trip-ID pattern.   |
 | `observer_identification_iotc_id`                       | trip.observer → common.person → ROS observer registry      | Decision: establish a reliable match to exactly one observer.   |
 | `observed_trip_summary_number_fishing_sets_conducted`   | activity and set records for this trip                     | Agreed: count distinct sets in FO activities.                   |
-| `observed_trip_summary_number_fishing_sets_observed`    | activity and set records for this trip                     | Decision: establish the observation-coverage rule.              |
+| `observed_trip_summary_number_fishing_sets_observed`    | computed conducted-set count                               | Agreed: copy the conducted-set count.                          |
 
 <details>
 <summary>Optional fields (20)</summary>
@@ -175,7 +175,8 @@ We reuse the identified source relationships, not that combined query structure.
 
 Its inner joins can exclude trips with missing optional links. That is not our extraction convention.
 
-Philippe uses the same FO activity count for both totals. The agreed rule below does not copy it to observed sets.
+Philippe uses the same FO activity count for both totals. His query filters by observation programme.
+The R script sets the export's source to `OB` for the entire workbook.
 
 Source: `sql-queries/observe_ll_trip.sql`, lines 30–31 and 65–83.
 
@@ -253,7 +254,7 @@ Those decisions would also be necessary if SQL wrote O-INFO directly.
 
 1. How is the ObServe observer linked reliably to one ROS observer, and how is the ROS trip ID constructed?
 2. When can trip departure and return represent observer embarkation and disembarkation, including unknown times?
-3. Which source records identify observed sets and establish each reported activity duration?
+3. Which source records establish each reported activity duration?
 
 A development comparison should retain trip IDs and source records so each resulting O-INFO row can be explained.
 
@@ -271,16 +272,16 @@ The live-data check below measures this selection. Missing required values and r
 
 ### What stays unresolved
 
-* Establish the ROS trip-ID rule and how to identify sets observed by the observer.
-* Leave observer dates and embarkation/disembarkation locations empty without observer-specific evidence.
-* Vessel trip ports and dates do not establish the observer's own movements.
+* Establish the ROS trip-ID rule.
+* The export leaves the observer's embarkation and disembarkation country, port, coordinates and date-time blank.
+* Vessel trip ports and dates describe vessel movements. The observer's movements need a separate source.
 * Leave activity-day totals and lost-day reasons empty until actual events support the requested measures.
 
 `monitored` means equipped with hook timers; it cannot identify sets observed by a person.
 
 ### Complete-row assessment
 
-The ROS trip ID, registry identity and observed-set count remain unresolved; O-INFO is not yet a complete row.
+The final ROS trip ID remains unresolved.
 
 ## Live-data check: 2025 selection
 
@@ -305,7 +306,7 @@ This cohort contains 70 OB trips. The preceding 2025 analysis includes self-repo
 | observed_trip_id                                    | trip.topiaId present in 70/70 trips        | Define the ROS ID construction rule.          |
 | observer_identification_iotc_id                     | Observer links present in 70/70 trips      | Map 15 ObServe people to ROS observer IDs.    |
 | observed_trip_summary_number_fishing_sets_conducted | 700 set records across 70/70 trips         | Agreed: distinct set IDs, FO activities.      |
-| observed_trip_summary_number_fishing_sets_observed  | The same 700 records are source candidates | Confirm which operations were observed.       |
+| observed_trip_summary_number_fishing_sets_observed  | The same 700 records are source candidates | Agreed: copy the conducted-set count.        |
 
 All 15 observer IDs resolve in the frozen ObServe person catalogue, with first and last names present.
 
@@ -351,10 +352,7 @@ Follow fishingSet.activity → activity.topiaId → activity.trip; use the same 
 
 This rule treats the recorded set list as the conducted-set total. It does not independently prove source completeness.
 
-The observed-set count remains unknown pending confirmation that unobserved sets can or cannot be recorded here.
-
-Do not copy the conducted count, substitute zero, or use monitored: that field means hook-timer equipment.
-
-The field is a mandatory integer. Unknown is a review status; no accepted ROS value or failure policy is chosen yet.
+The export now copies the computed conducted count to the mandatory observed-set field for both
+`OB` and `SR` trips. See O-INFO.6 in the [export decisions](ll-export-decisions.html).
 
 This records the agreed reporting decision. No extraction or transformation code was changed.

@@ -98,6 +98,7 @@ articles:
     contents:
       - articles/06-source-coverage/index
       - articles/06-source-coverage/export-configuration
+      - articles/06-source-coverage/ll-export-decisions
       - articles/06-source-coverage/ll-00-meta-summary
       - articles/06-source-coverage/ll-01-o-info-summary
       - articles/06-source-coverage/ll-02-v-info-summary
@@ -167,6 +168,8 @@ articles:
       - ros.form.observe
       - terminology
 reference:
+  - title: Export batches
+    contents: [prepare_export, extract_export_sources, finalize_ros_trip]
   - title: Export inputs
     contents: [export_settings, export_paths, prepare_export_inputs, prepare_observe_catalogue, prepare_ros_catalogue]
   - title: Export context

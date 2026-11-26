@@ -47,13 +47,11 @@ This entry copies a recorded value into its destination:
 sheets:
   E-SET:
     rows:
-      status: specified
       rule: each_set
       inputs:
         records: {sheet: ll_observation.fishingSet, within: ll_common.trip}
     fields:
       number_total_hooks_set:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: totalHooksCount}
@@ -72,7 +70,19 @@ sheets:
 | `unavailable` | No usable source has been identified for this field.                 |
 | `omitted`     | An explicit scope decision leaves this field or sheet empty.         |
 
-These are design statuses, not runtime resolution results. `specified` does not mean implemented or approved.
+A field defaults to `specified`. If it has no `rule`, the exporter looks for a callback registered
+under the exact field name. The observer name, set counts and licensed target species use this
+convention. Shared field rules and active row rules name their callbacks explicitly. The exporter
+checks the callback names when it prepares the plan.
+Set `pending`, `unavailable`, or `omitted` explicitly.
+
+The export context combines shared callbacks with the callbacks for the selected gear.
+For longline exports it also prepares the licensed-target correspondence when the rule uses it.
+
+O-INFO declares the IOTC observer ID as `omitted` in the first pass. After the plan runs,
+`finalize_ros_trip()` fills it from the ROS observer registry.
+
+Declare a field with no usable source as `{status: unavailable}`. The sheet article explains the source limitation.
 
 An unresolved row rule or shared identity affects its dependent fields, even when their rules are specified.
 
@@ -80,7 +90,8 @@ Pending declarations must not activate provisional assumptions when a future eng
 
 `inputs: {}` makes an absent source explicit. It is not a request to populate a default value.
 
-META uses named caller inputs. Its form identifier and revision come from the selected target model.
+META uses `fields_from: meta` to fill one fixed block from the batch YAML by field name.
+Its `preserve_fields` list keeps the form identifier and revision from the template.
 
 ## Source navigation
 
@@ -237,7 +248,7 @@ rules:
   trip_identity: "Construct the ROS trip ID from accepted observer/vessel identities and trip date; format components remain open."
   specimen_identity: "Allocate a stable four-digit sequence per trip/set/catch, shared by measurements, SSI and tags."
   catalogue_mapping: "Resolve the input with mapping.yaml for the declared target table; preserve unresolved and ambiguous results."
-  observer_identity: "Resolve common.person by topiaid, then an explicitly accepted ROS observer correspondence; return a property of that same record."
+  observer_identification_full_name: "Resolve common.person by topiaid and join the available name parts."
   vessel_identity: "Resolve common.vessel by topiaid and match its iotcid to ros_meta.vessel.iotc_vessel_identifier; require one accepted record."
   captain_identity: "Resolve the captain in common.person, then an accepted ros_meta.contact identity; return the declared property."
   vessel_flag: "Read common.vessel.flagcountry and map the country; flag versus chartering-state choice needs agreement."
@@ -247,7 +258,9 @@ rules:
   harbour_coordinate: "Read the requested common.harbour coordinate only after agreeing that it represents the vessel endpoint."
   date_at_time: "Combine the recorded vessel date with the declared reporting time and explicit timezone; retain convention provenance."
   timestamp: "Interpret the source timestamp using an agreed timezone convention, preserving the recorded instant."
-  conducted_sets: "Count distinct FishingSet topiaIds whose parent activity resolves to vesselActivity code FO within this trip."
+  observed_trip_summary_number_fishing_sets_conducted: "Count distinct FishingSet topiaIds whose parent activity resolves to vesselActivity code FO within this trip."
+  observed_trip_summary_number_fishing_sets_observed: "Reuse the conducted-set count from the same export row."
+  licensed_target_species: "Map the trip's recorded species to one ROS Target Species code."
   activity_days: "Derive durations by agreed vessel-activity categories and day boundaries; missing or uncovered intervals remain unresolved."
   trip_equipment: "Determine trip equipment availability from recorded use and gear information; false defaults and non-use do not establish absence."
   shooter_speed: "Convert a confirmed knots value to m/s using 1852/3600; missing speed or an unused shooter does not imply zero."
@@ -274,7 +287,7 @@ rules:
   specimen_leader: "Prefer the linked branchline material; a set-composition fallback requires approval and one distinct mapped material."
   photo_reference: "Preserve recorded photo references using an agreed encoding and multiplicity policy."
   tag_identifier: "Use a verified recorded tag identifier; it does not establish release, recovery, tag type or finder details."
-  one_trip: "Produce one row for the selected source trip; META uses one cell block for the same export."
+  one_row: "Require exactly one source record and use it to produce one output row."
   each_set: "Produce one row per selected trip's source FishingSet, preserving its source key."
   configurations: "Produce one row per distinct trip and branchlinesComposition topiaId; retain the source configuration key."
   light_rows: "Determine light-row presence from recorded light use; zero, missing and mixed categories require an explicit policy."

@@ -1,0 +1,128 @@
+---
+title: "ROS LL 4.2.0 export decisions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ROS LL 4.2.0 export decisions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Abstract
+
+This document records decisions for the ObServe 10.0 longline export to ROS LL 4.2.0.
+
+Each sheet has its own numbered notes. A `note` value in `export.yaml` uses the sheet name and note number, for example `O-INFO.1`.
+Notes follow the order of fields in the form.
+
+## META
+
+## O-INFO
+
+### O-INFO.1 — ROS trip ID
+
+In the first pass, O-INFO stores the ObServe `trip.topiaId` under `observed_trip_id` using `identity_to_cache`.
+The following sheets use `identity_from_cache` to reuse that value as their trip key.
+Each trip starts with an empty cache.
+
+In the final pass, use the resolved ROS fields to construct the ROS trip ID once. Replace the provisional identifier
+in the O-INFO row and every trip key that refers to it, then validate and write the workbook.
+Retain the source `topiaId` for traceability. The final ID construction remains to be agreed.
+
+### O-INFO.2 — IOTC observer ID
+
+In the final pass, `finalize_ros_trip()` looks up the exported name from O-INFO.3 in the ROS observer
+registry. It fills the IOTC observer ID when exactly one record matches and its ID is present.
+This lookup must succeed before the final ROS trip ID can be constructed in O-INFO.1.
+
+### O-INFO.3 — Observer full name
+
+In the first pass, look up the trip's observer `topiaId` in the ObServe person registry. Trim and join the
+available name parts with a space. Leave the name blank if both parts are missing.
+
+### O-INFO.4 — Observer movements
+
+ObServe records the vessel’s trip dates and ports. A separate source for the observer’s embarkation and disembarkation has yet to be identified. The export leaves the observer’s country, port, latitude, longitude and date-time blank for both events.
+
+### O-INFO.5 — Fishing sets conducted
+
+Count each set ID once when its linked activity has code `FO` (fishing operation) in the ObServe
+activity catalogue. Report zero when no sets qualify.
+
+### O-INFO.6 — Fishing sets observed
+
+In the first pass, reuse the O-INFO.5 conducted-set count as the observed-set count. This reporting
+convention applies to both `OB` and `SR` trips.
+
+### O-INFO.7 — Activity days
+
+Agree how recorded activities map to searching, active fishing, time in the fishing area, transit and lost days. Define how to calculate the duration of each activity, handle overlaps and set day boundaries.
+
+### O-INFO.8 — Reasons for days lost
+
+Leave the four lost-day reason fields blank until recorded reasons can be mapped to the ROS code list.
+
+## V-INFO
+
+### V-INFO.1 — Vessel identity
+
+Match the vessel to one ROS registry record. Use that record for the vessel name, IOTC number, IMO number and IRCS. Report missing or conflicting identifiers.
+
+### V-INFO.2 — Flag or chartering state
+
+Map the recorded flag to a ROS country code. Agree when to report a chartering state and how to handle France and Réunion.
+
+### V-INFO.3 — Vessel registration
+
+Confirm the sources for the registration country and port. Determine which source identifier supplies the registration number, including the use of the national identifier and CFR identifier.
+
+### V-INFO.4 — Licensed target species
+
+Use the target species recorded for the whole trip in ObServe. Resolve them to FAO codes and report one ROS Target Species code.
+
+`correspondences/licensed-targets.csv` defines the supported ROS groups. Prefer an exact match, then the smallest group that permits the recorded combination.
+
+For example, report `SW` for `SWO` and `TS` for `ALB`, `BET`, `SWO` and `YFT`. If no group matches or several tie, leave the field blank and report the FAO codes for review.
+
+### V-INFO.5 — Main fishing gear
+
+Supply or confirm the main ROS fishing gear code for each trip. This field is mandatory, and the checked ObServe sources have no direct equivalent.
+
+### V-INFO.6 — Fishing master and skipper names
+
+Use the trip captain for both roles under the agreed convention. Define how to match the captain to a ROS contact for the names.
+
+### V-INFO.7 — Fishing master and skipper nationalities
+
+Use the captain’s country for both roles under the agreed convention. Confirm how the source country represents nationality and map it to the ROS country code list.
+
+## V-TRIP
+
+## V-ATTRIBUTES
+
+## G-GENERAL
+
+## G-CONFIG-BRANCHLINES
+
+## G-CONFIG-MITIGATION-DEVICES
+
+## E-SET
+
+## E-SET-LIGHTS
+
+## E-SET-MITIGATION-MEASURES
+
+## E-SET-HOOKS
+
+## E-SET-BAITS
+
+## E-SET-HAULING
+
+## E-SET-HAULING-BITEOFFS
+
+## E-SET-CATCHES
+
+## E-SET-CATCH-SPECIMENS
+
+## E-SET-CATCH-SPECIMENS-SSI
+
+## E-SET-TAG-DETAILS

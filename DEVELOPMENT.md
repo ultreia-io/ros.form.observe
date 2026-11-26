@@ -15,7 +15,12 @@ The files organize functions in one package namespace. You do not source each fi
 | `observe-csv-extraction.R`   | Extract ObServe source tables to CSV.        |
 | `export-settings.R`          | Define run settings and prepare input files. |
 | `export-catalogues.R`        | Save the reference tables an export needs.   |
-| `export-context.R`           | Load the inputs shared by trips.              |
+| `export-context.R`           | Load shared inputs and select rules by gear. |
+| `ll-export-context.R`        | Register LL rules and prepare their inputs.  |
+| `export-runner.R`            | Prepare batches and extract their trip data. |
+| `export-rules.R`             | Implement rules shared by all gears.         |
+| `ll-export-rules.R`          | Implement the longline field rules.          |
+| `export-finalization.R`      | Resolve ROS fields after the export plan.    |
 | `observe-constants.R`        | Define ObServe versions.                     |
 
 Public operations appear before internal helpers in each R file.

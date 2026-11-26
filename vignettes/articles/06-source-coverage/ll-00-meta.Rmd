@@ -14,7 +14,7 @@ Reporting metadata, form identity and reporting authority.
 
 ROS LL **4.2.0**: **12 fields**, including **11 mandatory fields**.
 
-META will use user-supplied metadata shared by the per-trip workbooks. Its detailed review is deferred.
+The batch YAML supplies META values shared by all trip forms. The template supplies the form identifier and revision.
 
 Use [the sheet index](ll-sheet-reviews.html) and [export design](../export-design.html) for context.
 
@@ -59,7 +59,7 @@ First establish a source or an agreed reporting rule for every mandatory field.
 
 ## Source candidates
 
-* Form identifier and revision are fixed by the selected ROS model.
+* The export preserves the form identifier and revision from the selected ROS template.
 * Reporting contacts, organisation and submission details require explicit export metadata.
 * Reporting data source is supplied with the common metadata; no trip-based derivation is agreed.
 
