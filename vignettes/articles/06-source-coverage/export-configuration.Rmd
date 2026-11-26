@@ -79,8 +79,9 @@ Set `pending`, `unavailable`, or `omitted` explicitly.
 The export context combines shared callbacks with the callbacks for the selected gear.
 For longline exports it also prepares the licensed-target correspondence when the rule uses it.
 
-O-INFO declares the IOTC observer ID as `omitted` in the first pass. After the plan runs,
-`finalize_ros_trip()` fills it from the ROS observer registry.
+O-INFO declares the IOTC observer ID as `omitted` in the first pass.
+`export_ros_trip()` runs a prepared export plan and supplies `finalize_ros_trip()` to the engine.
+The finalizer fills the ID from the ROS observer registry after the tables are assembled.
 
 Declare a field with no usable source as `{status: unavailable}`. The sheet article explains the source limitation.
 

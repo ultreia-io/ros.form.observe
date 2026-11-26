@@ -169,7 +169,7 @@ articles:
       - terminology
 reference:
   - title: Export batches
-    contents: [prepare_export, extract_export_sources, finalize_ros_trip]
+    contents: [prepare_export, extract_export_sources, export_ros_trip, finalize_ros_trip]
   - title: Export inputs
     contents: [export_settings, export_paths, prepare_export_inputs, prepare_observe_catalogue, prepare_ros_catalogue]
   - title: Export context
