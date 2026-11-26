@@ -68,10 +68,10 @@ Mandatory status comes from `ros.form.model` 4.2.0. Resolve mandatory-field cove
 | ----------------------------------------- | -------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `identification_imo_number`               | O        | vessel.imoId                                          | Source column available; Philippe extracts it, then clears it in R.                    |
 | `identification_ircs`                     | O        | vessel.radioCallSignId                                | Source column available; Philippe returns NULL.                                        |
-| `registration_country`                    | O        | vessel.flagCountry in legacy SQL                      | Confirm whether flag country establishes registration country.                         |
-| `registration_port`                       | O        | First two characters of vessel.nationalId             | Legacy prefix correspondence; confirm meaning and canonical ROS port.                  |
-| `registration_registration_number`        | O        | vessel.cfrId in legacy SQL; nationalId also available | Confirm the intended registration identifier and target registry correspondence.       |
-| `licensed_target_species`                 | O        | No licence-target source selected                     | SQL NULL, then fixed TS in R; identify supporting licence information.                 |
+| `registration_country`                    | O        | vessel.flagCountry in legacy SQL                      | Deferred to RAV consolidation.                                                         |
+| `registration_port`                       | O        | First two characters of vessel.nationalId             | Deferred to RAV consolidation.                                                         |
+| `registration_registration_number`        | O        | vessel.cfrId in legacy SQL; nationalId also available | Deferred to RAV consolidation.                                                         |
+| `licensed_target_species`                 | O        | SQL NULL, then fixed TS in R                          | Deferred to RAV consolidation.                                                         |
 | `personnel_crew_number`                   | O        | trip.noOfCrewMembers                                  | Source field already extracted by our model; Philippe returns NULL.                    |
 
 </details>
@@ -107,7 +107,7 @@ The vessel activities "Drifting" and "Anchored" do not classify the fishing gear
 
 The checked gear and equipment-characteristic references provide no direct equivalent either.
 
-Treat this as missing source information for the exporter: the gear must be supplied or confirmed per trip.
+Supply `main_fishing_gear` in `export-runner.yaml` for trips sharing the same ROS gear code.
 
 Philippe's fixed `DL` value is not extracted data and must not become a universal default across countries.
 
@@ -129,9 +129,8 @@ This is a requested enhancement, not an implemented change. Define fallback beha
 
 1. Establish vessel/contact registry matching and the treatment of missing or conflicting identifiers.
 2. Discuss the separate fishing-master role with IRD; the current export convention uses the captain for both roles.
-3. Confirm the meanings of registration country, port and number, including the use of CFR versus national ID.
-4. Identify evidence for fishing gear and licensed target species instead of inheriting fixed values automatically.
-5. Review the available IRCS, IMO and crew fields before deciding their mappings.
+3. Confirm the main fishing gear code.
+4. Review the available IRCS, IMO and crew fields before deciding their mappings.
 
 Reuse the ROS trip ID established for O-INFO. Do not independently construct another trip identifier for this sheet.
 
@@ -173,7 +172,7 @@ The live-data check below measures this selection. Missing required values and r
 
 * The agreed export convention uses the captain for both roles; a separate fishing-master source is proposed to IRD.
 * Main fishing gear is a mandatory source gap; supply or confirm the ROS gear category for each trip.
-* Leave registration country, port, number and licensed targets unresolved where source meanings differ.
+* Defer vessel registration and licensed target species to RAV consolidation.
 * Keep missing IOTC IDs missing; do not manufacture placeholders.
 
 ### Complete-row assessment

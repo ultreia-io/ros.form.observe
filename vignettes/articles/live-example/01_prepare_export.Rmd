@@ -96,6 +96,7 @@ Save the following example as `ll-2026/export-runner.yaml` and replace the examp
 observe_version: "10.0"
 ros_form_version: "4.2.0"
 gear: ll
+main_fishing_gear: DL
 observe_trip_source: observe-main.public-api
 trips:
   start_date: "2025-06-09"
@@ -116,6 +117,9 @@ meta:
 ```
 
 Both dates are inclusive. Omit `programme_ids` to select trips from every programme.
+
+`gear` selects the form model. Set `main_fishing_gear` to the ROS code for the gear used on all trips
+in this batch. This example uses `DL` (Drifting longlines).
 
 Use your ROS focal point name and email and the codes from the ROS catalogues. `organisation_email` is optional.
 

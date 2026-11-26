@@ -71,17 +71,17 @@ sheets:
 | `omitted`     | An explicit scope decision leaves this field or sheet empty.         |
 
 A field defaults to `specified`. If it has no `rule`, the exporter looks for a callback registered
-under the exact field name. The observer name, set counts and licensed target species use this
+under the exact field name. The set counts, vessel flag and fishing master's nationality use this
 convention. Shared field rules and active row rules name their callbacks explicitly. The exporter
 checks the callback names when it prepares the plan.
 Set `pending`, `unavailable`, or `omitted` explicitly.
 
 The export context combines shared callbacks with the callbacks for the selected gear.
-For longline exports it also prepares the licensed-target correspondence when the rule uses it.
 
 O-INFO declares the IOTC observer ID as `omitted` in the first pass.
 `export_ros_trip()` runs a prepared export plan and supplies `finalize_ros_trip()` to the engine.
-The finalizer fills the ID from the ROS observer registry after the tables are assembled.
+The finalizer fills the ID from the ROS observer registry after the tables are assembled. It also
+tries the vessel's IMO and IRCS lookups if its IOTC number is still blank.
 
 Declare a field with no usable source as `{status: unavailable}`. The sheet article explains the source limitation.
 
@@ -249,11 +249,10 @@ rules:
   trip_identity: "Construct the ROS trip ID from accepted observer/vessel identities and trip date; format components remain open."
   specimen_identity: "Allocate a stable four-digit sequence per trip/set/catch, shared by measurements, SSI and tags."
   catalogue_mapping: "Resolve the input with mapping.yaml for the declared target table; preserve unresolved and ambiguous results."
-  observer_identification_full_name: "Resolve common.person by topiaid and join the available name parts."
-  vessel_identity: "Resolve common.vessel by topiaid and match its iotcid to ros_meta.vessel.iotc_vessel_identifier; require one accepted record."
-  captain_identity: "Resolve the captain in common.person, then an accepted ros_meta.contact identity; return the declared property."
-  vessel_flag: "Read common.vessel.flagcountry and map the country; flag versus chartering-state choice needs agreement."
-  captain_country: "Read common.person.country and map it; confirm its nationality meaning before reporting it for either role."
+  person_full_name: "Resolve common.person by topiaid and join the available name parts."
+  vessel_identity: "Resolve common.vessel by topiaid and copy the requested ObServe vessel field."
+  identification_flag_or_chartering_state: "Map common.vessel.flagcountry through the ROS country mapping."
+  personnel_fishing_master_nationality: "Map the ObServe captain's country to a ROS country code."
   harbour_country: "Read common.harbour.country and map it; resolve the France/Reunion reporting question without a global alias."
   harbour_port: "Read common.harbour.locode; derive candidates using its country prefix and port suffix; require one canonical ROS port."
   harbour_coordinate: "Read the requested common.harbour coordinate only after agreeing that it represents the vessel endpoint."

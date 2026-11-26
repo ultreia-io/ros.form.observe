@@ -65,35 +65,49 @@ Leave the four lost-day reason fields blank until recorded reasons can be mapped
 
 ### V-INFO.1 — Vessel identity
 
-Match the vessel to one ROS registry record. Use that record for the vessel name, IOTC number, IMO number and IRCS. Report missing or conflicting identifiers.
+Look up the trip vessel in the ObServe vessel registry. Copy the vessel name, IOTC number, IMO number
+and radio call sign as recorded. ROS validation checks these values against the ROS vessel registry.
+
+If the IOTC number is blank, `finalize_ros_trip()` uses the available IMO and IRCS values to look it up.
+Fill the IOTC number when the matches identify one vessel. Otherwise, leave it blank and report it.
+The vessel and observer IOTC IDs are needed before constructing the final trip ID in O-INFO.1.
 
 ### V-INFO.2 — Flag or chartering state
 
-Map the recorded flag to a ROS country code. Agree when to report a chartering state and how to handle France and Réunion.
+Map the recorded ObServe vessel flag through the existing country mapping. Use `FRA` for French-flagged
+vessels based in Réunion. Reporting a chartering state requires an explicit source for it.
+
+Ask the IOTC why the ROS Countries list includes both `FRA` and `REU`, and how it expects those codes
+to be used in V-INFO and META for French-flagged vessels based in Réunion.
 
 ### V-INFO.3 — Vessel registration
 
-Confirm the sources for the registration country and port. Determine which source identifier supplies the registration number, including the use of the national identifier and CFR identifier.
+Leave registration country, port and number blank for the IOTC Record of Authorised Vessels (RAV)
+consolidation pass.
 
 ### V-INFO.4 — Licensed target species
 
-Use the target species recorded for the whole trip in ObServe. Resolve them to FAO codes and report one ROS Target Species code.
-
-`correspondences/licensed-targets.csv` defines the supported ROS groups. Prefer an exact match, then the smallest group that permits the recorded combination.
-
-For example, report `SW` for `SWO` and `TS` for `ALB`, `BET`, `SWO` and `YFT`. If no group matches or several tie, leave the field blank and report the FAO codes for review.
+Leave licensed target species blank for the RAV consolidation pass.
 
 ### V-INFO.5 — Main fishing gear
 
-Supply or confirm the main ROS fishing gear code for each trip. This field is mandatory, and the checked ObServe sources have no direct equivalent.
+Supply the ROS code for the gear used on the selected trips as `main_fishing_gear` in
+`export-runner.yaml`. The saved batch uses `DL` (Drifting longlines).
+
+Check whether ObServe can provide a reliable source for this field or whether RAV synchronization can
+supply it. If the RAV lists several authorised gear types for a vessel, check how to identify the main
+gear used on the trip.
 
 ### V-INFO.6 — Fishing master and skipper names
 
-Use the trip captain for both roles under the agreed convention. Define how to match the captain to a ROS contact for the names.
+Use the trip captain for both roles. In the first pass, join the available name parts from the
+ObServe person record to fill the fishing master's full name. The final pass copies it to the
+skipper's full name.
 
 ### V-INFO.7 — Fishing master and skipper nationalities
 
-Use the captain’s country for both roles under the agreed convention. Confirm how the source country represents nationality and map it to the ROS country code list.
+Map the ObServe captain's country through the existing ROS country mapping to fill the fishing
+master's nationality. The final pass copies the code to the skipper's nationality.
 
 ## V-TRIP
 
