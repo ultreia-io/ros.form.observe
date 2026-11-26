@@ -1,26 +1,5 @@
 # Internal helpers ----------------------------------------------------------
 
-#' Assemble the observer name from the ObServe person record
-#' @param inputs ObServe observer identifier supplied as `value`.
-#' @param context Rule context containing the prepared ObServe references.
-#' @param parameters Arguments supplied by the export engine.
-#' @return The available name parts joined by a space, an omitted result for
-#'   a blank name, or an unresolved diagnostic when the person lookup fails.
-#' @keywords internal
-resolve_observe_observer_name <- function(inputs, context, parameters) {
-  people <- context$resources$observe_references[["registries/common.person/topiaid"]]
-  if (is.null(people))
-    stop("Prepare the ObServe person lookup before exporting the observer name.", call. = FALSE)
-  rows <- form.references::reference_match_rows(people, inputs$value)[[1L]]
-  if (length(rows) != 1L)
-    return(list(status = "unresolved", message = "Expected one ObServe person for the trip observer.",
-      details = list(matches = length(rows))))
-  name_parts <- trimws(c(people$data$firstname[[rows]], people$data$lastname[[rows]]))
-  name_parts <- name_parts[!is.na(name_parts) & nzchar(name_parts)]
-  if (!length(name_parts)) return(list(status = "omitted"))
-  paste(name_parts, collapse = " ")
-}
-
 #' Count distinct sets linked to a fishing operation
 #' @param inputs Extracted sets and activities for one trip.
 #' @param context Rule context containing the prepared ObServe references.
@@ -49,6 +28,21 @@ reuse_conducted_set_count <- function(inputs, context, parameters) {
     stop("Evaluate the conducted-set count before the observed-set count.", call. = FALSE)
   if (is.na(count)) return(list(status = "omitted"))
   count
+}
+
+#' Map the recorded ObServe vessel flag to a ROS country code
+#' @param inputs ObServe vessel identifier supplied as `value`.
+#' @param context Rule context containing the vessel lookup and country mapping.
+#' @param parameters Arguments supplied by the export engine.
+#' @return The ROS country code or a diagnostic when the flag is unresolved.
+#' @keywords internal
+resolve_vessel_flag <- function(inputs, context, parameters) {
+  vessel <- find_observe_vessel(inputs$value, context$resources$observe_references)
+  mapped <- form.references::map_reference_values(context$resources$mapping_references,
+    "refs_admin.countries", list(vessel$flagcountry))
+  if (identical(mapped$status, "resolved")) return(mapped$target_value)
+  list(status = "unresolved", message = "Could not map the ObServe vessel flag to a ROS country code.",
+    details = list(mapping_status = mapped$status))
 }
 
 #' Choose one ROS Target Species code for the whole trip

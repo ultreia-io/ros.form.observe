@@ -11,13 +11,7 @@
 load_export_context <- function(export_settings) {
   paths <- export_paths(export_settings)
   inputs <- paths$workspace
-  export_rules <- list(
-    one_row = select_one_row,
-    input = read_export_input,
-    identity = resolve_source_identity,
-    identity_to_cache = cache_export_identity,
-    identity_from_cache = read_cached_identity
-  )
+  export_rules <- get_shared_export_rules()
   if (identical(export_settings$gear, ros.form.model::ROS_FORM_LL))
     export_rules <- c(export_rules, get_ll_export_rules())
 
@@ -75,4 +69,23 @@ prepare_export_references <- function(export_context) {
   if (identical(export_context$settings$gear, ros.form.model::ROS_FORM_LL))
     export_context <- prepare_ll_export_references(export_context)
   export_context
+}
+
+# Internal helpers ----------------------------------------------------------
+
+#' Get the rules shared by all export gears
+#' @return A named list of shared export callbacks.
+#' @keywords internal
+get_shared_export_rules <- function() {
+  list(
+    one_row = select_one_row,
+    input = read_export_input,
+    copy = copy_source_value,
+    identity = resolve_source_identity,
+    identity_to_cache = cache_export_identity,
+    identity_from_cache = read_cached_identity,
+    person_full_name = read_observe_person_name,
+    personnel_fishing_master_nationality = resolve_fishing_master_nationality,
+    vessel_identity = read_vessel_identity
+  )
 }

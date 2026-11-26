@@ -5,9 +5,9 @@
 #' @keywords internal
 get_ll_export_rules <- function() {
   list(
-    observer_identification_full_name = resolve_observe_observer_name,
     observed_trip_summary_number_fishing_sets_conducted = count_conducted_sets,
     observed_trip_summary_number_fishing_sets_observed = reuse_conducted_set_count,
+    identification_flag_or_chartering_state = resolve_vessel_flag,
     licensed_target_species = resolve_licensed_targets
   )
 }
