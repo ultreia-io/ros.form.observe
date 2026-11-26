@@ -12,12 +12,13 @@ finalize_ros_trip(export_result, export_context)
 \item{export_context}{Prepared context from \code{\link[=prepare_export]{prepare_export()}}.}
 }
 \value{
-The export result with the IOTC observer ID filled in or an
-unresolved diagnostic. The trip ID remains provisional.
+The export result with the IOTC observer and vessel IDs filled in
+or unresolved diagnostics. The trip ID remains provisional.
 }
 \description{
 Finalize the ROS fields for one trip
 }
 \details{
 \code{\link[=export_ros_trip]{export_ros_trip()}} supplies this function to the export engine.
+The finalizer also copies the fishing master's name and nationality to the skipper.
 }
