@@ -4,350 +4,190 @@ source:
   root: ll_common.trip
 sheets:
   META:
-    rows:
-      status: specified
-      rule: one_trip
-      inputs:
-        records: {sheet: ll_common.trip, within: ll_common.trip}
-    fields:
-      form_identifier:
-        status: specified
-        rule: model_value
-        inputs:
-          value: {model: target, sheet: META, field: form_identifier}
-      form_revision:
-        status: specified
-        rule: model_value
-        inputs:
-          value: {model: target, sheet: META, field: form_revision}
-      liaison_officer_full_name:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.liaison_officer_full_name}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      liaison_officer_email:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.liaison_officer_email}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      organisation_name:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.organisation_name}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      organisation_email:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.organisation_email}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      finalisation_date:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.finalisation_date}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      submission_date:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.submission_date}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      reporting_year:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.reporting_year}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      reporting_entity:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.reporting_entity}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      reporting_country_code:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.reporting_country_code}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
-      data_source:
-        status: pending
-        rule: input
-        inputs:
-          value: {input: metadata.data_source}
-        note: "Explicit shared export metadata; detailed field policy and identity matching remain to be reviewed."
+    preserve_fields: [form_identifier, form_revision]
+    fields_from: meta
   O-INFO:
     rows:
-      status: specified
-      rule: one_trip
+      rule: one_row
       inputs:
         records: {sheet: ll_common.trip, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
+        rule: identity_to_cache
         inputs:
           value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
-      observer_identification_iotc_id:
-        status: pending
-        rule: observer_identity
-        inputs:
-          value: {sheet: ll_common.trip, field: observer}
-        parameters: {property: iotc_observer_identifier}
-        note: "Observer identity correspondence is not supplied by the code-list mapping; no name-only identity assumption."
+        note: O-INFO.1
+      observer_identification_iotc_id: {status: omitted, note: O-INFO.2}
       observer_identification_full_name:
-        status: pending
-        rule: observer_identity
         inputs:
           value: {sheet: ll_common.trip, field: observer}
-        parameters: {property: full_name}
-        note: "Observer identity correspondence is not supplied by the code-list mapping; no name-only identity assumption."
-      observer_trip_details_embarkation_in_port_country:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_embarkation_in_port_port:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_embarkation_at_sea_latitude:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_embarkation_at_sea_longitude:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_embarkation_date_time:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_disembarkation_in_port_country:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_disembarkation_in_port_port:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_disembarkation_at_sea_latitude:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_disembarkation_at_sea_longitude:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
-      observer_trip_details_disembarkation_date_time:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No separate observer movement source established; do not substitute vessel movements."
+        note: O-INFO.3
+      observer_trip_details_embarkation_in_port_country: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_embarkation_in_port_port: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_embarkation_at_sea_latitude: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_embarkation_at_sea_longitude: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_embarkation_date_time: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_disembarkation_in_port_country: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_disembarkation_in_port_port: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_disembarkation_at_sea_latitude: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_disembarkation_at_sea_longitude: {status: unavailable, note: O-INFO.4}
+      observer_trip_details_disembarkation_date_time: {status: unavailable, note: O-INFO.4}
       observed_trip_summary_number_fishing_sets_conducted:
-        status: specified
-        rule: conducted_sets
         inputs:
-          sets: {sheet: ll_observation.fishingSet, fields: [topiaId, activity], within: ll_common.trip}
           activities: {sheet: ll_observation.activity, fields: [topiaId, vesselActivity], within: ll_common.trip}
-        parameters: {activity_table: ll_common.vesselactivity, activity_lookup: topiaid, activity_property: code, activity_code: FO}
-      observed_trip_summary_number_fishing_sets_observed:
-        status: pending
-        rule: unresolved
-        inputs:
-          sets: {sheet: ll_observation.fishingSet, field: topiaId, within: ll_common.trip}
-        note: "Observed coverage is not established by presence in ObServe; monitored is a hook-timer flag."
+          sets: {sheet: ll_observation.fishingSet, fields: [topiaId, activity], within: ll_common.trip}
+        note: O-INFO.5
+      observed_trip_summary_number_fishing_sets_observed: {note: O-INFO.6}
       observed_trip_summary_number_of_days_searching:
         status: pending
         rule: activity_days
         inputs:
           activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
         parameters: {category: searching}
-        note: "Agree activity categories, duration intervals, overlaps and day boundaries."
+        note: O-INFO.7
       observed_trip_summary_number_of_days_actively_fishing:
         status: pending
         rule: activity_days
         inputs:
           activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
         parameters: {category: actively_fishing}
-        note: "Agree activity categories, duration intervals, overlaps and day boundaries."
+        note: O-INFO.7
       observed_trip_summary_number_of_days_in_fishing_area:
         status: pending
         rule: activity_days
         inputs:
           activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
         parameters: {category: in_fishing_area}
-        note: "Agree activity categories, duration intervals, overlaps and day boundaries."
+        note: O-INFO.7
       observed_trip_summary_number_of_days_transiting:
         status: pending
         rule: activity_days
         inputs:
           activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
         parameters: {category: transiting}
-        note: "Agree activity categories, duration intervals, overlaps and day boundaries."
+        note: O-INFO.7
       observed_trip_summary_number_of_days_lost:
         status: pending
         rule: activity_days
         inputs:
           activities: {sheet: ll_observation.activity, fields: [timeStamp, vesselActivity], within: ll_common.trip}
         parameters: {category: lost}
-        note: "Agree activity categories, duration intervals, overlaps and day boundaries."
-      observed_trip_summary_reasons_for_days_lost_reason_1:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      observed_trip_summary_reasons_for_days_lost_reason_2:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      observed_trip_summary_reasons_for_days_lost_reason_3:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      observed_trip_summary_reasons_for_days_lost_reason_4:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+        note: O-INFO.7
+      observed_trip_summary_reasons_for_days_lost_reason_1: {status: unavailable, note: O-INFO.8}
+      observed_trip_summary_reasons_for_days_lost_reason_2: {status: unavailable, note: O-INFO.8}
+      observed_trip_summary_reasons_for_days_lost_reason_3: {status: unavailable, note: O-INFO.8}
+      observed_trip_summary_reasons_for_days_lost_reason_4: {status: unavailable, note: O-INFO.8}
   V-INFO:
     rows:
-      status: specified
-      rule: one_trip
+      rule: one_row
       inputs:
         records: {sheet: ll_common.trip, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       identification_name:
         status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
         parameters: {property: vessel_name}
-        note: "All vessel properties must come from the same accepted identity; retain missing/conflicting-ID diagnostics."
+        note: V-INFO.1
       identification_flag_or_chartering_state:
         status: pending
         rule: vessel_flag
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
         parameters: {target: refs_admin.countries}
-        note: "Flag is recorded; treatment of chartering state and France/Reunion remains open."
+        note: V-INFO.2
       identification_iotc_number:
         status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
         parameters: {property: iotc_vessel_identifier}
-        note: "All vessel properties must come from the same accepted identity; retain missing/conflicting-ID diagnostics."
+        note: V-INFO.1
       identification_imo_number:
         status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
         parameters: {property: imo_identifier}
-        note: "All vessel properties must come from the same accepted identity; retain missing/conflicting-ID diagnostics."
+        note: V-INFO.1
       identification_ircs:
         status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
         parameters: {property: ircs_identifier}
-        note: "All vessel properties must come from the same accepted identity; retain missing/conflicting-ID diagnostics."
+        note: V-INFO.1
       registration_country:
         status: pending
         rule: unresolved
         inputs:
           vessel: {sheet: ll_common.trip, field: vessel}
-        note: "Source vessel has flagcountry, nationalid and cfrid; their registration meaning is unconfirmed. No prefix-derived port or automatic flag reuse."
+        note: V-INFO.3
       registration_port:
         status: pending
         rule: unresolved
         inputs:
           vessel: {sheet: ll_common.trip, field: vessel}
-        note: "Source vessel has flagcountry, nationalid and cfrid; their registration meaning is unconfirmed. No prefix-derived port or automatic flag reuse."
+        note: V-INFO.3
       registration_registration_number:
         status: pending
         rule: unresolved
         inputs:
           vessel: {sheet: ll_common.trip, field: vessel}
-        note: "Source vessel has flagcountry, nationalid and cfrid; their registration meaning is unconfirmed. No prefix-derived port or automatic flag reuse."
+        note: V-INFO.3
       licensed_target_species:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+        inputs:
+          species: {sheet: ll_common.trip_species, field: species, within: ll_common.trip}
+        note: V-INFO.4
       gear_main_fishing_gear:
         status: pending
         rule: input
         inputs:
           value: {input: trip.main_fishing_gear}
-        note: "Supply and confirm gear for this trip; do not fix DL from the programme or use the equipment vocabulary."
+        note: V-INFO.5
       personnel_fishing_master_full_name:
         status: pending
         rule: captain_identity
         inputs:
           value: {sheet: ll_common.trip, field: captain}
         parameters: {property: full_name}
-        note: "Agreed role convention: use the captain for both roles; accepted contact matching remains open."
+        note: V-INFO.6
       personnel_fishing_master_nationality:
         status: pending
         rule: captain_country
         inputs:
           value: {sheet: ll_common.trip, field: captain}
         parameters: {target: refs_admin.countries}
-        note: "Agreed captain reuse for both roles; country/nationality semantics and correspondence remain open."
+        note: V-INFO.7
       personnel_skipper_captain_full_name:
         status: pending
         rule: captain_identity
         inputs:
           value: {sheet: ll_common.trip, field: captain}
         parameters: {property: full_name}
-        note: "Agreed role convention: use the captain for both roles; accepted contact matching remains open."
+        note: V-INFO.6
       personnel_skipper_captain_nationality:
         status: pending
         rule: captain_country
         inputs:
           value: {sheet: ll_common.trip, field: captain}
         parameters: {target: refs_admin.countries}
-        note: "Agreed captain reuse for both roles; country/nationality semantics and correspondence remain open."
+        note: V-INFO.7
       personnel_crew_number:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_common.trip, field: noOfCrewMembers}
   V-TRIP:
     rows:
-      status: specified
-      rule: one_trip
+      rule: one_row
       inputs:
         records: {sheet: ll_common.trip, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       vessel_departure_port_country:
         status: pending
         rule: harbour_country
@@ -427,11 +267,7 @@ sheets:
       note: "Optional attributes are omitted; decide no rows versus a trip-ID-only row."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       vessel_attributes_gross_tonnage:
         status: omitted
         rule: omit
@@ -634,17 +470,12 @@ sheets:
         note: "Agreed scope: optional vessel attributes remain empty; RAV consolidation is separate."
   G-GENERAL:
     rows:
-      status: specified
-      rule: one_trip
+      rule: one_row
       inputs:
         records: {sheet: ll_common.trip, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       special_equipment_or_machinery_line_setter_shooter:
         status: pending
         rule: trip_equipment
@@ -669,19 +500,13 @@ sheets:
         note: "Candidate gear records are not an established source for this equipment; do not default to FALSE, NAV or UNK."
   G-CONFIG-BRANCHLINES:
     rows:
-      status: specified
       rule: configurations
       inputs:
         records: {sheet: ll_observation.branchlinesComposition, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       branchline_configurations_configuration_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.branchlinesComposition, field: topiaId}
@@ -820,19 +645,13 @@ sheets:
         note: "Sheet has no data rows in the agreed scope; configuration measurements are unsupported."
   E-SET:
     rows:
-      status: specified
       rule: each_set
       inputs:
         records: {sheet: ll_observation.fishingSet, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -845,12 +664,10 @@ sheets:
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       start_setting_position_latitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: settingStartLatitude}
       start_setting_position_longitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: settingStartLongitude}
@@ -862,17 +679,14 @@ sheets:
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       end_setting_position_latitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: settingEndLatitude}
       end_setting_position_longitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: settingEndLongitude}
       vessel_speed_kn:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: settingVesselSpeed}
@@ -890,29 +704,16 @@ sheets:
           value: {sheet: ll_observation.fishingSet, field: lineType}
         parameters: {target: refs_fishery.line_material_types}
         note: "Review the initial material correspondences; Polyvinyl has no agreed equivalent."
-      mainline_length_value:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      mainline_length_unit:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      mainline_length_value: {status: unavailable}
+      mainline_length_unit: {status: unavailable}
       clip_on_time_branchline:
         status: pending
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: timeBetweenHooks}
         note: "Source is labelled seconds; confirm equivalence to branchline clip-on time."
-      clip_on_time_buoys:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      clip_on_time_buoys: {status: unavailable}
       number_total_hooks_set:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: totalHooksCount}
@@ -922,11 +723,7 @@ sheets:
         inputs:
           baskets: {sheet: ll_observation.fishingSet, field: totalBasketsCount}
         note: "No agreed line-layout rule; do not automatically subtract one from baskets."
-      number_radio_dhan_buoys_set:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      number_radio_dhan_buoys_set: {status: unavailable}
       floatline_length_1_m:
         status: pending
         rule: floatline_length
@@ -954,21 +751,9 @@ sheets:
         inputs:
           value: {sheet: ll_observation.fishingSet, field: branchlinesPerBasketCount}
         note: "Confirm basket/float and hook/branchline equivalence."
-      distance_between_branchlines_m:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      shark_lines_set:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      shark_lines_number:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      distance_between_branchlines_m: {status: unavailable}
+      shark_lines_set: {status: unavailable}
+      shark_lines_number: {status: unavailable}
       leader_material_type:
         status: pending
         rule: leader_material
@@ -1034,13 +819,8 @@ sheets:
       note: "Decide row presence for recorded zero, missing categories and mixtures; never default a missing count to zero."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -1075,13 +855,8 @@ sheets:
       note: "Required observations and row presence are unresolved."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -1092,11 +867,7 @@ sheets:
         inputs:
           measures: {sheet: ll_observation.fishingSet_mitigationType, field: mitigationType, within: ll_observation.fishingSet}
         note: "Tori-line membership indicates a category, not the deployed count."
-      minimum_deck_lighting_used:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      minimum_deck_lighting_used: {status: unavailable}
       branchline_weighted:
         status: pending
         rule: unresolved
@@ -1116,11 +887,7 @@ sheets:
         inputs:
           weighting: {sheet: ll_observation.fishingSet, fields: [weightedSnap, weightedSwivel]}
         note: "No measured weighting proportion; equipment presence must not become 100 percent."
-      hook_sinker_distance_cm:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      hook_sinker_distance_cm: {status: unavailable}
       hook_pods:
         status: pending
         rule: unresolved
@@ -1177,13 +944,8 @@ sheets:
       note: "Agree grouping by the resolved hook code and aggregation of proportions."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -1216,13 +978,8 @@ sheets:
       note: "Agree grouping by resolved species/condition and handling artificial bait."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -1247,26 +1004,16 @@ sheets:
         inputs:
           value: {sheet: ll_observation.baitsComposition, field: proportion}
         note: "Confirm target-key grouping and proportion aggregation."
-      bait_dye_colour:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      bait_dye_colour: {status: unavailable}
   E-SET-HAULING:
     rows:
-      status: specified
       rule: each_set
       inputs:
         records: {sheet: ll_observation.fishingSet, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -1279,12 +1026,10 @@ sheets:
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       start_hauling_position_latitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: haulingStartLatitude}
       start_hauling_position_longitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: haulingStartLongitude}
@@ -1296,40 +1041,18 @@ sheets:
         parameters: {timezone: null}
         note: "Confirm the stored timezone and serialization convention."
       end_hauling_position_latitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: haulingEndLatitude}
       end_hauling_position_longitude:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.fishingSet, field: haulingEndLongitude}
-      offal_management:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      positions_of_offal_disposal_position_1:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      positions_of_offal_disposal_position_2:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      positions_of_offal_disposal_position_3:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      positions_of_offal_disposal_position_4:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      offal_management: {status: unavailable}
+      positions_of_offal_disposal_position_1: {status: unavailable}
+      positions_of_offal_disposal_position_2: {status: unavailable}
+      positions_of_offal_disposal_position_3: {status: unavailable}
+      positions_of_offal_disposal_position_4: {status: unavailable}
       bird_scaring_device_at_hauler:
         status: pending
         rule: unresolved
@@ -1350,11 +1073,7 @@ sheets:
           deployed: {sheet: ll_observation.fishingSet, field: totalHooksCount}
           branchlines: {sheet: ll_observation.branchline, field: topiaId, within: ll_observation.fishingSet}
         note: "Neither deployed hooks nor enumerated branchlines prove observation coverage or retrieved counts."
-      sampling_protocol:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      sampling_protocol: {status: unavailable}
   E-SET-HAULING-BITEOFFS:
     rows:
       status: pending
@@ -1364,13 +1083,8 @@ sheets:
       note: "Need bite-off event semantics, observed coverage and configuration assignment."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
@@ -1390,31 +1104,23 @@ sheets:
         note: "Confirm event semantics and actual observation; false defaults do not establish a zero count."
   E-SET-CATCHES:
     rows:
-      status: specified
       rule: catch_rows
       inputs:
         records: {sheet: ll_observation.catch, within: ll_common.trip}
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
         parameters: {key: set}
       catch_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.catch, field: topiaId}
         parameters: {key: catch}
       species:
-        status: specified
         rule: catalogue_mapping
         inputs:
           value: {sheet: ll_observation.catch, field: species}
@@ -1441,7 +1147,6 @@ sheets:
           method: {sheet: ll_common.trip, field: observationMethod}
         note: "Acquisition mode and observation programme do not establish exhaustive or sampled catch estimation."
       number_of_fish:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.catch, field: count}
@@ -1453,7 +1158,6 @@ sheets:
         parameters: {target: refs_biology.weight_measurements}
         note: "Use the E-SET-CATCHES target binding; review the initial whole/gutted/headed-and-gutted correspondences."
       weight_value_kg:
-        status: specified
         rule: copy
         inputs:
           value: {sheet: ll_observation.catch, field: totalWeight}
@@ -1474,19 +1178,13 @@ sheets:
       note: "One row per actual animal, not per measurement; count expansion is forbidden."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
         parameters: {key: set}
       catch_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.catch, field: topiaId}
@@ -1636,19 +1334,13 @@ sheets:
       note: "Use the same specimen population and identities; eligibility and unmeasured parent rows remain open."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
         parameters: {key: set}
       catch_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.catch, field: topiaId}
@@ -1708,36 +1400,12 @@ sheets:
           compositions: {sheet: ll_observation.branchlinesComposition, field: tracelineType, within: ll_observation.fishingSet}
         parameters: {target: refs_fishery.line_material_types, branchline_fields: [tracelineType], allow_set_fallback: false}
         note: "IRD must approve set-to-individual fallback. Distinct materials are ambiguous; repeated equal materials alone are not ambiguity."
-      leader_diameter_mm:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      dehooker_device:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      light_attached:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      brought_onboard:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      handling_method:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      revival:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      leader_diameter_mm: {status: unavailable}
+      dehooker_device: {status: unavailable}
+      light_attached: {status: unavailable}
+      brought_onboard: {status: unavailable}
+      handling_method: {status: unavailable}
+      revival: {status: unavailable}
       photo_id:
         status: pending
         rule: photo_reference
@@ -1767,19 +1435,13 @@ sheets:
       note: "Only verified tag information attached to the same exported specimen; no ID-only placeholder."
     fields:
       observed_trip_id:
-        status: pending
-        rule: identity
-        inputs:
-          value: {sheet: ll_common.trip, field: topiaId}
-        parameters: {key: trip}
+        rule: identity_from_cache
       set_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.fishingSet, field: topiaId}
         parameters: {key: set}
       catch_id:
-        status: specified
         rule: identity
         inputs:
           value: {sheet: ll_observation.catch, field: topiaId}
@@ -1814,18 +1476,6 @@ sheets:
         inputs:
           value: {sheet: ll_observation.catch, field: tagNumber}
         note: "Confirm this is a tag identifier; it does not establish tag type, deployment or recovery."
-      tag_id_2:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      finder_name:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
-      finder_contact_details:
-        status: unavailable
-        rule: unresolved
-        inputs: {}
-        note: "No identified ObServe source for this field; keep unresolved."
+      tag_id_2: {status: unavailable}
+      finder_name: {status: unavailable}
+      finder_contact_details: {status: unavailable}

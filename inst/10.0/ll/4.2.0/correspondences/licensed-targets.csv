@@ -1,0 +1,9 @@
+code,match,species
+AL,exact,ALB
+BF,exact,SBF
+SA,exact,ALB SWO
+SW,exact,SWO
+TM,exact,ALB SBF
+TR,subset,BET SKJ YFT
+TS,subset,ALB BET SKJ SWO YFT
+YA,exact,ALB YFT
