@@ -11,7 +11,7 @@ prepare_export(runner_path = "export-runner.yaml")
 }
 \value{
 An \link[=load_export_context]{export_context} with the shared inputs and
-references, trip source and filters, and typed META values.
+references, trip source and filters, main fishing gear, and typed META values.
 }
 \description{
 Prepare a batch from its export runner file
@@ -21,4 +21,5 @@ The parent of the batch directory is the workspace. Set
 \code{observe_trip_source} to the stem of a workspace connection file ending in
 \code{.postgresql.yaml} or \code{.public-api.yaml}. The reader opens the file when
 extracting trips.
+Set \code{main_fishing_gear} to the ROS gear code shared by the selected trips.
 }

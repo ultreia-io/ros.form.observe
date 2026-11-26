@@ -3,11 +3,12 @@
 #' Prepare a batch from its export runner file
 #' @param runner_path Path to export-runner.yaml in the batch directory.
 #' @return An [export_context][load_export_context] with the shared inputs and
-#'   references, trip source and filters, and typed META values.
+#'   references, trip source and filters, main fishing gear, and typed META values.
 #' @details The parent of the batch directory is the workspace. Set
 #'   `observe_trip_source` to the stem of a workspace connection file ending in
 #'   `.postgresql.yaml` or `.public-api.yaml`. The reader opens the file when
 #'   extracting trips.
+#'   Set `main_fishing_gear` to the ROS gear code shared by the selected trips.
 #' @export
 prepare_export <- function(runner_path = "export-runner.yaml") {
   form.tools::require_nonempty_string(runner_path, "runner_path")
@@ -15,8 +16,10 @@ prepare_export <- function(runner_path = "export-runner.yaml") {
     stop("Use a batch file named export-runner.yaml.", call. = FALSE)
   runner_path <- normalizePath(path.expand(runner_path), winslash = "/", mustWork = TRUE)
   runner <- yaml::read_yaml(runner_path, eval.expr = FALSE)
-  keys <- c("observe_version", "ros_form_version", "gear", "observe_trip_source", "trips", "meta")
+  keys <- c("observe_version", "ros_form_version", "gear", "main_fishing_gear",
+    "observe_trip_source", "trips", "meta")
   check_runner_mapping(runner, keys, keys, "export-runner.yaml")
+  form.tools::require_nonempty_string(runner$main_fishing_gear, "main_fishing_gear")
   settings <- export_settings(runner$observe_version, runner$ros_form_version,
                               runner$gear, dirname(runner_path))
   workspace_directory <- export_paths(settings)$workspace$directory
@@ -26,6 +29,7 @@ prepare_export <- function(runner_path = "export-runner.yaml") {
   context <- prepare_export_references(load_export_context(settings))
   context$observe_trip_source <- trip_source
   context$trip_filters <- trip_filters
+  context$main_fishing_gear <- runner$main_fishing_gear
   context$meta <- prepare_export_metadata(runner$meta, context)
   context
 }
@@ -80,7 +84,7 @@ extract_export_sources <- function(export_context) {
 #' @export
 export_ros_trip <- function(export_plan, observe_trip_tables, export_context) {
   form.tools::run_form_export(export_plan, observe_trip_tables,
-    inputs = list(meta = export_context$meta),
+    inputs = list(meta = export_context$meta, main_fishing_gear = export_context$main_fishing_gear),
     resources = export_context,
     finalize = finalize_ros_trip)
 }
