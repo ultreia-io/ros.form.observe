@@ -19,6 +19,7 @@ sheets:
         note: O-INFO.1
       observer_identification_iotc_id: {status: omitted, note: O-INFO.2}
       observer_identification_full_name:
+        rule: person_full_name
         inputs:
           value: {sheet: ll_common.trip, field: observer}
         note: O-INFO.3
@@ -56,96 +57,53 @@ sheets:
       observed_trip_id:
         rule: identity_from_cache
       identification_name:
-        status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
-        parameters: {property: vessel_name}
+        parameters: {property: label1}
         note: V-INFO.1
       identification_flag_or_chartering_state:
-        status: pending
-        rule: vessel_flag
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
-        parameters: {target: refs_admin.countries}
         note: V-INFO.2
       identification_iotc_number:
-        status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
-        parameters: {property: iotc_vessel_identifier}
+        parameters: {property: iotcid}
         note: V-INFO.1
       identification_imo_number:
-        status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
-        parameters: {property: imo_identifier}
+        parameters: {property: imoid}
         note: V-INFO.1
       identification_ircs:
-        status: pending
         rule: vessel_identity
         inputs:
           value: {sheet: ll_common.trip, field: vessel}
-        parameters: {property: ircs_identifier}
+        parameters: {property: radiocallsignid}
         note: V-INFO.1
-      registration_country:
-        status: pending
-        rule: unresolved
-        inputs:
-          vessel: {sheet: ll_common.trip, field: vessel}
-        note: V-INFO.3
-      registration_port:
-        status: pending
-        rule: unresolved
-        inputs:
-          vessel: {sheet: ll_common.trip, field: vessel}
-        note: V-INFO.3
-      registration_registration_number:
-        status: pending
-        rule: unresolved
-        inputs:
-          vessel: {sheet: ll_common.trip, field: vessel}
-        note: V-INFO.3
-      licensed_target_species:
-        inputs:
-          species: {sheet: ll_common.trip_species, field: species, within: ll_common.trip}
-        note: V-INFO.4
+      registration_country: {status: omitted, note: V-INFO.3}
+      registration_port: {status: omitted, note: V-INFO.3}
+      registration_registration_number: {status: omitted, note: V-INFO.3}
+      licensed_target_species: {status: omitted, note: V-INFO.4}
       gear_main_fishing_gear:
-        status: pending
         rule: input
         inputs:
-          value: {input: trip.main_fishing_gear}
+          value: {input: main_fishing_gear}
         note: V-INFO.5
       personnel_fishing_master_full_name:
-        status: pending
-        rule: captain_identity
+        rule: person_full_name
         inputs:
           value: {sheet: ll_common.trip, field: captain}
-        parameters: {property: full_name}
         note: V-INFO.6
       personnel_fishing_master_nationality:
-        status: pending
-        rule: captain_country
         inputs:
           value: {sheet: ll_common.trip, field: captain}
-        parameters: {target: refs_admin.countries}
         note: V-INFO.7
-      personnel_skipper_captain_full_name:
-        status: pending
-        rule: captain_identity
-        inputs:
-          value: {sheet: ll_common.trip, field: captain}
-        parameters: {property: full_name}
-        note: V-INFO.6
-      personnel_skipper_captain_nationality:
-        status: pending
-        rule: captain_country
-        inputs:
-          value: {sheet: ll_common.trip, field: captain}
-        parameters: {target: refs_admin.countries}
-        note: V-INFO.7
+      personnel_skipper_captain_full_name: {status: omitted, note: V-INFO.6}
+      personnel_skipper_captain_nationality: {status: omitted, note: V-INFO.7}
       personnel_crew_number:
         rule: copy
         inputs:
