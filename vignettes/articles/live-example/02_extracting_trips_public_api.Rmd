@@ -9,82 +9,16 @@ vignette: >
 
 ## Before you start
 
-Continue in the same R session with `export_context` and `open_observe_api()` from article 01.
-[See the Public API setup](01_prepare_export.html#public-api).
+Prepare the batch and load its context as shown in [Prepare the export](01_prepare_export.html#public-api).
+Set `observe_trip_source` to `observe-main.public-api` in `export-runner.yaml`.
 
-### Output directory
+## Select and extract trips
 
-The run directory is dated and sits under the ROS target. This example uses `2026-11-24`.
+Use the prepared context to select trip IDs and extract their tables through the public API.
 
-```{r output-directory, eval=FALSE}
-# Set the date used in the output directory name.
-run_date <- as.Date("2026-11-24")
-# Use the target directory from the export context.
-run_directory <- file.path(export_context$paths$target_directory, format(run_date, "%Y-%m-%d"), "public-api")
-# Create a new directory for the extracted trips.
-if (!dir.create(run_directory, recursive = TRUE, mode = "0700", showWarnings = FALSE))
-  stop("Choose a new output directory.", call. = FALSE)
+```{r extract-trip-sources, eval=FALSE}
+# Save the selected trip IDs, source CSVs and typed tables.
+batch_sources <- ros.form.observe::extract_export_sources(export_context)
 ```
 
-## 1. Select trip IDs
-
-The query selects trips that overlap the requested period, including both dates.
-Use observation programme `topiaId` values if you need a programme filter.
-
-```{r select-trip-ids, eval=FALSE}
-# Set the inclusive selection period.
-trip_window_start <- as.Date("2025-06-09")
-trip_window_end <- as.Date("2025-06-22")
-# Select the observation programme by its topiaId.
-observation_programme_ids <- "fr.ird.referential.ll.common.Program#1239832686139#0.1"
-# Create the directory for the selection CSVs.
-trip_selection_directory <- file.path(run_directory, "01-trip-selection")
-dir.create(trip_selection_directory, mode = "0700")
-
-# Select the matching trip IDs and close the API session.
-trip_ids <- ros.form.observe::observe_public_api_with_connection(
-  open_observe_api, function(api_connection) {
-    # Apply the date and programme filters through the public API.
-    ros.form.observe::observe_public_api_select_trip_ids(
-      api_connection, trip_window_start, trip_window_end, observation_programme_ids
-    )
-  }
-)
-# Save the trip IDs returned by the public API.
-utils::write.csv(
-  data.frame(trip_id = trip_ids),
-  file.path(trip_selection_directory, "selected-trip-ids.csv"),
-  row.names = FALSE
-)
-```
-
-## 2. Extract and load the source tables
-
-For each selected trip, write its CSVs to `<topiaId>/` and save the typed tables beside it as `<topiaId>.Rds`.
-
-```{r extract-trip, eval=FALSE}
-# Create the parent directory for the extracted trips.
-source_tables_directory <- file.path(run_directory, "02-source-tables")
-dir.create(source_tables_directory, mode = "0700")
-
-# Extract and load each selected trip, then close the API session.
-ros.form.observe::observe_public_api_with_connection(
-  open_observe_api, function(api_connection) {
-    for (trip_id in trip_ids) {
-      # Extract this trip and keep the returned CSV directory.
-      trip_csv_directory <- ros.form.observe::observe_public_api_extract_trip_csv(
-        trip_id, api_connection, source_tables_directory,
-        export_context = export_context
-      )
-      # Read the trip CSVs with the form model already in the context.
-      observe_trip_tables <- form.tools::read_form_csv_tables(
-        export_context$observe_form_model, trip_csv_directory
-      )
-      # Save the loaded tables beside the CSV directory.
-      saveRDS(observe_trip_tables, paste0(trip_csv_directory, ".Rds"))
-    }
-  }
-)
-```
-
-Use `readRDS()` to reopen a saved trip.
+Find `selected-trip-ids.csv` in `sources/`. Each trip has its own CSV directory and a matching `.Rds` under `sources/trips/`.
